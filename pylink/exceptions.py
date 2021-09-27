@@ -31,3 +31,13 @@ class PylinkException(Exception):
 class NoNodesConnected(PylinkException):
     def __init__(self, message):
         super().__init__(message)
+
+
+class InvalidGuildID(PylinkException):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class InvalidChannelID(PylinkException):
+    def __init__(self, message):
+        super().__init__(message)
