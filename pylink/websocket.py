@@ -28,24 +28,24 @@ from typing import Dict
 
 class Websocket:
     def __init__(self, host: str, port: int, password: str, userID: str):
+        self.host = host
+        self.port = port
+        self.password = password
+        self.userID = userID
         self._session = aiohttp.ClientSession()
-        self._host = host
-        self._port = port
-        self._password = password
-        self._userID = userID
-        self._websocket = None
+        self._connection = None
         asyncio.create_task(self.connect())
 
     async def connect(self):
         headers = {
-            "Authorization": self._password,
-            "User-Id": self._userID,
+            "Authorization": self.password,
+            "User-Id": self.userID,
             "Client-Name": "Pylink"
         }
-        self._websocket = await self._session.ws_connect(f"ws://{self._host}:{self._port}", headers=headers, heartbeat=60)
+        self._connection = await self._session.ws_connect(f"ws://{self.host}:{self.port}", headers=headers, heartbeat=60)
 
     async def get(self, destination: str, headers: Dict[str, str]):
         return await self._session.get(destination, headers=headers)
 
     async def send(self, payload):
-        await self._websocket.send_json(payload)
+        await self._connection.send_json(payload)

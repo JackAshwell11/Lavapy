@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .exceptions import InvalidGuildID, InvalidChannelID
+from .exceptions import InvalidChannelID
 from .node import Node
 from typing import Union, Dict
 from discord.ext import commands
@@ -29,16 +29,14 @@ from discord import Guild, VoiceChannel
 
 
 class Player:
-    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], node: Node, guildID: int) -> None:
-        self._bot = bot
-        self._node = node
-        if self._bot.get_guild(guildID) is None:
-            raise InvalidGuildID("temp")
-        self._guildID = guildID
+    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], node: Node, guild: Guild) -> None:
+        self.bot = bot
+        self.node = node
+        self.guild = guild
         self._voiceState = {}
 
     def __repr__(self):
-        return f"<Pylink Player (GuildID={self._guildID})>"
+        return f"<Pylink Player (GuildID={self.guild.id})>"
 
     async def voiceStateUpdate(self, data):
         self._voiceState.update({"sessionId": data["session_id"]})
@@ -52,27 +50,26 @@ class Player:
         if {"sessionId", "event"} == self._voiceState.keys():
             voiceUpdate = {
                 "op": "voiceUpdate",
-                "guildId": str(self._guildID),
+                "guildId": str(self.guild.id),
                 "sessionId": self._voiceState["sessionId"],
                 "event": self._voiceState["event"]
             }
-            await self._node.send(voiceUpdate)
+            await self.node.send(voiceUpdate)
 
     async def connect(self, channelID: int) -> None:
-        guild: Guild = self._bot.get_guild(self._guildID)
-        channel: VoiceChannel = guild.get_channel(channelID)
+        channel: VoiceChannel = self.guild.get_channel(channelID)
         if channel is None:
             raise InvalidChannelID("temp")
-        await guild.change_voice_state(channel=channel)
+        await self.guild.change_voice_state(channel=channel)
 
     async def getYoutubeTracks(self, query: str):
-        songs = await self._node.getTracks(f"ytsearch:{query}")
+        songs = await self.node.getTracks(f"ytsearch:{query}")
         return songs["tracks"]
 
     async def play(self, track: Dict[str, Union[str, Dict[str, Union[str, bool, int]]]]):
         newTrack = {
             "op": "play",
-            "guildId": str(self._guildID),
+            "guildId": str(self.guild.id),
             "track": track["track"]
         }
-        await self._node.send(newTrack)
+        await self.node.send(newTrack)

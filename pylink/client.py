@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from .node import Node
 from .player import Player
-from .exceptions import NoNodesConnected
+from .exceptions import NoNodesConnected, InvalidGuildID
 from typing import Union
 from discord.ext import commands
 
@@ -31,23 +31,29 @@ from discord.ext import commands
 class PylinkClient:
     def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot]) -> None:
         self.bot = bot
-        self._node = None
-        self._player = None
+        self.nodes = {}
+        self.player = None
+        self.bot.add_listener(self.voiceUpdateHandler, "on_socket_response")
 
     def __repr__(self):
         return f"<Pylink Client>"
 
-    async def createNode(self, host: str, port: int, password: str, identifier: str) -> None:
-        self._node = Node(host, port, password, str(self.bot.user.id), identifier)
+    async def createNode(self, host: str, port: int, password: str, region: str, identifier: str) -> None:
+        self.nodes[identifier] = Node(host, port, password, str(self.bot.user.id), region, identifier)
 
     async def createPlayer(self, guildID: int) -> Player:
-        if self._node is None:
+        guild = self.bot.get_guild(guildID)
+        if guild is None:
+            raise InvalidGuildID(f"A guild with the ID <{guildID}> does not exist")
+        if len(self.nodes) == 0:
             raise NoNodesConnected("There are currently no nodes connected")
-        self._player = Player(self.bot, self._node, guildID)
-        return self._player
+        self.player = Player(self.bot, self.nodes[0], guild)
+        return self.player
 
     async def voiceUpdateHandler(self, data):
         if data["t"] == "VOICE_STATE_UPDATE":
-            await self._player.voiceStateUpdate(data["d"])
+            await self.player.voiceStateUpdate(data["d"])
         elif data["t"] == "VOICE_SERVER_UPDATE":
-            await self._player.voiceServerUpdate(data["d"])
+            await self.player.voiceServerUpdate(data["d"])
+        else:
+            print(data)

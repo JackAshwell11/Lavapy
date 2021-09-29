@@ -26,20 +26,20 @@ from urllib.parse import quote
 
 
 class Node:
-    def __init__(self, host: str, port: int, password: str, userID: str, identifier: str):
-        self._host = host
-        self._port = port
-        self._password = password
-        self._identifier = identifier
+    def __init__(self, host: str, port: int, password: str, userID: str, region: str, identifier: str):
+        self.host = host
+        self.port = port
+        self.password = password
+        self.identifier = identifier
         self._websocket = Websocket(host, port, password, userID)
 
     def __repr__(self):
-        return f"<Pylink Node (Identifier={self._identifier})>"
+        return f"<Pylink Node (Identifier={self.identifier})>"
 
     async def getTracks(self, query: str):
-        destination = f"http://{self._host}:{self._port}/loadtracks?identifier={quote(query)}"
+        destination = f"http://{self.host}:{self.port}/loadtracks?identifier={quote(query)}"
         headers = {
-            "Authorization": self._password
+            "Authorization": self.password
         }
         async with await self._websocket.get(destination, headers) as req:
             if req.status == 200:
