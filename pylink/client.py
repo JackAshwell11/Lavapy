@@ -31,29 +31,30 @@ from discord.ext import commands
 class PylinkClient:
     def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot]) -> None:
         self.bot = bot
-        self.nodes = {}
-        self.player = None
+        self.nodes = None
+        self.players = {}
         self.bot.add_listener(self.voiceUpdateHandler, "on_socket_response")
 
     def __repr__(self):
         return f"<Pylink Client>"
 
     async def createNode(self, host: str, port: int, password: str, region: str, identifier: str) -> None:
-        self.nodes[identifier] = Node(host, port, password, str(self.bot.user.id), region, identifier)
+        self.nodes = Node(host, port, password, str(self.bot.user.id), region, identifier)
 
     async def createPlayer(self, guildID: int) -> Player:
         guild = self.bot.get_guild(guildID)
         if guild is None:
             raise InvalidGuildID(f"A guild with the ID <{guildID}> does not exist")
-        if len(self.nodes) == 0:
+        if self.nodes is None:
             raise NoNodesConnected("There are currently no nodes connected")
-        self.player = Player(self.bot, self.nodes[0], guild)
-        return self.player
+        self.players[guildID] = Player(self.bot, self.nodes, guild)
+        return self.players[guildID]
 
     async def voiceUpdateHandler(self, data):
-        if data["t"] == "VOICE_STATE_UPDATE":
-            await self.player.voiceStateUpdate(data["d"])
-        elif data["t"] == "VOICE_SERVER_UPDATE":
-            await self.player.voiceServerUpdate(data["d"])
+        if data["t"] == "VOICE_SERVER_UPDATE":
+            await self.players[int(data["d"]["guild_id"])].voiceServerUpdate(data["d"])
+        elif data["t"] == "VOICE_STATE_UPDATE":
+            if int(data["d"]["user_id"]) == self.bot.user.id:
+                await self.players[int(data["d"]["guild_id"])].voiceStateUpdate(data["d"])
         else:
             print(data)
