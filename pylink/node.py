@@ -21,28 +21,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .websocket import Websocket
-from discord.ext import commands
-from discord.enums import VoiceRegion
 from urllib.parse import quote
-from typing import Union
+
+from discord.enums import VoiceRegion
+
+from .websocket import Websocket
 
 
 class Node:
-    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], host: str, port: int, password: str, userID: str, region: VoiceRegion, identifier: str):
-        self.bot = bot
+    def __init__(self, client, host: str, port: int, password: str, region: VoiceRegion, identifier: str) -> None:
+        self.client = client
         self.host = host
         self.port = port
         self.password = password
         self.region = region
         self.identifier = identifier
-        self.players = 0
-        self._websocket = Websocket(bot, host, port, password, userID)
+        self.playerCount = 0
+        self._websocket = Websocket(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Pylink Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region})>"
 
-    async def getTracks(self, query: str):
+    async def getTracks(self, query: str) -> dict:
         destination = f"http://{self.host}:{self.port}/loadtracks?identifier={quote(query)}"
         headers = {
             "Authorization": self.password
@@ -51,5 +51,5 @@ class Node:
             if req.status == 200:
                 return await req.json()
 
-    async def send(self, payload):
+    async def send(self, payload: dict) -> None:
         await self._websocket.send(payload)

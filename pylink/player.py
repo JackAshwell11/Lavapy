@@ -21,32 +21,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from discord import Guild, VoiceChannel
+
 from .exceptions import InvalidChannelID
 from .node import Node
-from typing import Union, Dict
-from discord.ext import commands
-from discord import Guild, VoiceChannel
 
 
 class Player:
-    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], node: Node, guild: Guild) -> None:
-        self.bot = bot
+    def __init__(self, client, node: Node, guild: Guild) -> None:
+        self.client = client
         self.node = node
         self.guild = guild
         self._voiceState = {}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Pylink Player (GuildID={self.guild.id})>"
 
-    async def voiceStateUpdate(self, data):
+    async def voiceStateUpdate(self, data: dict) -> None:
         self._voiceState.update({"sessionId": data["session_id"]})
         await self.sendVoiceUpdate()
 
-    async def voiceServerUpdate(self, data):
+    async def voiceServerUpdate(self, data: dict) -> None:
         self._voiceState.update({"event": data})
         await self.sendVoiceUpdate()
 
-    async def sendVoiceUpdate(self):
+    async def sendVoiceUpdate(self) -> None:
         if {"sessionId", "event"} == self._voiceState.keys():
             voiceUpdate = {
                 "op": "voiceUpdate",
@@ -62,11 +61,11 @@ class Player:
             raise InvalidChannelID("temp")
         await self.guild.change_voice_state(channel=channel)
 
-    async def getYoutubeTracks(self, query: str):
+    async def getYoutubeTracks(self, query: str) -> dict:
         songs = await self.node.getTracks(f"ytsearch:{query}")
         return songs["tracks"]
 
-    async def play(self, track: Dict[str, Union[str, Dict[str, Union[str, bool, int]]]]):
+    async def play(self, track: dict) -> None:
         newTrack = {
             "op": "play",
             "guildId": str(self.guild.id),

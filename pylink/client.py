@@ -21,30 +21,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .node import Node
-from .player import Player
-from .exceptions import NoNodesConnected, InvalidGuildID
 from typing import Union
-from discord.ext import commands
+import aiohttp
+
 from discord import Guild
 from discord.enums import VoiceRegion
+from discord.ext.commands import Bot, AutoShardedBot
+
+from .exceptions import NoNodesConnected, InvalidGuildID
+from .node import Node
+from .player import Player
 
 
 class PylinkClient:
-    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot]) -> None:
+    def __init__(self, bot: Union[Bot, AutoShardedBot]) -> None:
         self.bot = bot
+        self.session = aiohttp.ClientSession()
         self.nodes = {}
         self.players = {}
         self.bot.add_listener(self.voiceUpdateHandler, "on_socket_response")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Pylink Client>"
 
-    def getBestNode(self, guild: Guild):
-        return [node for node in sorted(self.nodes.values(), key=lambda x: x.players) if node.region == guild.region][0]
+    def getBestNode(self, guild: Guild) -> Node:
+        return [node for node in sorted(self.nodes.values(), key=lambda x: x.playerCount) if node.region == guild.region][0]
 
     async def createNode(self, host: str, port: int, password: str, region: VoiceRegion, identifier: str) -> None:
-        self.nodes[identifier] = Node(self.bot, host, port, password, str(self.bot.user.id), region, identifier)
+        self.nodes[identifier] = Node(self, host, port, password, region, identifier)
 
     async def createPlayer(self, guildID: int) -> Player:
         guild = self.bot.get_guild(guildID)
@@ -52,12 +56,12 @@ class PylinkClient:
             raise InvalidGuildID(f"A guild with the ID <{guildID}> does not exist")
         if len(list(self.nodes.keys())) == 0:
             raise NoNodesConnected("There are currently no nodes connected")
-        bestNode: Node = list(self.nodes.values())[0] if len(list(self.nodes.keys())) == 1 else self.getBestNode(guild)
-        self.players[guildID] = Player(self.bot, bestNode, guild)
-        self.nodes[bestNode.identifier].players += 1
+        bestNode = list(self.nodes.values())[0] if len(list(self.nodes.keys())) == 1 else self.getBestNode(guild)
+        self.players[guildID] = Player(self, bestNode, guild)
+        self.nodes[bestNode.identifier].playerCount += 1
         return self.players[guildID]
 
-    async def voiceUpdateHandler(self, data):
+    async def voiceUpdateHandler(self, data: dict) -> None:
         if data["t"] == "VOICE_SERVER_UPDATE":
             await self.players[int(data["d"]["guild_id"])].voiceServerUpdate(data["d"])
         elif data["t"] == "VOICE_STATE_UPDATE":

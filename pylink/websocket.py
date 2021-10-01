@@ -22,45 +22,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import asyncio
-import aiohttp
-from typing import Dict, Union
-from discord.ext import commands
+from typing import Dict
+from aiohttp.client_reqrep import ClientResponse
 
 
 class Websocket:
-    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], host: str, port: int, password: str, userID: str):
-        self.bot = bot
-        self.host = host
-        self.port = port
-        self.password = password
-        self.userID = userID
-        self._session = aiohttp.ClientSession()
-        self.connected = False
+    def __init__(self, node) -> None:
+        self.node = node
+        self.isConnected = False
         self._connection = None
         self._listener = None
         asyncio.create_task(self.connect())
 
-    async def connect(self):
+    async def connect(self) -> None:
         headers = {
-            "Authorization": self.password,
-            "User-Id": self.userID,
+            "Authorization": self.node.password,
+            "User-Id": str(self.node.client.bot.user.id),
             "Client-Name": "Pylink"
         }
-        self._connection = await self._session.ws_connect(f"ws://{self.host}:{self.port}", headers=headers, heartbeat=60)
-        self._listener = self.bot.loop.create_task(self.listener())
-        self.connected = True
+        self._connection = await self.node.client.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers, heartbeat=60)
+        self._listener = self.node.client.bot.loop.create_task(self.listener())
+        self.isConnected = True
 
-    async def listener(self):
+    async def listener(self) -> None:
         while True:
             msg = await self._connection.receive()
             await self.processListener(msg.json())
             await asyncio.sleep(30)
 
     async def processListener(self, data):
-        print(data)
+        pass
 
-    async def get(self, destination: str, headers: Dict[str, str]):
-        return await self._session.get(destination, headers=headers)
+    async def get(self, destination: str, headers: Dict[str, str]) -> ClientResponse:
+        return await self.node.client.session.get(destination, headers=headers)
 
-    async def send(self, payload):
+    async def send(self, payload: dict) -> None:
         await self._connection.send_json(payload)
