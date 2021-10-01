@@ -26,28 +26,35 @@ from .player import Player
 from .exceptions import NoNodesConnected, InvalidGuildID
 from typing import Union
 from discord.ext import commands
+from discord import Guild
+from discord.enums import VoiceRegion
 
 
 class PylinkClient:
     def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot]) -> None:
         self.bot = bot
-        self.nodes = None
+        self.nodes = {}
         self.players = {}
         self.bot.add_listener(self.voiceUpdateHandler, "on_socket_response")
 
     def __repr__(self):
         return f"<Pylink Client>"
 
-    async def createNode(self, host: str, port: int, password: str, region: str, identifier: str) -> None:
-        self.nodes = Node(host, port, password, str(self.bot.user.id), region, identifier)
+    def getBestNode(self, guild: Guild):
+        return [node for node in sorted(self.nodes.values(), key=lambda x: x.players) if node.region == guild.region][0]
+
+    async def createNode(self, host: str, port: int, password: str, region: VoiceRegion, identifier: str) -> None:
+        self.nodes[identifier] = Node(self.bot, host, port, password, str(self.bot.user.id), region, identifier)
 
     async def createPlayer(self, guildID: int) -> Player:
         guild = self.bot.get_guild(guildID)
         if guild is None:
             raise InvalidGuildID(f"A guild with the ID <{guildID}> does not exist")
-        if self.nodes is None:
+        if len(list(self.nodes.keys())) == 0:
             raise NoNodesConnected("There are currently no nodes connected")
-        self.players[guildID] = Player(self.bot, self.nodes, guild)
+        bestNode: Node = list(self.nodes.values())[0] if len(list(self.nodes.keys())) == 1 else self.getBestNode(guild)
+        self.players[guildID] = Player(self.bot, bestNode, guild)
+        self.nodes[bestNode.identifier].players += 1
         return self.players[guildID]
 
     async def voiceUpdateHandler(self, data):
@@ -56,5 +63,5 @@ class PylinkClient:
         elif data["t"] == "VOICE_STATE_UPDATE":
             if int(data["d"]["user_id"]) == self.bot.user.id:
                 await self.players[int(data["d"]["guild_id"])].voiceStateUpdate(data["d"])
-        else:
+        elif data["d"] is not None:
             print(data)

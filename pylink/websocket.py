@@ -23,17 +23,21 @@ SOFTWARE.
 """
 import asyncio
 import aiohttp
-from typing import Dict
+from typing import Dict, Union
+from discord.ext import commands
 
 
 class Websocket:
-    def __init__(self, host: str, port: int, password: str, userID: str):
+    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], host: str, port: int, password: str, userID: str):
+        self.bot = bot
         self.host = host
         self.port = port
         self.password = password
         self.userID = userID
         self._session = aiohttp.ClientSession()
+        self.connected = False
         self._connection = None
+        self._listener = None
         asyncio.create_task(self.connect())
 
     async def connect(self):
@@ -43,6 +47,17 @@ class Websocket:
             "Client-Name": "Pylink"
         }
         self._connection = await self._session.ws_connect(f"ws://{self.host}:{self.port}", headers=headers, heartbeat=60)
+        self._listener = self.bot.loop.create_task(self.listener())
+        self.connected = True
+
+    async def listener(self):
+        while True:
+            msg = await self._connection.receive()
+            await self.processListener(msg.json())
+            await asyncio.sleep(30)
+
+    async def processListener(self, data):
+        print(data)
 
     async def get(self, destination: str, headers: Dict[str, str]):
         return await self._session.get(destination, headers=headers)

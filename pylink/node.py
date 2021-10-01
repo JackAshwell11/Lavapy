@@ -22,19 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from .websocket import Websocket
+from discord.ext import commands
+from discord.enums import VoiceRegion
 from urllib.parse import quote
+from typing import Union
 
 
 class Node:
-    def __init__(self, host: str, port: int, password: str, userID: str, region: str, identifier: str):
+    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], host: str, port: int, password: str, userID: str, region: VoiceRegion, identifier: str):
+        self.bot = bot
         self.host = host
         self.port = port
         self.password = password
+        self.region = region
         self.identifier = identifier
-        self._websocket = Websocket(host, port, password, userID)
+        self.players = 0
+        self._websocket = Websocket(bot, host, port, password, userID)
 
     def __repr__(self):
-        return f"<Pylink Node (Identifier={self.identifier})>"
+        return f"<Pylink Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region})>"
 
     async def getTracks(self, query: str):
         destination = f"http://{self.host}:{self.port}/loadtracks?identifier={quote(query)}"
