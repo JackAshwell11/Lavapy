@@ -1,47 +1,43 @@
 """
-MIT License
+Copyright (C) 2021 Aspect1103
 
-Copyright (c) 2021-present Aspect1103
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-from discord import Guild, VoiceChannel
+from typing import Union
 
-from .exceptions import InvalidChannelID
-from .node import Node
+from discord import VoiceProtocol, VoiceChannel
+from discord.ext.commands import Bot, AutoShardedBot
+
+from .pool import NodePool
 
 
-class Player:
-    def __init__(self, client, node: Node, guild: Guild) -> None:
-        self.client = client
-        self.node = node
-        self.guild = guild
+class Player(VoiceProtocol):
+    def __init__(self, bot: Union[Bot, AutoShardedBot], channel: VoiceChannel) -> None:
+        super().__init__(bot, channel)
+        self.bot = bot
+        self.channel = channel
+        self.node = NodePool.getNode()
         self._voiceState = {}
 
     def __repr__(self) -> str:
-        return f"<Pylink Player (GuildID={self.guild.id})>"
+        return f"<Pylink Player (ChannelID={self.channel.id}) (GuildID={self.channel.guild.id})>"
 
-    async def voiceStateUpdate(self, data: dict) -> None:
+    async def on_voice_state_update(self, data: dict) -> None:
         self._voiceState.update({"sessionId": data["session_id"]})
         await self.sendVoiceUpdate()
 
-    async def voiceServerUpdate(self, data: dict) -> None:
+    async def on_voice_server_update(self, data: dict) -> None:
         self._voiceState.update({"event": data})
         await self.sendVoiceUpdate()
 
@@ -49,17 +45,19 @@ class Player:
         if {"sessionId", "event"} == self._voiceState.keys():
             voiceUpdate = {
                 "op": "voiceUpdate",
-                "guildId": str(self.guild.id),
+                "guildId": str(self.channel.guild.id),
                 "sessionId": self._voiceState["sessionId"],
                 "event": self._voiceState["event"]
             }
             await self.node.send(voiceUpdate)
 
-    async def connect(self, channelID: int) -> None:
-        channel: VoiceChannel = self.guild.get_channel(channelID)
-        if channel is None:
-            raise InvalidChannelID("temp")
-        await self.guild.change_voice_state(channel=channel)
+    async def connect(self, timeout: float, reconnect: bool) -> None:
+        await self.channel.guild.change_voice_state(channel=self.channel)
+        self.node.playerCount += 1
+
+    async def disconnect(self, *, force: bool = False) -> None:
+        await self.channel.guild.change_voice_state(channel=None)
+        self.node.playerCount -= 1
 
     async def getYoutubeTracks(self, query: str) -> dict:
         songs = await self.node.getTracks(f"ytsearch:{query}")
@@ -68,7 +66,7 @@ class Player:
     async def play(self, track: dict) -> None:
         newTrack = {
             "op": "play",
-            "guildId": str(self.guild.id),
+            "guildId": str(self.channel.guild.id),
             "track": track["track"]
         }
         await self.node.send(newTrack)
