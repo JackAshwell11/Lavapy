@@ -16,6 +16,5 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 from .player import *
 from .node import *
-from .pool import NodePool
 from .websocket import *
 from .exceptions import *
