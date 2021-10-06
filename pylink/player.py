@@ -19,7 +19,7 @@ from typing import Union
 from discord import VoiceProtocol, VoiceChannel
 from discord.ext.commands import Bot, AutoShardedBot
 
-from .node import getNode
+from .pool import _getNode
 
 
 class Player(VoiceProtocol):
@@ -27,7 +27,7 @@ class Player(VoiceProtocol):
         super().__init__(bot, channel)
         self.bot = bot
         self.channel = channel
-        self.node = getNode()
+        self.node = _getNode()
         self._voiceState = {}
 
     def __repr__(self) -> str:

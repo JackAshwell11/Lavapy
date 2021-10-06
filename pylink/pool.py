@@ -26,7 +26,7 @@ from .exceptions import NoNodesConnected, InvalidIdentifier, NodeOccupied
 _nodes: Dict[str, Node] = {}
 
 
-def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
+def _getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
     if not _nodes:
         raise NoNodesConnected("There are currently no nodes connected")
 
