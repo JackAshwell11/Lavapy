@@ -14,12 +14,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-from typing import Union
+from typing import Union, List
 
 from discord import VoiceProtocol, VoiceChannel
 from discord.ext.commands import Bot, AutoShardedBot
 
 from .pool import _getNode
+from .track import YoutubeTrack
 
 
 class Player(VoiceProtocol):
@@ -59,14 +60,17 @@ class Player(VoiceProtocol):
         await self.channel.guild.change_voice_state(channel=None)
         self.node.playerCount -= 1
 
-    async def getYoutubeTracks(self, query: str) -> dict:
+    async def getYoutubeTracks(self, query: str) -> List[YoutubeTrack]:
         songs = await self.node.getTracks(f"ytsearch:{query}")
-        return songs["tracks"]
+        if len(songs) == 0:
+            return []
+        else:
+            return [YoutubeTrack(element.get("track"), element.get("info")) for element in songs["tracks"]]
 
-    async def play(self, track: dict) -> None:
+    async def play(self, track: YoutubeTrack) -> None:
         newTrack = {
             "op": "play",
             "guildId": str(self.channel.guild.id),
-            "track": track["track"]
+            "track": track.id
         }
         await self.node.send(newTrack)
