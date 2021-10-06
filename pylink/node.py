@@ -16,13 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 import aiohttp
 from urllib.parse import quote
-from typing import Union, Dict
+from typing import Union
 
 from discord.enums import VoiceRegion
 from discord.ext.commands import Bot, AutoShardedBot
 
 from .websocket import Websocket
-from .exceptions import NoNodesConnected, InvalidIdentifier, NodeOccupied
 
 
 class Node:
@@ -54,35 +53,3 @@ class Node:
 
     async def send(self, payload: dict) -> None:
         await self._websocket.send(payload)
-
-
-def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
-    if not _nodes:
-        raise NoNodesConnected("There are currently no nodes connected")
-
-    if identifier is not None:
-        try:
-            node = _nodes[identifier]
-            return node
-        except KeyError:
-            raise InvalidIdentifier(f"No nodes with the identifier <{identifier}>")
-    elif region is not None:
-        possibleNodes = [node for node in _nodes.values() if node.region is region]
-        if not possibleNodes:
-            raise NoNodesConnected(f"No nodes exist for region <{region}>")
-    else:
-        possibleNodes = _nodes.values()
-    return sorted(possibleNodes, key=lambda x: x.playerCount)[0]
-
-
-async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: VoiceRegion, identifier: str) -> None:
-    if identifier in _nodes:
-        raise NodeOccupied(f"A node with the identifier <{identifier}> already exists")
-
-    node = Node(bot, host, port, password, region, identifier)
-    await node.connect()
-
-    _nodes[identifier] = node
-
-
-_nodes: Dict[str, Node] = {}
