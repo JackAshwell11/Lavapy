@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Dict, Any
 
 
-class YoutubeTrack:
+class Track:
     def __init__(self, id: str, info: Dict[str, Any]) -> None:
         self.id = id
         self.info = info
@@ -25,8 +25,9 @@ class YoutubeTrack:
         self.isSeekable = info.get("isSeekable")
         self.author = info.get("author")
         self.length = info.get("length")
+        self.type = info.get("sourceName")
         self.title = info.get("title")
         self.uri = info.get("uri")
 
     def __repr__(self) -> str:
-        return f"Pylink YoutubeTrack (Identifier={self.identifier})"
+        return f"Pylink Track (Identifier={self.identifier}) (Type={self.type})"

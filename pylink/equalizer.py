@@ -14,13 +14,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-from .equalizer import *
-from .exceptions import *
-from .player import *
-from .pool import *
+from typing import List, Tuple
 
-__title__ = "Pylink"
-__author__ = "Aspect1103"
-__license__ = "GPL v3"
-__copyright__ = "Copyright 2021-present (c) Aspect1103"
-__version__ = "1.0.0"
+
+class Equalizer:
+    def __init__(self, levels: List[Tuple[int, float]], name: str) -> None:
+        self.levels = levels
+        self.name = name
+        self.eq = self._setup(levels)
+
+    @staticmethod
+    def _setup(levels: List[Tuple[int, float]]):
+        return [{"band": level[0], "gain": level[1]} for level in levels]
+
+    @classmethod
+    def flat(cls):
+        levels = [(0, 0.0), (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0),
+                  (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0),
+                  (10, 0.0), (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0)]
+        return cls(levels, "Flat")
