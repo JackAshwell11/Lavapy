@@ -22,8 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import asyncio
+import logging
 from typing import Dict, Any
 from aiohttp.client_reqrep import ClientResponse
+
+logger = logging.getLogger(__name__)
 
 
 class Websocket:

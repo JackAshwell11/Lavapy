@@ -26,8 +26,8 @@ from typing import Dict, Union
 from discord import VoiceRegion
 from discord.ext.commands import Bot, AutoShardedBot
 
-from .node import Node
 from .exceptions import NoNodesConnected, InvalidIdentifier, NodeOccupied
+from .node import Node
 
 
 _nodes: Dict[str, Node] = {}

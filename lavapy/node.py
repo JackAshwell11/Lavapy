@@ -21,14 +21,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import logging
 import aiohttp
-from urllib.parse import quote
 from typing import Union
+from urllib.parse import quote
 
 from discord.enums import VoiceRegion
 from discord.ext.commands import Bot, AutoShardedBot
 
 from .websocket import Websocket
+
+logger = logging.getLogger(__name__)
 
 
 class Node:

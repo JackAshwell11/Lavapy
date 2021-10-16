@@ -21,14 +21,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import logging
 from typing import Union, List
 
 from discord import VoiceProtocol, VoiceChannel
 from discord.ext.commands import Bot, AutoShardedBot
 
+from .equalizer import Equalizer
+from .exceptions import InvalidIdentifier
 from .pool import _getNode
 from .track import Track
-from .equalizer import Equalizer
+
+logger = logging.getLogger(__name__)
 
 
 class Player(VoiceProtocol):
@@ -96,15 +100,17 @@ class Player(VoiceProtocol):
         except TypeError:
             return []
 
-    async def play(self, track: Track, replace: bool = True, startTime: int = 0, endTime: int = 0) -> None:
+    async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         if not replace:
             return
         newTrack = {
             "op": "play",
             "guildId": str(self.channel.guild.id),
             "track": track.id,
+            "startTime": str(startTime),
+            "volume": str(volume),
             "noReplace": not replace,
-            "startTime": str(startTime)
+            "pause": pause
         }
         if endTime > 0:
             newTrack["endTime"] = str(endTime)
@@ -135,7 +141,8 @@ class Player(VoiceProtocol):
         await self.togglePause(False)
 
     async def seek(self, position: int) -> None:
-        # TODO: Maybe add an if statement to check if position is above length of song
+        if position > self._track.length:
+            raise InvalidIdentifier("Seek position is bigger than track length")
         seek = {
             "op": "seek",
             "guildId": str(self.channel.guild.id),
