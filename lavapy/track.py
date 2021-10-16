@@ -37,4 +37,4 @@ class Track:
         self.uri = info.get("uri")
 
     def __repr__(self) -> str:
-        return f"Pylink Track (Identifier={self.identifier}) (Type={self.type})"
+        return f"Lavapy Track (Identifier={self.identifier}) (Type={self.type})"

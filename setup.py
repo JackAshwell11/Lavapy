@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="Pylink",
+    name="Lavapy",
     version="0.1.0",
     packages=["lavapy"],
     url="",

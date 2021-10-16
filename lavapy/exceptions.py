@@ -23,17 +23,17 @@ SOFTWARE.
 """
 
 
-class PylinkException(Exception):
-    """Base Pylink exception"""
+class LavapyException(Exception):
+    """Base Lavapy exception"""
 
 
-class NoNodesConnected(PylinkException):
+class NoNodesConnected(LavapyException):
     """Exception raised when an operation is attempted with nodes and there none connected"""
 
 
-class NodeOccupied(PylinkException):
+class NodeOccupied(LavapyException):
     """Exception raised when node identifiers conflict"""
 
 
-class InvalidIdentifier(PylinkException):
-    """Exception raised when an invalid ID is passed somewhere in Pylink"""
+class InvalidIdentifier(LavapyException):
+    """Exception raised when an invalid ID is passed somewhere in Lavapy"""

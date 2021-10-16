@@ -4,5 +4,5 @@
 # Discord bot testing directory
 tests
 
-# Temporary v2 upgrade
-pylinkclient
+# PyPI distrubtion
+dist/

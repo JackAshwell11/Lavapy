@@ -26,8 +26,8 @@ from .exceptions import *
 from .player import *
 from .pool import *
 
-__title__ = "Pylink"
+__title__ = "Lavapy"
 __author__ = "Aspect1103"
-__license__ = "GPL v3"
+__license__ = "MIT"
 __copyright__ = "Copyright 2021-present (c) Aspect1103"
-__version__ = "1.0.0"
+__version__ = "0.1.0"

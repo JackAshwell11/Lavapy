@@ -45,7 +45,7 @@ class Player(VoiceProtocol):
         self._equalizer = Equalizer.flat()
 
     def __repr__(self) -> str:
-        return f"<Pylink Player (ChannelID={self.channel.id}) (GuildID={self.channel.guild.id})>"
+        return f"<Lavapy Player (ChannelID={self.channel.id}) (GuildID={self.channel.guild.id})>"
 
     def isConnected(self) -> bool:
         return self._connected

@@ -42,7 +42,7 @@ class Websocket:
         headers = {
             "Authorization": self.node.password,
             "User-Id": str(self.node.bot.user.id),
-            "Client-Name": "Pylink"
+            "Client-Name": "Lavapy"
         }
         self._connection = await self.node.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers, heartbeat=60)
         self._listener = self.node.bot.loop.create_task(self.listener())

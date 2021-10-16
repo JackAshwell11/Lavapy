@@ -44,7 +44,7 @@ class Node:
         self._websocket = None
 
     def __repr__(self) -> str:
-        return f"<Pylink Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region})>"
+        return f"<Lavapy Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region})>"
 
     async def connect(self):
         self._websocket = Websocket(self)
