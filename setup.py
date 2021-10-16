@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name="Pylink",
     version="0.1.0",
-    packages=["pylink"],
+    packages=["lavapy"],
     url="",
     license="MIT",
     author="Aspect1103",
