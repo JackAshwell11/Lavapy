@@ -30,7 +30,7 @@ from discord.ext.commands import Bot, AutoShardedBot
 from .equalizer import Equalizer
 from .exceptions import InvalidIdentifier
 from .pool import _getNode
-from .track import Track
+from .tracks import Track
 
 logger = logging.getLogger(__name__)
 

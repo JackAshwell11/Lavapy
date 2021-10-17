@@ -2,7 +2,7 @@
 .idea
 
 # Discord bot testing directory
-tests
+bot/
 
 # PyPI distrubtion
 dist/

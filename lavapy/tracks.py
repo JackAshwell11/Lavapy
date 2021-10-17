@@ -27,14 +27,14 @@ from typing import Dict, Any
 class Track:
     def __init__(self, id: str, info: Dict[str, Any]) -> None:
         self.id = id
-        self.info = info
-        self.identifier = info.get("identifer")
-        self.isSeekable = info.get("isSeekable")
-        self.author = info.get("author")
-        self.length = info.get("length")
-        self.type = info.get("sourceName")
-        self.title = info.get("title")
-        self.uri = info.get("uri")
+        self.info: Dict[str, Any] = info
+        self.identifier: str = info.get("identifer")
+        self.isSeekable: bool = info.get("isSeekable")
+        self.author: str = info.get("author")
+        self.length: int = info.get("length")
+        self.type: str = info.get("sourceName")
+        self.title: str = info.get("title")
+        self.uri: str = info.get("uri")
 
     def __repr__(self) -> str:
         return f"Lavapy Track (Identifier={self.identifier}) (Type={self.type})"
