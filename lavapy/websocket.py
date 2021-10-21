@@ -24,7 +24,11 @@ SOFTWARE.
 import asyncio
 import logging
 from typing import Dict, Any
+
+from aiohttp import WSMsgType
 from aiohttp.client_reqrep import ClientResponse
+
+from .backoff import ExponentialBackoff
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +58,17 @@ class Websocket:
 
     async def listener(self) -> None:
         while True:
+            backoff = ExponentialBackoff()
             msg = await self._connection.receive()
-            await self.processListener(msg.json())
-            await asyncio.sleep(30)
+            if msg.type is WSMsgType.TEXT:
+                await asyncio.create_task(self.processListener(msg.json()))
+            elif msg.type is WSMsgType.CLOSED:
+                await asyncio.sleep(backoff.delay())
 
     async def processListener(self, data: Dict[str, Any]):
         op = data.get("op")
         if op == "stats":
+            # TODO: Implement
             return
         elif op == "playerUpdate":
             # TODO: Implement

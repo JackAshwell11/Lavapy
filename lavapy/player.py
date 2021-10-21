@@ -22,15 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import logging
-from typing import Union, List
+from typing import Union, List, Optional, Any, Dict
 
-from discord import VoiceProtocol, VoiceChannel
+from discord import VoiceProtocol, VoiceChannel, Guild
 from discord.ext.commands import Bot, AutoShardedBot
 
 from .equalizer import Equalizer
 from .exceptions import InvalidIdentifier
 from .pool import _getNode
 from .tracks import Track
+from .node import Node
+
+__all__ = ("Player",)
 
 logger = logging.getLogger(__name__)
 
@@ -38,18 +41,31 @@ logger = logging.getLogger(__name__)
 class Player(VoiceProtocol):
     def __init__(self, bot: Union[Bot, AutoShardedBot], channel: VoiceChannel) -> None:
         super().__init__(bot, channel)
-        self.bot = bot
-        self.channel = channel
-        self.node = _getNode()
-        self.volume = 100
-        self._voiceState = {}
-        self._track = None
-        self._connected = False
-        self._paused = False
-        self._equalizer = Equalizer.flat()
+        self.bot: Union[Bot, AutoShardedBot] = bot
+        self.channel: VoiceChannel = channel
+        self.node: Optional[Node] = _getNode()
+        self._voiceState: Dict[str, Any] = {}
+        self._track: Optional[Track] = None
+        self._connected: bool = False
+        self._paused: bool = False
+        self._volume: int = 100
+        self._equalizer: Equalizer = Equalizer.flat()
 
     def __repr__(self) -> str:
-        return f"<Lavapy Player (ChannelID={self.channel.id}) (GuildID={self.channel.guild.id})>"
+        return f"<Lavapy Player (ChannelID={self.channel.id}) (GuildID={self.guild.id})>"
+
+    @property
+    def guild(self) -> Guild:
+        return self.channel.guild
+
+    @property
+    def track(self) -> Track:
+        return self._track
+
+    @property
+    def position(self) -> float:
+        if not self.isPlaying():
+            return 0
 
     def isConnected(self) -> bool:
         return self._connected
@@ -72,19 +88,19 @@ class Player(VoiceProtocol):
         if {"sessionId", "event"} == self._voiceState.keys():
             voiceUpdate = {
                 "op": "voiceUpdate",
-                "guildId": str(self.channel.guild.id),
+                "guildId": str(self.guild.id),
                 "sessionId": self._voiceState["sessionId"],
                 "event": self._voiceState["event"]
             }
             await self.node.send(voiceUpdate)
 
     async def connect(self, timeout: float, reconnect: bool) -> None:
-        await self.channel.guild.change_voice_state(channel=self.channel)
+        await self.guild.change_voice_state(channel=self.channel)
         self.node.playerCount += 1
         self._connected = True
 
     async def disconnect(self, *, force: bool = False) -> None:
-        await self.channel.guild.change_voice_state(channel=None)
+        await self.guild.change_voice_state(channel=None)
         self.node.playerCount -= 1
 
     async def getYoutubeTracks(self, query: str) -> List[Track]:
@@ -105,7 +121,7 @@ class Player(VoiceProtocol):
             return
         newTrack = {
             "op": "play",
-            "guildId": str(self.channel.guild.id),
+            "guildId": str(self.guild.id),
             "track": track.id,
             "startTime": str(startTime),
             "volume": str(volume),
@@ -115,12 +131,13 @@ class Player(VoiceProtocol):
         if endTime > 0:
             newTrack["endTime"] = str(endTime)
         self._track = track
+        self._volume = volume
         await self.node.send(newTrack)
 
     async def stop(self) -> None:
         stop = {
             "op": "stop",
-            "guildId": str(self.channel.guild.id)
+            "guildId": str(self.guild.id)
         }
         self._track = None
         await self.node.send(stop)
@@ -128,7 +145,7 @@ class Player(VoiceProtocol):
     async def togglePause(self, pause: bool) -> None:
         pause = {
             "op": "pause",
-            "guildId": str(self.channel.guild.id),
+            "guildId": str(self.guild.id),
             "pause": pause
         }
         self._paused = pause
@@ -145,24 +162,24 @@ class Player(VoiceProtocol):
             raise InvalidIdentifier("Seek position is bigger than track length")
         seek = {
             "op": "seek",
-            "guildId": str(self.channel.guild.id),
+            "guildId": str(self.guild.id),
             "position": position
         }
         await self.node.send(seek)
 
     async def setVolume(self, volume: int) -> None:
-        self.volume = max(min(volume, 1000), 0)
+        self._volume = max(min(volume, 1000), 0)
         volume = {
             "op": "volume",
-            "guildId": str(self.channel.guild.id),
-            "volume": self.volume
+            "guildId": str(self.guild.id),
+            "volume": self._volume
         }
         await self.node.send(volume)
 
     async def destroy(self) -> None:
         destroy = {
             "op": "destroy",
-            "guildId": str(self.channel.guild.id)
+            "guildId": str(self.guild.id)
         }
         await self.node.send(destroy)
 
@@ -172,7 +189,7 @@ class Player(VoiceProtocol):
         self._equalizer = eq
         equalizer = {
             "op": "equalizer",
-            "guildId": str(self.channel.guild.id),
+            "guildId": str(self.guild.id),
             "bands": self._equalizer.eq
         }
         await self.node.send(equalizer)
