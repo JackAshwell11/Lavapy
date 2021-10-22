@@ -48,7 +48,7 @@ def _getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
             raise NoNodesConnected(f"No nodes exist for region <{region}>")
     else:
         possibleNodes = _nodes.values()
-    return sorted(possibleNodes, key=lambda x: x.playerCount)[0]
+    return sorted(possibleNodes, key=lambda x: len(x.players))[0]
 
 
 async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: VoiceRegion, identifier: str) -> None:

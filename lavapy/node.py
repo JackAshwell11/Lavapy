@@ -43,7 +43,7 @@ class Node:
         self.region = region
         self.identifier = identifier
         self.session = aiohttp.ClientSession()
-        self.playerCount = 0
+        self.players = []
         self._websocket = None
 
     def __repr__(self) -> str:

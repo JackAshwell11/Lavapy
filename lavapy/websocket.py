@@ -56,6 +56,11 @@ class Websocket:
         self.connected = True
         self.open = True
 
+    async def disconnect(self):
+        await self._connection.close()
+        self.connected = False
+        self.open = False
+
     async def listener(self) -> None:
         while True:
             backoff = ExponentialBackoff()
@@ -67,10 +72,11 @@ class Websocket:
 
     async def processListener(self, data: Dict[str, Any]):
         op = data.get("op")
-        if op == "stats":
-            # TODO: Implement
-            return
-        elif op == "playerUpdate":
+        if op == "playerUpdate":
+            guild = self.node.bot.get_guild(int(data["guildId"]))
+            player = [player for player in self.node.players if player.guild == guild][0]
+            player.updateState(data)
+        elif op == "stats":
             # TODO: Implement
             return
         elif op == "event":

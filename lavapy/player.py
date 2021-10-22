@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import logging
+import datetime
 from typing import Union, List, Optional, Any, Dict
 
 from discord import VoiceProtocol, VoiceChannel, Guild
@@ -49,6 +50,8 @@ class Player(VoiceProtocol):
         self._connected: bool = False
         self._paused: bool = False
         self._volume: int = 100
+        self._lastUpdateTime = None
+        self._lastPosition = None
         self._equalizer: Equalizer = Equalizer.flat()
 
     def __repr__(self) -> str:
@@ -64,17 +67,26 @@ class Player(VoiceProtocol):
 
     @property
     def position(self) -> float:
-        if not self.isPlaying():
+        if not self.isPlaying:
             return 0
 
+    @property
     def isConnected(self) -> bool:
         return self._connected
 
+    @property
     def isPlaying(self) -> bool:
-        return self.isConnected() and self._track is not None
+        return self.isConnected and self._track is not None
 
+    @property
     def isPaused(self) -> bool:
         return self._paused
+
+    def updateState(self, state: Dict[str, Any]):
+        state: Dict[str, Any] = state.get("state")
+        print(state)
+        self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, datetime.timezone.utc)
+        print(self._lastUpdateTime)
 
     async def on_voice_state_update(self, data: dict) -> None:
         self._voiceState.update({"sessionId": data["session_id"]})
@@ -96,12 +108,12 @@ class Player(VoiceProtocol):
 
     async def connect(self, timeout: float, reconnect: bool) -> None:
         await self.guild.change_voice_state(channel=self.channel)
-        self.node.playerCount += 1
+        self.node.players.append(self)
         self._connected = True
 
     async def disconnect(self, *, force: bool = False) -> None:
         await self.guild.change_voice_state(channel=None)
-        self.node.playerCount -= 1
+        self.node.players.remove(self)
 
     async def getYoutubeTracks(self, query: str) -> List[Track]:
         return await self._getTracks(f"ytsearch:{query}")
