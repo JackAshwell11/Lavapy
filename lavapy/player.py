@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import logging
+from datetime import datetime, timezone
 import datetime
 from typing import Union, List, Optional, Any, Dict
 
@@ -45,8 +46,8 @@ class Player(VoiceProtocol):
         self.bot: Union[Bot, AutoShardedBot] = bot
         self.channel: VoiceChannel = channel
         self.node: Optional[Node] = _getNode()
+        self.track: Optional[Track] = None
         self._voiceState: Dict[str, Any] = {}
-        self._track: Optional[Track] = None
         self._connected: bool = False
         self._paused: bool = False
         self._volume: int = 100
@@ -62,13 +63,14 @@ class Player(VoiceProtocol):
         return self.channel.guild
 
     @property
-    def track(self) -> Track:
-        return self._track
-
-    @property
-    def position(self) -> float:
+    def position(self) -> int:
         if not self.isPlaying:
             return 0
+
+        if self.isPaused:
+            pass
+
+        print(self._lastPosition)
 
     @property
     def isConnected(self) -> bool:
@@ -76,7 +78,7 @@ class Player(VoiceProtocol):
 
     @property
     def isPlaying(self) -> bool:
-        return self.isConnected and self._track is not None
+        return self.isConnected and self.track is not None
 
     @property
     def isPaused(self) -> bool:
@@ -84,9 +86,13 @@ class Player(VoiceProtocol):
 
     def updateState(self, state: Dict[str, Any]):
         state: Dict[str, Any] = state.get("state")
-        print(state)
-        self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, datetime.timezone.utc)
-        print(self._lastUpdateTime)
+        # Convert from milliseconds to seconds
+        self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time", 0)/1000, timezone.utc)
+        try:
+            self._lastPosition = state.get("position")/1000
+        except TypeError:
+            # Current position is None
+            self._lastPosition = 0.0
 
     async def on_voice_state_update(self, data: dict) -> None:
         self._voiceState.update({"sessionId": data["session_id"]})
@@ -142,7 +148,7 @@ class Player(VoiceProtocol):
         }
         if endTime > 0:
             newTrack["endTime"] = str(endTime)
-        self._track = track
+        self.track = track
         self._volume = volume
         await self.node.send(newTrack)
 
@@ -151,7 +157,7 @@ class Player(VoiceProtocol):
             "op": "stop",
             "guildId": str(self.guild.id)
         }
-        self._track = None
+        self.track = None
         await self.node.send(stop)
 
     async def togglePause(self, pause: bool) -> None:
@@ -170,7 +176,7 @@ class Player(VoiceProtocol):
         await self.togglePause(False)
 
     async def seek(self, position: int) -> None:
-        if position > self._track.length:
+        if position > self.track.length:
             raise InvalidIdentifier("Seek position is bigger than track length")
         seek = {
             "op": "seek",
