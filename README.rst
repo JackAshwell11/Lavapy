@@ -2,7 +2,7 @@ Lavapy
 ========
 
 
-A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
+A powerful and robust python library for interacting with Lavalink.
 
 Installation
 ---------------------------
