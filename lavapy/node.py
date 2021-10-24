@@ -52,7 +52,7 @@ class Node:
     async def connect(self):
         self._websocket = Websocket(self)
 
-    async def getTracks(self, query: str) -> dict:
+    async def getData(self, query: str) -> dict:
         destination = f"http://{self.host}:{self.port}/loadtracks?identifier={quote(query)}"
         headers = {
             "Authorization": self.password

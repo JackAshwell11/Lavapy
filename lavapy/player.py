@@ -32,7 +32,7 @@ from discord.ext.commands import Bot, AutoShardedBot
 from .equalizer import Equalizer
 from .exceptions import InvalidIdentifier
 from .pool import _getNode
-from .tracks import Track
+from .tracks import Track, Playlist
 from .node import Node
 
 __all__ = ("Player",)
@@ -51,8 +51,8 @@ class Player(VoiceProtocol):
         self._voiceState: Dict[str, Any] = {}
         self._connected: bool = False
         self._paused: bool = False
-        self._lastUpdateTime = None
-        self._lastPosition = None
+        self._lastUpdateTime: Optional[datetime.datetime] = None
+        self._lastPosition: Optional[float] = None
         self._equalizer: Equalizer = Equalizer.flat()
 
     def __repr__(self) -> str:
@@ -63,7 +63,7 @@ class Player(VoiceProtocol):
         return self.channel.guild
 
     @property
-    def position(self) -> int:
+    def position(self) -> float:
         if not self.isPlaying:
             return 0
 
@@ -86,25 +86,36 @@ class Player(VoiceProtocol):
         return self._paused
 
     def updateState(self, state: Dict[str, Any]):
+        # State updates are sent in milliseconds so need to be converted to seconds (/1000)
         state: Dict[str, Any] = state.get("state")
-        # Convert from milliseconds to seconds
-        self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time", 0)/1000, timezone.utc)
-        try:
-            self._lastPosition = state.get("position")/1000
-        except TypeError:
-            # Current position is None
-            self._lastPosition = 0.0
+        self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, timezone.utc)
 
-    async def on_voice_state_update(self, data: dict) -> None:
-        self._voiceState.update({"sessionId": data["session_id"]})
-        await self.sendVoiceUpdate()
+        self._lastPosition = state.get("position", 0)/1000
 
     async def on_voice_server_update(self, data: dict) -> None:
         self._voiceState.update({"event": data})
         await self.sendVoiceUpdate()
 
+    async def on_voice_state_update(self, data: dict) -> None:
+        self._voiceState.update({"sessionId": data["session_id"]})
+
+        channelID = data["channel_id"]
+        if channelID is None:
+            # Disconnecting
+            self._voiceState.clear()
+            return
+
+        channel = self.bot.get_channel(channelID)
+        if channel != self.channel:
+            logger.debug(f"Moved player to channel: {channel.id}")
+            self.channel = channel
+
+        await self.sendVoiceUpdate()
+
     async def sendVoiceUpdate(self) -> None:
         if {"sessionId", "event"} == self._voiceState.keys():
+            logger.debug(f"Dispatching voice update: {self.channel.id}")
+
             voiceUpdate = {
                 "op": "voiceUpdate",
                 "guildId": str(self.guild.id),
@@ -118,23 +129,43 @@ class Player(VoiceProtocol):
         self.node.players.append(self)
         self._connected = True
 
+        logger.info(f"Connected to voice channel: {self.channel.id}")
+
     async def disconnect(self, *, force: bool = False) -> None:
         await self.guild.change_voice_state(channel=None)
         self.node.players.remove(self)
         self._connected = False
 
-    async def getYoutubeTracks(self, query: str) -> List[Track]:
+        logger.info(f"Disconnected from voice channel: {self.channel.id}")
+
+    async def getYoutubeTracks(self, query: str) -> List[Optional[Track]]:
+        logger.info(f"Getting Youtube tracks with query: {query}")
+
         return await self._getTracks(f"ytsearch:{query}")
 
-    async def getSoundcloudTracks(self, query: str) -> List[Track]:
+    async def getSoundcloudTracks(self, query: str) -> List[Optional[Track]]:
+        logger.info(f"Getting Soundcloud tracks with query: {query}")
+
         return await self._getTracks(f"scsearch:{query}")
 
-    async def _getTracks(self, query: str) -> List[Track]:
-        songs = await self.node.getTracks(query)
-        try:
-            return [Track(element.get("track"), element.get("info")) for element in songs.get("tracks")]
-        except TypeError:
-            return []
+    async def _getTracks(self, query: str) -> List[Optional[Track]]:
+        songs = await self.node.getData(query)
+        return [Track(element.get("track"), element.get("info")) for element in songs.get("tracks")] if songs.get("loadType") != "NO_MATCHES" else []
+
+    # TODO: Playlist need more work
+    # async def getYoutubePlaylist(self, query: str) -> Optional[Playlist]:
+    #     logger.info(f"Getting Youtube playlist with query: {query}")
+    #
+    #     return await self._getPlaylist(f"ytsearch:{query}")
+    #
+    # async def getSoundcloudPlaylist(self, query: str) -> Optional[Playlist]:
+    #     logger.info(f"Getting Soundcloud playlist with query: {query}")
+    #
+    #     return await self._getPlaylist(f"scsearch:{query}")
+    #
+    # async def _getPlaylist(self, query: str) -> Optional[Playlist]:
+    #     songs = await self.node.getData(query)
+    #     return Playlist(songs.get("playlistInfo").get("name"), songs.get("tracks")) if songs.get("loadType") != "NO_MATCHES" else None
 
     async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         if not replace:
@@ -154,15 +185,26 @@ class Player(VoiceProtocol):
         self.volume = volume
         await self.node.send(newTrack)
 
+        logger.debug(f"Started playing track: {self.track.title} in {self.channel.id}")
+
     async def stop(self) -> None:
         stop = {
             "op": "stop",
             "guildId": str(self.guild.id)
         }
+        tempTrack = self.track
         self.track = None
         await self.node.send(stop)
 
-    async def togglePause(self, pause: bool) -> None:
+        logger.debug(f"Stopped playing track: {tempTrack.title} in {self.channel.id}")
+
+    async def pause(self) -> None:
+        await self._togglePause(True)
+
+    async def resume(self) -> None:
+        await self._togglePause(False)
+
+    async def _togglePause(self, pause: bool) -> None:
         pause = {
             "op": "pause",
             "guildId": str(self.guild.id),
@@ -171,11 +213,7 @@ class Player(VoiceProtocol):
         self._paused = pause
         await self.node.send(pause)
 
-    async def pause(self) -> None:
-        await self.togglePause(True)
-
-    async def resume(self) -> None:
-        await self.togglePause(False)
+        logger.debug(f"Toggled pause: {pause} in {self.channel.id}")
 
     async def seek(self, position: int) -> None:
         if position > self.track.length:
@@ -187,6 +225,8 @@ class Player(VoiceProtocol):
         }
         await self.node.send(seek)
 
+        logger.debug(f"Seeked to position: {position}")
+
     async def setVolume(self, volume: int) -> None:
         self.volume = max(min(volume, 1000), 0)
         volume = {
@@ -196,15 +236,10 @@ class Player(VoiceProtocol):
         }
         await self.node.send(volume)
 
+        logger.debug(f"Set volume to: {volume}")
+
     async def moveTo(self, channel: VoiceChannel) -> None:
         await self.guild.change_voice_state(channel=channel)
-
-    # async def destroy(self) -> None:
-    #     destroy = {
-    #         "op": "destroy",
-    #         "guildId": str(self.guild.id)
-    #     }
-    #     await self.node.send(destroy)
 
     async def setEqualizer(self, eq: Equalizer) -> None:
         if not isinstance(eq, Equalizer):
@@ -216,3 +251,12 @@ class Player(VoiceProtocol):
             "bands": self._equalizer.eq
         }
         await self.node.send(equalizer)
+
+        logger.debug(f"Changed equalizer to: {self._equalizer}")
+
+    # async def destroy(self) -> None:
+    #     destroy = {
+    #         "op": "destroy",
+    #         "guildId": str(self.guild.id)
+    #     }
+    #     await self.node.send(destroy)

@@ -21,14 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 class Track:
     def __init__(self, id: str, info: Dict[str, Any]) -> None:
         self.id = id
         self.info: Dict[str, Any] = info
-        self.identifier: str = info.get("identifer")
+        self.identifier: str = info.get("identifier")
         self.isSeekable: bool = info.get("isSeekable")
         self.author: str = info.get("author")
         self.length: int = info.get("length")
@@ -37,4 +37,13 @@ class Track:
         self.uri: str = info.get("uri")
 
     def __repr__(self) -> str:
-        return f"Lavapy Track (Identifier={self.identifier}) (Type={self.type})"
+        return f"<Lavapy Track (Identifier={self.identifier}) (Type={self.type})>"
+
+
+class Playlist:
+    def __init__(self, name: str, tracks: List[Dict[str, Any]]):
+        self.name = name
+        self.tracks = [Track(track["track"], track["info"]) for track in tracks]
+
+    def __repr__(self):
+        return f"<Lavapy Playlist (Name={self.name}) (Track count={len(self.tracks)})>"
