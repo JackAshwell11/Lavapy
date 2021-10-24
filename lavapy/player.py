@@ -47,10 +47,10 @@ class Player(VoiceProtocol):
         self.channel: VoiceChannel = channel
         self.node: Optional[Node] = _getNode()
         self.track: Optional[Track] = None
+        self.volume: int = 100
         self._voiceState: Dict[str, Any] = {}
         self._connected: bool = False
         self._paused: bool = False
-        self._volume: int = 100
         self._lastUpdateTime = None
         self._lastPosition = None
         self._equalizer: Equalizer = Equalizer.flat()
@@ -68,9 +68,10 @@ class Player(VoiceProtocol):
             return 0
 
         if self.isPaused:
-            pass
+            return min(self._lastPosition, self.track.length)
 
-        print(self._lastPosition)
+        timeSinceLastUpdate = (datetime.datetime.now(timezone.utc) - self._lastUpdateTime).total_seconds()
+        return min(self._lastPosition + timeSinceLastUpdate, self.track.length)
 
     @property
     def isConnected(self) -> bool:
@@ -120,6 +121,7 @@ class Player(VoiceProtocol):
     async def disconnect(self, *, force: bool = False) -> None:
         await self.guild.change_voice_state(channel=None)
         self.node.players.remove(self)
+        self._connected = False
 
     async def getYoutubeTracks(self, query: str) -> List[Track]:
         return await self._getTracks(f"ytsearch:{query}")
@@ -149,7 +151,7 @@ class Player(VoiceProtocol):
         if endTime > 0:
             newTrack["endTime"] = str(endTime)
         self.track = track
-        self._volume = volume
+        self.volume = volume
         await self.node.send(newTrack)
 
     async def stop(self) -> None:
@@ -186,20 +188,23 @@ class Player(VoiceProtocol):
         await self.node.send(seek)
 
     async def setVolume(self, volume: int) -> None:
-        self._volume = max(min(volume, 1000), 0)
+        self.volume = max(min(volume, 1000), 0)
         volume = {
             "op": "volume",
             "guildId": str(self.guild.id),
-            "volume": self._volume
+            "volume": self.volume
         }
         await self.node.send(volume)
 
-    async def destroy(self) -> None:
-        destroy = {
-            "op": "destroy",
-            "guildId": str(self.guild.id)
-        }
-        await self.node.send(destroy)
+    async def moveTo(self, channel: VoiceChannel) -> None:
+        await self.guild.change_voice_state(channel=channel)
+
+    # async def destroy(self) -> None:
+    #     destroy = {
+    #         "op": "destroy",
+    #         "guildId": str(self.guild.id)
+    #     }
+    #     await self.node.send(destroy)
 
     async def setEqualizer(self, eq: Equalizer) -> None:
         if not isinstance(eq, Equalizer):
