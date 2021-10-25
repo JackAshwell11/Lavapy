@@ -40,7 +40,7 @@ A simple and easy example to connect to a voice channel and play a Youtube song 
     from discord.ext import commands
     import lavapy
 
-    bot = commands.Bot(command_prefix="$")
+    bot = commands.Bot(command_prefix="!")
 
 
     async def initialiseNodes():
