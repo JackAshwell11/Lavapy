@@ -23,7 +23,7 @@ SOFTWARE.
 """
 import logging
 import aiohttp
-from typing import Union
+from typing import Union, Optional
 from urllib.parse import quote
 
 from discord.enums import VoiceRegion
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class Node:
-    def __init__(self, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: VoiceRegion, identifier: str) -> None:
+    def __init__(self, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
         self.bot = bot
         self.host = host
         self.port = port

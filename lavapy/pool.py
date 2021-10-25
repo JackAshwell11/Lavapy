@@ -21,7 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from typing import Dict, Union
+import string
+import random
+from typing import Dict, Union, Optional
 
 from discord import VoiceRegion
 from discord.ext.commands import Bot, AutoShardedBot
@@ -51,7 +53,10 @@ def _getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
     return sorted(possibleNodes, key=lambda x: len(x.players))[0]
 
 
-async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: VoiceRegion, identifier: str) -> None:
+async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: str = None) -> None:
+    if identifier is None:
+        identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
+
     if identifier in _nodes:
         raise NodeOccupied(f"A node with the identifier <{identifier}> already exists")
 
