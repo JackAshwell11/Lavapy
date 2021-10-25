@@ -11,12 +11,10 @@ setup(
     description="A powerful and robust python library for interacting with Lavalink.",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Intended Audience :: Developers",
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Programming Language :: Python :: 3.10"
       ]
 )
