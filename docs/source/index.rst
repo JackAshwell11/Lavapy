@@ -7,7 +7,7 @@ Help and Support
 ================
 
 - Try the :doc:`faq` first.
-- Try the :ref:`index <genindex>` if you're looking for something specific.
+- Try the :ref:`index <genindex>` or :ref:`searching <search>` if you're looking for something specific.
 - Report bugs with our `Issue Tracker <https://github.com/Aspect1103/Lavapy/issues>`_.
 
 .. toctree::
@@ -18,7 +18,7 @@ Help and Support
     quickstart
     examples
 
-API Reference
+Documentation
 =============
 
 .. toctree::
