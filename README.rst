@@ -19,6 +19,8 @@ Installation
 ------------
 Lavapy requires Python 3.8 or higher
 
+To install Lavapy, use one of the commands below:
+
 .. code:: sh
 
     # Windows

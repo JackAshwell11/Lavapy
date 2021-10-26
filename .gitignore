@@ -9,3 +9,6 @@ bot/
 
 # PyPI distrubtion
 dist/
+
+# Sphinx documentation
+docs/_build
