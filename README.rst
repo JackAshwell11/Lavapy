@@ -1,5 +1,5 @@
 Lavapy
-========
+======
 
 .. image:: https://img.shields.io/pypi/v/Lavapy
     :target: https://pypi.org/project/Lavapy/
@@ -16,7 +16,7 @@ Lavapy
 A powerful and robust python library for interacting with Lavalink.
 
 Installation
----------------------------
+------------
 Lavapy requires Python 3.8 or higher
 
 .. code:: sh
@@ -28,11 +28,11 @@ Lavapy requires Python 3.8 or higher
     python3.8 -m pip install -U lavapy
 
 Features
----------------------------
+--------
 TO DO
 
 Usage
----------------------------
+-----
 A simple and easy example to connect to a voice channel and play a Youtube song based on a given search query.
 
 .. code:: py
@@ -81,7 +81,7 @@ A simple and easy example to connect to a voice channel and play a Youtube song 
     bot.run("BOT_TOKEN")
 
 Links
----------------------------
+-----
 - `Official Documentation <https://lavapy.readthedocs.io/en/latest/>`_
 - `Source Code <https://github.com/Aspect1103/Lavapy>`_
 - `Issue Tracker <https://github.com/Aspect1103/Lavapy/issues>`_
