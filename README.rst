@@ -1,8 +1,13 @@
-Lavapy |lavapyLogo|
-======
+.. raw:: html
 
-.. |lavapyLogo| image:: logo-README.png
-    :width: 300px
+    h1 {
+        background: url(logo-README.png) no-repeat top right;
+        padding-right: 5px;
+    }
+
+
+Lavapy
+======
 
 .. image:: https://img.shields.io/pypi/v/Lavapy
     :target: https://pypi.org/project/Lavapy/
