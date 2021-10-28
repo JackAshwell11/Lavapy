@@ -26,7 +26,7 @@ import logging
 from .equalizer import *
 from .exceptions import *
 from .player import *
-from .pool import *
+from .pool import createNode
 
 __title__ = "Lavapy"
 __author__ = "Aspect1103"

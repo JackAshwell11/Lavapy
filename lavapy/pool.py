@@ -54,6 +54,26 @@ def _getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
 
 
 async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: str = None) -> None:
+    """
+    Creates a Lavapy Node object and stores it for later use
+
+    :param bot: The discord.py Bot or AutoShardedBot
+    :type bot: Union[Bot, AutoShardedBot]
+    :param host: The IP address of the Lavalink server
+    :type host: str
+    :param port: The port of the Lavalink server
+    :type port: int
+    :param password: The password to the Lavalink server
+    :type password: str
+    :param region: The discord.py VoiceRegion to assign to this node
+    :type region: Optional[VoiceRegion]
+    :param identifier: The unique identifier for this node. If not supplied, it will be generated for you
+    :type identifier: str
+
+    :raise NodeOccupied: If a node with the identifier already exists
+
+    :return: None
+    """
     if identifier is None:
         identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
 

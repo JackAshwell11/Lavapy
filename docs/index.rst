@@ -25,10 +25,4 @@ Documentation
     :maxdepth: 1
     :caption: API Reference:
 
-    TO DO
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Extensions:
-
-    TO DO
+    lavapy

@@ -168,8 +168,7 @@ class Player(VoiceProtocol):
     #     return Playlist(songs.get("playlistInfo").get("name"), songs.get("tracks")) if songs.get("loadType") != "NO_MATCHES" else None
 
     async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
-        if not replace:
-            return
+        # TODO: Check if track is currently playing and raise error if replace = False
         newTrack = {
             "op": "play",
             "guildId": str(self.guild.id),
