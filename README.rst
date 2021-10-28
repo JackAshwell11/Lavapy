@@ -1,4 +1,4 @@
-.. image:: logo.png?raw=true
+.. image:: logo-README.png?raw=true
     :align: right
 
 
