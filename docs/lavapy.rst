@@ -3,4 +3,6 @@
 API Reference
 =============
 
+.. autofunction:: getNode
+
 .. autofunction:: createNode

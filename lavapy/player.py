@@ -31,7 +31,7 @@ from discord.ext.commands import Bot, AutoShardedBot
 
 from .equalizer import Equalizer
 from .exceptions import InvalidIdentifier
-from .pool import _getNode
+from .pool import getNode
 from .tracks import Track, Playlist
 from .node import Node
 
@@ -45,7 +45,7 @@ class Player(VoiceProtocol):
         super().__init__(bot, channel)
         self.bot: Union[Bot, AutoShardedBot] = bot
         self.channel: VoiceChannel = channel
-        self.node: Optional[Node] = _getNode()
+        self.node: Optional[Node] = getNode()
         self.track: Optional[Track] = None
         self.volume: int = 100
         self._voiceState: Dict[str, Any] = {}
@@ -168,7 +168,8 @@ class Player(VoiceProtocol):
     #     return Playlist(songs.get("playlistInfo").get("name"), songs.get("tracks")) if songs.get("loadType") != "NO_MATCHES" else None
 
     async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
-        # TODO: Check if track is currently playing and raise error if replace = False
+        if self.isPlaying and not replace:
+            return
         newTrack = {
             "op": "play",
             "guildId": str(self.guild.id),

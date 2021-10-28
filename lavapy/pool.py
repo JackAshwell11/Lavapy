@@ -35,7 +35,7 @@ from .node import Node
 _nodes: Dict[str, Node] = {}
 
 
-def _getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
+def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
     if not _nodes:
         raise NoNodesConnected("There are currently no nodes connected")
     if identifier is not None:
