@@ -1,6 +1,6 @@
-.. image:: logo-README.png?raw=true
+.. image:: logo.png
     :align: center
-    :width: 500px
+    :width: 750px
 
 
 Lavapy
