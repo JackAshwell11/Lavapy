@@ -1,4 +1,4 @@
-.. image:: logo-README.png
+.. image:: logo-README.png?raw=true
     :align: center
     :width: 500px
 
