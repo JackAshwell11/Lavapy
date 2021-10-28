@@ -1,5 +1,6 @@
-.. image:: logo-README.png?raw=true
-    :align: right
+.. raw:: html
+
+    <img src="logo-README.png" align="right" width="300px">
 
 
 Lavapy
