@@ -1,9 +1,11 @@
 .. raw:: html
 
-    h1 {
-        background: url(logo-README.png) no-repeat top right;
-        padding-right: 5px;
-    }
+    <style>
+        h1 {
+            background: url(logo-README.png) no-repeat top right;
+            padding-right: 5px;
+        }
+    </style>
 
 
 Lavapy
