@@ -36,6 +36,27 @@ _nodes: Dict[str, Node] = {}
 
 
 def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
+    """Retrieves a node either based on identifier, voice region or neither (randomly)
+
+    Parameters
+    ----------
+    identifier: str
+        The unique identifier for the desired node
+    region: VoiceRegion
+        The VoiceRegion a specific node is assigned to
+
+    Returns
+    -------
+    Node
+        A Lavapy Node object
+
+    Raises
+    ------
+    NoNodesConnected
+        There are currently no nodes connected with the provided options
+    InvalidIdentifier
+        No nodes exists with the given identifier
+    """
     if not _nodes:
         raise NoNodesConnected("There are currently no nodes connected")
     if identifier is not None:
@@ -54,8 +75,7 @@ def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
 
 
 async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: str = None) -> None:
-    """
-    Creates a Lavapy Node object and stores it for later use
+    """Creates a Lavapy Node object and stores it for later use
 
     :param bot: The discord.py Bot or AutoShardedBot
     :type bot: Union[Bot, AutoShardedBot]
@@ -71,8 +91,6 @@ async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, pass
     :type identifier: str
 
     :raise NodeOccupied: If a node with the identifier already exists
-
-    :return: None
     """
     if identifier is None:
         identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
