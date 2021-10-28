@@ -1,3 +1,7 @@
+.. image:: logo.png?raw=true
+    :align: right
+
+
 Lavapy
 ======
 
