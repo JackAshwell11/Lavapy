@@ -45,17 +45,17 @@ def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
     region: VoiceRegion
         The VoiceRegion a specific node is assigned to
 
-    Returns
-    -------
-    Node
-        A Lavapy Node object
-
     Raises
     ------
     NoNodesConnected
         There are currently no nodes connected with the provided options
     InvalidIdentifier
         No nodes exists with the given identifier
+
+    Returns
+    -------
+    Node
+        A Lavapy Node object
     """
     if not _nodes:
         raise NoNodesConnected("There are currently no nodes connected")

@@ -3,7 +3,6 @@
 API Reference
 =============
 
-.. autosummary::
-    :toctree: generated
+.. autofunction:: getNode
 
-    lavapy
+.. autofunction:: createNode
