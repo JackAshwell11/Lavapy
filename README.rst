@@ -3,7 +3,6 @@ Lavapy |lavapyLogo|
 
 .. |lavapyLogo| image:: logo-README.png
     :width: 300px
-    :align: right
 
 .. image:: https://img.shields.io/pypi/v/Lavapy
     :target: https://pypi.org/project/Lavapy/
