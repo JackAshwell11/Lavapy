@@ -1,6 +1,6 @@
 .. image:: logo.png
     :align: center
-    :width: 750px
+    :width: 10000px
 
 
 Lavapy
