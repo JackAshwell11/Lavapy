@@ -14,6 +14,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath(".."))
 sys.path.append(os.path.abspath("extensions"))
 
 
@@ -22,8 +23,6 @@ sys.path.append(os.path.abspath("extensions"))
 project = "Lavapy"
 copyright = "2021, Aspect1103"
 author = "Aspect1103"
-
-# The full version, including alpha/beta/rc tags
 release = "0.1.2"
 
 

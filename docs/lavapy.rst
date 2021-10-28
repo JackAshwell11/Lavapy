@@ -7,10 +7,10 @@ API Reference
 
 .. autofunction:: createNode
 
-Node
-----
+Player
+------
 
-.. attributetable:: Node
+.. attributetable:: Player
 
-.. autoclass:: Node
+.. autoclass:: Player
     :members:
