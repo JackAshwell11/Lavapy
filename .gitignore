@@ -1,3 +1,6 @@
+# Python files
+__pycache__/
+
 # Editor files
 .idea
 
@@ -6,3 +9,6 @@ bot/
 
 # PyPI distrubtion
 dist/
+
+# Sphinx documentation
+docs/_build
