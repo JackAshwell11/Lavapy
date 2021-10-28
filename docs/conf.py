@@ -39,7 +39,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+html_css_files = ["css/custom.css"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
