@@ -1,10 +1,9 @@
-.. raw:: html
-
-    <img src="logo-README.png" align="right" width="300px">
-
-
-Lavapy
+Lavapy |lavapyLogo|
 ======
+
+.. |lavapyLogo| image:: logo-README.png
+    :width: 300px
+    :align: right
 
 .. image:: https://img.shields.io/pypi/v/Lavapy
     :target: https://pypi.org/project/Lavapy/
