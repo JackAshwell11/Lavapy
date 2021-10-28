@@ -1,11 +1,6 @@
-.. raw:: html
-
-    <style>
-        h1 {
-            background: url(logo-README.png) no-repeat top right;
-            padding-right: 5px;
-        }
-    </style>
+.. image:: logo-README.png
+    :align: right
+    :width: 300px
 
 
 Lavapy
