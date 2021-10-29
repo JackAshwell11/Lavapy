@@ -47,14 +47,14 @@ def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
 
     Raises
     ------
-    :class:`NoNodesConnected`
+    NoNodesConnected
         There are currently no nodes connected with the provided options
-    :class:`InvalidIdentifier`
+    InvalidIdentifier
         No nodes exists with the given identifier
 
     Returns
     -------
-    :class:`Node`
+    Node
         A Lavapy Node object
     """
     if not _nodes:
@@ -90,11 +90,11 @@ async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, pass
     region: Optional[VoiceRegion]
         The discord.py VoiceRegion to assign to this node
     identifier: Optional[str]
-    The unique identifier for this node. If not supplied, it will be generated for you
+        The unique identifier for this node. If not supplied, it will be generated for you
 
     Raises
     ------
-    :class:`NodeOccupied`
+    NodeOccupied
         If a node with the identifier already exists
     """
     if identifier is None:
