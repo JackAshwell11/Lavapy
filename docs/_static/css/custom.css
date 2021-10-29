@@ -22,3 +22,12 @@
 .py-attribute-table-column > span {
     font-weight: bold;
 }
+
+.attr-table-title {
+    flex: 0 0 100%;
+    padding-bottom: 1rem;
+}
+
+.attr-table-title > .attr-table-title-qualified {
+    font-weight: bold;
+}
