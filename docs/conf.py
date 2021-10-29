@@ -34,7 +34,7 @@ extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
-    "attributetable"
+    "attributetable",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
