@@ -47,14 +47,14 @@ def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
 
     Raises
     ------
-    NoNodesConnected
+    :class:`NoNodesConnected`
         There are currently no nodes connected with the provided options
-    InvalidIdentifier
+    :class:`InvalidIdentifier`
         No nodes exists with the given identifier
 
     Returns
     -------
-    Node
+    :class:`Node`
         A Lavapy Node object
     """
     if not _nodes:
@@ -74,23 +74,28 @@ def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
     return sorted(possibleNodes, key=lambda x: len(x.players))[0]
 
 
-async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: str = None) -> None:
+async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> None:
     """Creates a Lavapy Node object and stores it for later use
 
-    :param bot: The discord.py Bot or AutoShardedBot
-    :type bot: Union[Bot, AutoShardedBot]
-    :param host: The IP address of the Lavalink server
-    :type host: str
-    :param port: The port of the Lavalink server
-    :type port: int
-    :param password: The password to the Lavalink server
-    :type password: str
-    :param region: The discord.py VoiceRegion to assign to this node
-    :type region: Optional[VoiceRegion]
-    :param identifier: The unique identifier for this node. If not supplied, it will be generated for you
-    :type identifier: str
+    Parameters
+    ----------
+    bot: Union[Bot, AutoShardedBot]
+        The unique identifier for the desired node
+    host: str
+        The IP address of the Lavalink server
+    port: int
+        The port of the Lavalink server
+    password: str
+        The password to the Lavalink server
+    region: Optional[VoiceRegion]
+        The discord.py VoiceRegion to assign to this node
+    identifier: Optional[str]
+    The unique identifier for this node. If not supplied, it will be generated for you
 
-    :raise NodeOccupied: If a node with the identifier already exists
+    Raises
+    ------
+    :class:`NodeOccupied`
+        If a node with the identifier already exists
     """
     if identifier is None:
         identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
