@@ -10,5 +10,7 @@ API Reference
 Player
 ------
 
+.. attributetable:: Player
+
 .. autoclass:: Player
     :members:
