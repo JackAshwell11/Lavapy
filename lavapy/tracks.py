@@ -21,12 +21,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
 from typing import Dict, Any, List
+
+__all__ = ("Track",
+           "Playlist",)
 
 
 class Track:
+    """
+    A Lavapy Track object. This should not be created manually, instead use the player object to get tracks
+
+    Parameters
+    ----------
+    id: str
+        The unique base64 track ID which can be used to rebuild a track
+    info: Dict[str, Any]
+        The raw track info
+
+    Attributes
+    ----------
+    id: str
+        The unique base64 track ID which can be used to rebuild a track
+    info: Dict[str, Any]
+        The raw track info
+    identifier: str
+        The track's unique identifier
+    isSeekable: bool
+        A bool stating if a track can be seeked or not
+    author: str
+        The author of the track
+    length: int
+        The duration of the track in seconds
+    type: str
+        The source site of the track
+    title: str
+        The title of the track
+    uri: str
+        The track's URI
+    """
     def __init__(self, id: str, info: Dict[str, Any]) -> None:
-        self.id = id
+        self.id: str = id
         self.info: Dict[str, Any] = info
         self.identifier: str = info.get("identifier")
         self.isSeekable: bool = info.get("isSeekable")
@@ -41,9 +77,26 @@ class Track:
 
 
 class Playlist:
-    def __init__(self, name: str, tracks: List[Dict[str, Any]]):
-        self.name = name
-        self.tracks = [Track(track["track"], track["info"]) for track in tracks]
+    """
+    A Lavapy Playlist object. This should not be created manually, instead use the player object to get playlists
+
+    Parameters
+    ----------
+    name: str
+        The playlist's name
+    trackArr: List[Dict[str, Any]]
+        A list of Lavapy Track objects
+
+    Attributes
+    ----------
+    name: str
+        The playlist's name
+    tracks: List[Track]
+        A list of Lavapy Track objects
+    """
+    def __init__(self, name: str, trackArr: List[Dict[str, Any]]):
+        self.name: str = name
+        self.tracks: List[Track] = [Track(track["track"], track["info"]) for track in trackArr]
 
     def __repr__(self):
         return f"<Lavapy Playlist (Name={self.name}) (Track count={len(self.tracks)})>"

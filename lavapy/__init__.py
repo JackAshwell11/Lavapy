@@ -23,10 +23,13 @@ SOFTWARE.
 """
 import logging
 
+from .backoff import *
 from .equalizer import *
 from .exceptions import *
+from .node import *
 from .player import *
 from .pool import *
+from .tracks import *
 
 __title__ = "Lavapy"
 __author__ = "Aspect1103"

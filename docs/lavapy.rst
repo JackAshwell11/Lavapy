@@ -3,14 +3,45 @@
 API Reference
 =============
 
-.. autofunction:: getNode
+Pool
+----
 
-.. autofunction:: createNode
+.. autoclass:: NodePool
+    :members:
+
+Node
+----
+
+.. autoclass:: Node
+    :members:
 
 Player
 ------
 
-.. attributetable:: Player
-
 .. autoclass:: Player
     :members:
+
+Tracks
+------
+
+.. autoclass:: Track
+    :members:
+
+.. autoclass:: Playlist
+    :members:
+
+Equalizer
+---------
+
+.. autoclass:: Equalizer
+    :members:
+
+Exceptions
+----------
+
+.. py:exception:: LavapyException
+.. py:exception:: NoNodesConnected
+.. py:exception:: NodeOccupied
+.. py:exception:: InvalidIdentifier
+
+

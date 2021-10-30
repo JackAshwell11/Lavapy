@@ -56,7 +56,7 @@ A simple and easy example to connect to a voice channel and play a Youtube song 
         """
         await bot.wait_until_ready()
 
-        await lavapy.createNode(bot, "0.0.0.0", 2333, "LAVALINK_PASSWORD")
+        await lavapy.NodePool.createNode(bot, "0.0.0.0", 2333, "LAVALINK_PASSWORD")
 
 
     @bot.command()

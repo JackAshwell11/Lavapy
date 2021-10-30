@@ -34,8 +34,13 @@ extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
     "attributetable"
 ]
+
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+autodoc_member_order = "groupwise"
 
 # Add any paths that contain templates here, relative to this directory.
 html_css_files = ["css/custom.css"]
@@ -44,6 +49,13 @@ html_css_files = ["css/custom.css"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+# Link to other sphinx documentation
+intersphinx_mapping = {
+    "py": ("https://docs.python.org/3", None),
+    "aio": ('https://docs.aiohttp.org/en/stable/', None),
+    "dpy": ('https://discordpy.readthedocs.io/en/latest/', None),
+}
 
 
 # -- Options for HTML output -------------------------------------------------

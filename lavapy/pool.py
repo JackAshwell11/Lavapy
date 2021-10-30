@@ -31,79 +31,96 @@ from discord.ext.commands import Bot, AutoShardedBot
 from .exceptions import NoNodesConnected, InvalidIdentifier, NodeOccupied
 from .node import Node
 
+__all__ = ("NodePool",)
 
-_nodes: Dict[str, Node] = {}
 
-
-def getNode(identifier: str = None, region: VoiceRegion = None) -> Node:
-    """Retrieves a node either based on identifier, voice region or neither (randomly)
-
-    Parameters
-    ----------
-    identifier: str
-        The unique identifier for the desired node
-    region: VoiceRegion
-        The VoiceRegion a specific node is assigned to
-
-    Raises
-    ------
-    NoNodesConnected
-        There are currently no nodes connected with the provided options
-    InvalidIdentifier
-        No nodes exists with the given identifier
-
-    Returns
-    -------
-    Node
-        A Lavapy Node object
+class NodePool:
     """
-    if not _nodes:
-        raise NoNodesConnected("There are currently no nodes connected")
-    if identifier is not None:
-        try:
-            node = _nodes[identifier]
-            return node
-        except KeyError:
-            raise InvalidIdentifier(f"No nodes with the identifier <{identifier}>")
-    elif region is not None:
-        possibleNodes = [node for node in _nodes.values() if node.region is region]
-        if not possibleNodes:
-            raise NoNodesConnected(f"No nodes exist for region <{region}>")
-    else:
-        possibleNodes = _nodes.values()
-    return sorted(possibleNodes, key=lambda x: len(x.players))[0]
+    Lavapy NodePool class
 
-
-async def createNode(bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> None:
-    """Creates a Lavapy Node object and stores it for later use
-
-    Parameters
-    ----------
-    bot: Union[Bot, AutoShardedBot]
-        The unique identifier for the desired node
-    host: str
-        The IP address of the Lavalink server
-    port: int
-        The port of the Lavalink server
-    password: str
-        The password to the Lavalink server
-    region: Optional[VoiceRegion]
-        The discord.py VoiceRegion to assign to this node
-    identifier: Optional[str]
-        The unique identifier for this node. If not supplied, it will be generated for you
-
-    Raises
-    ------
-    NodeOccupied
-        If a node with the identifier already exists
+    This holds all the Node objects created with :meth:`create_node()`
     """
-    if identifier is None:
-        identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
+    _nodes: Dict[str, Node] = {}
 
-    if identifier in _nodes:
-        raise NodeOccupied(f"A node with the identifier <{identifier}> already exists")
+    @property
+    def nodes(self) -> Dict[str, Node]:
+        """A dict of created Node objects"""
+        return self._nodes
 
-    node = Node(bot, host, port, password, region, identifier)
-    await node.connect()
 
-    _nodes[identifier] = node
+    @classmethod
+    def getNode(cls, identifier: Optional[str] = None, region: Optional[VoiceRegion] = None) -> Node:
+        """
+        Retrieves a node either based on identifier, voice region or neither (randomly)
+
+        Parameters
+        ----------
+        identifier: Optional[str]
+            The unique identifier for the desired node
+        region: Optional[VoiceRegion]
+            The VoiceRegion a specific node is assigned to
+
+        Raises
+        ------
+        NoNodesConnected
+            There are currently no nodes connected with the provided options
+        InvalidIdentifier
+            No nodes exists with the given identifier
+
+        Returns
+        -------
+        Node
+            A Lavapy Node object
+        """
+        if not cls._nodes:
+            raise NoNodesConnected("There are currently no nodes connected")
+        if identifier is not None:
+            try:
+                node = cls._nodes[identifier]
+                return node
+            except KeyError:
+                raise InvalidIdentifier(f"No nodes with the identifier <{identifier}>")
+        elif region is not None:
+            possibleNodes = [node for node in cls._nodes.values() if node.region is region]
+            if not possibleNodes:
+                raise NoNodesConnected(f"No nodes exist for region <{region}>")
+        else:
+            possibleNodes = cls._nodes.values()
+        return sorted(possibleNodes, key=lambda x: len(x.players))[0]
+
+
+    @classmethod
+    async def createNode(cls, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> None:
+        """
+        Creates a Lavapy Node object and stores it for later use
+
+        Parameters
+        ----------
+        bot: Union[Bot, AutoShardedBot]
+            The unique identifier for the desired node
+        host: str
+            The IP address of the Lavalink server
+        port: int
+            The port of the Lavalink server
+        password: str
+            The password to the Lavalink server
+        region: Optional[VoiceRegion]
+            The discord.py VoiceRegion to assign to this node
+        identifier: Optional[str]
+            The unique identifier for this node. If not supplied, it will be generated for you
+
+        Raises
+        ------
+        NodeOccupied
+            If a node with the identifier already exists
+        """
+        if identifier is None:
+            identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
+
+        if identifier in cls._nodes:
+            raise NodeOccupied(f"A node with the identifier <{identifier}> already exists")
+
+        node = Node(bot, host, port, password, region, identifier)
+        await node.connect()
+
+        cls._nodes[identifier] = node

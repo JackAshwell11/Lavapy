@@ -31,7 +31,7 @@ from discord.ext.commands import Bot, AutoShardedBot
 
 from .equalizer import Equalizer
 from .exceptions import InvalidIdentifier
-from .pool import getNode
+from .pool import NodePool
 from .tracks import Track, Playlist
 from .node import Node
 
@@ -41,11 +41,59 @@ logger = logging.getLogger(__name__)
 
 
 class Player(VoiceProtocol):
+    """
+    Lavapy Player object
+
+    This class subclasses :class:`discord.VoiceProtocol` and such should be treated as one with additions.
+
+    Examples
+    --------
+        .. code::
+            @commands.command()
+            async def connect(self, channel: discord.VoiceChannel):
+                voice_client = await channel.connect(cls=lavapy.Player)
+
+    .. warning::
+        This class should not be created manually but can be subclassed to add additional functionality.
+        You should instead use :meth:`discord.VoiceChannel.connect()` and pass the player object to the cls kwarg.
+
+    Parameters
+    ----------
+    bot: Union[Bot, AutoShardedBot]
+        The discord.py Bot or AutoShardedBot
+    channel: VoiceChannel
+        A discord.py voice channel for the player to connect to
+
+    Attributes
+    ----------
+    bot: Union[Bot, AutoShardedBot]
+        The discord.py Bot or AutoShardedBot
+    channel: VoiceChannel
+        A discord.py voice channel for the player to connect to
+    node: Optional[Node]
+        The Lavapy Node object which is used for communicating with lavalink
+    track: Optional[Track]
+        The currently playing track
+    volume: int
+        The volume the player should play at
+    _voiceState: Dict[str, Any]
+        A dict which stores server and state updates
+    _connected: bool
+        A bool stating if the player is connected to a channel
+    _paused: bool
+        A bool stating if the player is currently paused
+    _lastUpdateTime: Optional[datetime.datetime]
+        The time at which lavalink sent the last player update
+    _lastPosition: Optional[float]
+        The position the track was at when lavalink sent the last player update
+    _equalizer: Equalizer
+        The currently applied equalizer to the player
+    """
     def __init__(self, bot: Union[Bot, AutoShardedBot], channel: VoiceChannel) -> None:
         super().__init__(bot, channel)
         self.bot: Union[Bot, AutoShardedBot] = bot
         self.channel: VoiceChannel = channel
-        self.node: Optional[Node] = getNode()
+        self.node: Optional[Node] = NodePool.getNode()
         self.track: Optional[Track] = None
         self.volume: int = 100
         self._voiceState: Dict[str, Any] = {}
@@ -60,10 +108,12 @@ class Player(VoiceProtocol):
 
     @property
     def guild(self) -> Guild:
+        """Returns the guild this player is in"""
         return self.channel.guild
 
     @property
     def position(self) -> float:
+        """The current position of the track in seconds. If nothing is playing, this returns 0"""
         if not self.isPlaying:
             return 0
 
@@ -74,29 +124,61 @@ class Player(VoiceProtocol):
         return min(self._lastPosition + timeSinceLastUpdate, self.track.length)
 
     @property
+    def equalizer(self) -> Equalizer:
+        """Returns the currently applied Equalizer"""
+        return self._equalizer
+
+    @property
     def isConnected(self) -> bool:
+        """Returns whether the player is connected to a channel"""
         return self._connected
 
     @property
     def isPlaying(self) -> bool:
+        """Returns whether the player is currently playing a track"""
         return self.isConnected and self.track is not None
 
     @property
     def isPaused(self) -> bool:
+        """Returns whether the player is currently paused"""
         return self._paused
 
     def updateState(self, state: Dict[str, Any]):
+        """
+        Updates self._lastUpdateTime and self._lastPosition with lavalink's player updates
+
+        Parameters
+        ----------
+        state: Dict[str, Any]
+            The raw info sent by lavalink
+        """
         # State updates are sent in milliseconds so need to be converted to seconds (/1000)
         state: Dict[str, Any] = state.get("state")
         self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, timezone.utc)
 
         self._lastPosition = state.get("position", 0)/1000
 
-    async def on_voice_server_update(self, data: dict) -> None:
+    async def on_voice_server_update(self, data: Dict[str, str]) -> None:
+        """
+        Called when the bot connects to a voice channel
+
+        Parameters
+        ----------
+        data: Dict[str, str]
+            The raw info sent by discord about the voice channel
+        """
         self._voiceState.update({"event": data})
         await self.sendVoiceUpdate()
 
-    async def on_voice_state_update(self, data: dict) -> None:
+    async def on_voice_state_update(self, data: Dict[str, Any]) -> None:
+        """
+        Called when the bot's voice state changes
+
+        Parameters
+        ----------
+        data: Dict[str, Any]
+            The raw info sent by discord about the bot's voice state
+        """
         self._voiceState.update({"sessionId": data["session_id"]})
 
         channelID = data["channel_id"]
@@ -113,6 +195,7 @@ class Player(VoiceProtocol):
         await self.sendVoiceUpdate()
 
     async def sendVoiceUpdate(self) -> None:
+        """Sends data collected from on_voice_server_update and on_voice_state_update to lavalink"""
         if {"sessionId", "event"} == self._voiceState.keys():
             logger.debug(f"Dispatching voice update: {self.channel.id}")
 
@@ -125,6 +208,16 @@ class Player(VoiceProtocol):
             await self.node.send(voiceUpdate)
 
     async def connect(self, timeout: float, reconnect: bool) -> None:
+        """
+        Connects the player to a voice channel
+
+        Parameters
+        ----------
+        timeout: float
+            The timeout for the connection
+        reconnect: bool
+            A bool stating if reconnection is expected
+        """
         await self.guild.change_voice_state(channel=self.channel)
         self.node.players.append(self)
         self._connected = True
@@ -132,25 +225,69 @@ class Player(VoiceProtocol):
         logger.info(f"Connected to voice channel: {self.channel.id}")
 
     async def disconnect(self, *, force: bool = False) -> None:
+        """
+        Disconnects the player from a voice channel
+
+        Parameters
+        ----------
+        force: bool
+            Whether to force the disconnection. This is currently not used
+        """
         await self.guild.change_voice_state(channel=None)
         self.node.players.remove(self)
         self._connected = False
 
         logger.info(f"Disconnected from voice channel: {self.channel.id}")
 
-    async def getYoutubeTracks(self, query: str) -> List[Optional[Track]]:
+    async def getYoutubeTracks(self, query: str, returnFirst: bool = True) -> Union[Track, List[Optional[Track]]]:
+        """
+        Gets Youtube tracks based on a given search query
+
+        Parameters
+        ----------
+        query: str
+            The query to search Youtube for tracks
+        returnFirst: bool
+            Whether to return only the first result or not. By default, this is True
+        """
         logger.info(f"Getting Youtube tracks with query: {query}")
 
-        return await self._getTracks(f"ytsearch:{query}")
+        return await self._getTracks(f"ytsearch:{query}", returnFirst)
 
-    async def getSoundcloudTracks(self, query: str) -> List[Optional[Track]]:
+    async def getSoundcloudTracks(self, query: str, returnFirst: bool = True) -> Union[Track, List[Optional[Track]]]:
+        """
+        Gets Soundcloud tracks based on a given search query
+
+        Parameters
+        ----------
+        query: str
+            The query to search Soundcloud for tracks
+        returnFirst: bool
+            Whether to return only the first result or not. By default, this is True
+        """
         logger.info(f"Getting Soundcloud tracks with query: {query}")
 
-        return await self._getTracks(f"scsearch:{query}")
+        return await self._getTracks(f"scsearch:{query}", returnFirst)
 
-    async def _getTracks(self, query: str) -> List[Optional[Track]]:
+    async def _getTracks(self, query: str, returnFirst: bool) -> Union[Track, List[Optional[Track]]]:
+        """
+        Sends search query to lavalink and processes the result
+
+        Parameters
+        ----------
+        query: str
+            The query to search for tracks
+        returnFirst: bool
+            Whether to return only the first result or not. By default, this is True
+        """
         songs = await self.node.getData(query)
-        return [Track(element.get("track"), element.get("info")) for element in songs.get("tracks")] if songs.get("loadType") != "NO_MATCHES" else []
+        if songs.get("loadType") != "NO_MATCHES":
+            if returnFirst:
+                firstSong = songs.get("tracks")[0]
+                return Track(firstSong.get("track"), firstSong.get("info"))
+            else:
+                return [Track(element.get("track"), element.get("info")) for element in songs.get("tracks")]
+        return []
 
     # TODO: Playlist need more work
     # async def getYoutubePlaylist(self, query: str) -> Optional[Playlist]:
@@ -168,6 +305,24 @@ class Player(VoiceProtocol):
     #     return Playlist(songs.get("playlistInfo").get("name"), songs.get("tracks")) if songs.get("loadType") != "NO_MATCHES" else None
 
     async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
+        """
+        Plays a given track
+
+        Parameters
+        ----------
+        track: Track
+            The track to play
+        startTime: int
+            The position in milliseconds to start at. By default, this is the beginning
+        endTime: int
+            The position in milliseconds to end at. By default, this is the end
+        volume: int
+            The volume at which the player should play the track at. By default, this is 100
+        replace: bool
+            A bool stating if the current track should be replaced or not. By default, this is True
+        pause: bool
+            A bool stating if the track should start paused. By default, this is False
+        """
         if self.isPlaying and not replace:
             return
         newTrack = {
@@ -188,6 +343,7 @@ class Player(VoiceProtocol):
         logger.debug(f"Started playing track: {self.track.title} in {self.channel.id}")
 
     async def stop(self) -> None:
+        """Stops the currently playing track"""
         stop = {
             "op": "stop",
             "guildId": str(self.guild.id)
@@ -199,12 +355,22 @@ class Player(VoiceProtocol):
         logger.debug(f"Stopped playing track: {tempTrack.title} in {self.channel.id}")
 
     async def pause(self) -> None:
+        """Pauses the player if it was playing"""
         await self._togglePause(True)
 
     async def resume(self) -> None:
+        """Resumes the player if it was paused"""
         await self._togglePause(False)
 
     async def _togglePause(self, pause: bool) -> None:
+        """
+        Toggles the player's pause state
+
+        Parameters
+        ----------
+        pause: bool
+            A bool stating whether the player's paused state should be True or False
+        """
         pause = {
             "op": "pause",
             "guildId": str(self.guild.id),
@@ -216,6 +382,14 @@ class Player(VoiceProtocol):
         logger.debug(f"Toggled pause: {pause} in {self.channel.id}")
 
     async def seek(self, position: int) -> None:
+        """
+        Seek to a given position
+
+        Parameters
+        ----------
+        position: int
+            The position to seek to
+        """
         if position > self.track.length:
             raise InvalidIdentifier("Seek position is bigger than track length")
         seek = {
@@ -228,6 +402,14 @@ class Player(VoiceProtocol):
         logger.debug(f"Seeked to position: {position}")
 
     async def setVolume(self, volume: int) -> None:
+        """
+        Changes the player's volume
+
+        Parameters
+        ----------
+        volume: int
+            The new player volume
+        """
         self.volume = max(min(volume, 1000), 0)
         volume = {
             "op": "volume",
@@ -239,9 +421,25 @@ class Player(VoiceProtocol):
         logger.debug(f"Set volume to: {volume}")
 
     async def moveTo(self, channel: VoiceChannel) -> None:
+        """
+        Moves the player to another channel
+
+        Parameters
+        ----------
+        channel: VoiceChannel
+            The voice channel to move to
+        """
         await self.guild.change_voice_state(channel=channel)
 
     async def setEqualizer(self, eq: Equalizer) -> None:
+        """
+        Sets the player's equalizer
+
+        Parameters
+        ----------
+        eq: Equalizer
+            The equalizer to change to
+        """
         if not isinstance(eq, Equalizer):
             return
         self._equalizer = eq

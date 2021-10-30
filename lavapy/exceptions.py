@@ -21,6 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+__all__ = ("LavapyException",
+           "NoNodesConnected",
+           "NodeOccupied",
+           "InvalidIdentifier",
+           "WebsocketAlreadyExists",)
 
 
 class LavapyException(Exception):
@@ -37,3 +42,7 @@ class NodeOccupied(LavapyException):
 
 class InvalidIdentifier(LavapyException):
     """Exception raised when an invalid ID is passed somewhere in Lavapy"""
+
+
+class WebsocketAlreadyExists(LavapyException):
+    """Exception raised when a new websocket connection is attempted but it already exists"""
