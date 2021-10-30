@@ -44,6 +44,9 @@ class Node:
     """
     Lavapy Node object
 
+    .. warning::
+        This class should not be created manually. Please use :meth:`NodePool.create_node()` instead.
+
     Parameters
     ----------
     bot: Union[Bot, AutoShardedBot]
@@ -79,9 +82,6 @@ class Node:
         A list containing all Lavapy Players which are connected to this node
     _websocket: Optional[Websocket]
         The actual connection to the lavalink server
-
-    .. warning::
-        This class should not be created manually. Please use :meth:`NodePool.create_node()` instead.
     """
     def __init__(self, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
         self.bot: Union[Bot, AutoShardedBot] = bot
