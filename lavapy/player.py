@@ -21,19 +21,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import datetime
 import logging
 from datetime import datetime, timezone
-import datetime
-from typing import Union, List, Optional, Any, Dict
+from typing import Union, Optional, Any, Dict
 
 from discord import VoiceProtocol, VoiceChannel, Guild
 from discord.ext.commands import Bot, AutoShardedBot
 
 from .equalizer import Equalizer
 from .exceptions import InvalidIdentifier
-from .pool import NodePool
-from .tracks import Track, Playlist
 from .node import Node
+from .pool import NodePool
+from .tracks import Track, Searcher
 
 __all__ = ("Player",)
 
@@ -129,6 +129,11 @@ class Player(VoiceProtocol):
         return self._equalizer
 
     @property
+    def searcher(self) -> Searcher:
+        """Returns the track searcher"""
+        return self.node.searcher
+
+    @property
     def isConnected(self) -> bool:
         """Returns whether the player is connected to a channel"""
         return self._connected
@@ -143,7 +148,7 @@ class Player(VoiceProtocol):
         """Returns whether the player is currently paused"""
         return self._paused
 
-    def updateState(self, state: Dict[str, Any]):
+    def updateState(self, state: Dict[str, Any]) -> None:
         """
         Updates self._lastUpdateTime and self._lastPosition with lavalink's player updates
 
@@ -238,71 +243,6 @@ class Player(VoiceProtocol):
         self._connected = False
 
         logger.info(f"Disconnected from voice channel: {self.channel.id}")
-
-    async def getYoutubeTracks(self, query: str, returnFirst: bool = True) -> Union[Track, List[Optional[Track]]]:
-        """
-        Gets Youtube tracks based on a given search query
-
-        Parameters
-        ----------
-        query: str
-            The query to search Youtube for tracks
-        returnFirst: bool
-            Whether to return only the first result or not. By default, this is True
-        """
-        logger.info(f"Getting Youtube tracks with query: {query}")
-
-        return await self._getTracks(f"ytsearch:{query}", returnFirst)
-
-    async def getSoundcloudTracks(self, query: str, returnFirst: bool = True) -> Union[Track, List[Optional[Track]]]:
-        """
-        Gets Soundcloud tracks based on a given search query
-
-        Parameters
-        ----------
-        query: str
-            The query to search Soundcloud for tracks
-        returnFirst: bool
-            Whether to return only the first result or not. By default, this is True
-        """
-        logger.info(f"Getting Soundcloud tracks with query: {query}")
-
-        return await self._getTracks(f"scsearch:{query}", returnFirst)
-
-    async def _getTracks(self, query: str, returnFirst: bool) -> Union[Track, List[Optional[Track]]]:
-        """
-        Sends search query to lavalink and processes the result
-
-        Parameters
-        ----------
-        query: str
-            The query to search for tracks
-        returnFirst: bool
-            Whether to return only the first result or not. By default, this is True
-        """
-        songs = await self.node.getData(query)
-        if songs.get("loadType") != "NO_MATCHES":
-            if returnFirst:
-                firstSong = songs.get("tracks")[0]
-                return Track(firstSong.get("track"), firstSong.get("info"))
-            else:
-                return [Track(element.get("track"), element.get("info")) for element in songs.get("tracks")]
-        return []
-
-    # TODO: Playlist need more work
-    # async def getYoutubePlaylist(self, query: str) -> Optional[Playlist]:
-    #     logger.info(f"Getting Youtube playlist with query: {query}")
-    #
-    #     return await self._getPlaylist(f"ytsearch:{query}")
-    #
-    # async def getSoundcloudPlaylist(self, query: str) -> Optional[Playlist]:
-    #     logger.info(f"Getting Soundcloud playlist with query: {query}")
-    #
-    #     return await self._getPlaylist(f"scsearch:{query}")
-    #
-    # async def _getPlaylist(self, query: str) -> Optional[Playlist]:
-    #     songs = await self.node.getData(query)
-    #     return Playlist(songs.get("playlistInfo").get("name"), songs.get("tracks")) if songs.get("loadType") != "NO_MATCHES" else None
 
     async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         """

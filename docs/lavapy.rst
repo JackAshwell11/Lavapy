@@ -30,6 +30,9 @@ Tracks
 .. autoclass:: Playlist
     :members:
 
+.. autoclass:: Searcher
+    :members:
+
 Equalizer
 ---------
 

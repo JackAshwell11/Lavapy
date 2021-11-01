@@ -25,7 +25,9 @@ __all__ = ("LavapyException",
            "NoNodesConnected",
            "NodeOccupied",
            "InvalidIdentifier",
-           "WebsocketAlreadyExists",)
+           "WebsocketAlreadyExists",
+           "LavalinkException",
+           "LoadTrackError")
 
 
 class LavapyException(Exception):
@@ -46,3 +48,11 @@ class InvalidIdentifier(LavapyException):
 
 class WebsocketAlreadyExists(LavapyException):
     """Exception raised when a new websocket connection is attempted but it already exists"""
+
+
+class LavalinkException(LavapyException):
+    """Exception raised when an error occurs communicating with lavalink"""
+
+
+class LoadTrackError(LavapyException):
+    """Exception raised when an error occurred when loading a track"""

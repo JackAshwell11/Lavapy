@@ -24,14 +24,15 @@ SOFTWARE.
 from __future__ import annotations
 
 import logging
+from typing import Union, Optional, List, Dict, Any, Tuple, TYPE_CHECKING
 import aiohttp
-from typing import Union, Optional, List, TYPE_CHECKING
-from urllib.parse import quote
+from aiohttp import ClientResponse
 
 from discord.enums import VoiceRegion
 from discord.ext.commands import Bot, AutoShardedBot
 
 from .exceptions import WebsocketAlreadyExists
+from .tracks import Searcher
 from .websocket import Websocket
 
 if TYPE_CHECKING:
@@ -92,6 +93,7 @@ class Node:
         self.identifier: str = identifier
         self.session: aiohttp.ClientSession = aiohttp.ClientSession()
         self.players: List[Player] = []
+        self.searcher: Searcher = Searcher(self)
         self._websocket: Optional[Websocket] = None
 
     def __repr__(self) -> str:
@@ -105,16 +107,24 @@ class Node:
         else:
             raise WebsocketAlreadyExists("Websocket already initialised")
 
-    async def getData(self, query: str) -> dict:
-        """Make a request to the lavalink server with a given query and return a response"""
+    async def getData(self, query: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
+        """
+        Make a request to the lavalink server with a given query and return a response
+
+        Parameters
+        ----------
+        query: str
+            The request to send to lavalink and get a response for
+        params: Optional[Dict[str, str]]
+            Optional parameter to send additional info to lavalink
+        """
         logger.debug(f"Getting data with query: {query}")
-        destination = f"http://{self.host}:{self.port}/loadtracks?identifier={quote(query)}"
         headers = {
             "Authorization": self.password
         }
-        async with await self._websocket.get(destination, headers) as req:
-            if req.status == 200:
-                return await req.json()
+        async with await self._websocket.get(query, headers=headers, params=params) as req:
+            data = await req.json()
+        return data, req
 
     async def send(self, payload: dict) -> None:
         """Send a payload to the lavalink server without a response"""
