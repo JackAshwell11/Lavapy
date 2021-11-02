@@ -23,64 +23,60 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from .player import Player
 
 __all__ = ("Equalizer",)
 
 
 class Equalizer:
-    """
-    A class representing a usable equalizer
+	"""
+	A class representing a usable Equalizer.
 
-    Parameters
-    ----------
-    levels: List[Tuple[int, float]]
-        A list of tuple pairs containing a band int and gain float
-    name: str
-        A string to name this equalizer
+	Attributes
+	---------
+	levels: List[Tuple[int, float]]
+		A list of tuple pairs containing a band int and gain float.
+	name: str
+		A string to name this Equalizer.
+	eq: List[Dict[str, Union[int, float]]]
+		A list of {'band': int, 'gain': float} pairs
+	"""
 
+	def __init__(self, levels: List[Tuple[int, float]], name: str) -> None:
+		self.levels: List[Tuple[int, float]] = levels
+		self.name: str = name
+		self.eq: List[Dict[str, Union[int, float]]] = self._setup(levels)
 
-    Attributes
-    ---------
-    levels: List[Tuple[int, float]]
-        A list of tuple pairs containing a band int and gain float
-    name: str
-        A string to name this equalizer
-    eq: List[Dict[str, Union[int, float]]]
-        A list of {'band': int, 'gain': float} pairs
-    """
-    def __init__(self, levels: List[Tuple[int, float]], name: str) -> None:
-        self.levels: List[Tuple[int, float]] = levels
-        self.name: str = name
-        self.eq: List[Dict[str, Union[int, float]]] = self._setup(levels)
+	@staticmethod
+	def _setup(levels: List[Tuple[int, float]]) -> List[Dict[str, Union[int, float]]]:
+		"""A function to convert self.levels into a dict for sending to Lavalink"""
+		return [{"band": level[0], "gain": level[1]} for level in levels]
 
-    @staticmethod
-    def _setup(levels: List[Tuple[int, float]]) -> List[Dict[str, Union[int, float]]]:
-        """A function to convert self.levels into a dict for sending to lavalink"""
-        return [{"band": level[0], "gain": level[1]} for level in levels]
+	@classmethod
+	def build(cls, levels: List[Tuple[int, float]], name: str = "CustomEqualizer"):
+		"""
+		Build a custom Equalizer class with the given levels.
 
-    @classmethod
-    def build(cls, levels: List[Tuple[int, float]], name: str = "CustomEqualizer"):
-        """
-        Build a custom equalizer class with the given levels
+		Parameters
+		----------
+		levels: List[Tuple[int, float]]
+			A custom list of tuple pairs containing a band int and gain float. You will have to construct this yourself.
+		name: str
+			An optional string to name this Equalizer. If this is not supplied, it will be set to 'CustomEqualizer'.
+		"""
+		return cls(levels, name)
 
-        Parameters
-        ----------
-        levels: List[Tuple[int, float]]
-            A list of tuple pairs containing a band int and gain float
-        name: str
-            An optional string to name this equalizer. If this is not supplied, it will be set to 'CustomEqualizer'
-        """
-        return cls(levels, name)
+	@classmethod
+	def flat(cls):
+		"""
+		A Flat Equalizer. This will not provide a cut or boost to any frequency.
 
-    @classmethod
-    def flat(cls):
-        """
-        A Flat Equalizer
-
-        Resets your EQ to flat
-        """
-        levels = [(0, 0.0), (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0),
-                  (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0),
-                  (10, 0.0), (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0)]
-        return cls(levels, "Flat")
+		This is the default EQ for :class:`Player`
+		"""
+		levels = [(0, 0.0), (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0),
+				  (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0),
+				  (10, 0.0), (11, 0.0), (12, 0.0), (13, 0.0), (14, 0.0)]
+		return cls(levels, "Flat")
