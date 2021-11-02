@@ -27,10 +27,13 @@ Tracks
 .. autoclass:: Track
     :members:
 
-.. autoclass:: Playlist
+.. autoclass:: YoutubeTrack
     :members:
 
-.. autoclass:: Searcher
+.. autoclass:: SoundcloudTrack
+    :members:
+
+.. autoclass:: YoutubePlaylist
     :members:
 
 Equalizer
