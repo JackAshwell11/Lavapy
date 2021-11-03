@@ -15,8 +15,6 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.append(os.path.abspath("extensions"))
 
-on_rtd = os.environ.get("READTHEDOCS") == "True"
-
 # -- Project information -----------------------------------------------------
 
 project = "Lavapy"
@@ -31,16 +29,14 @@ release = "0.1.2"
 # ones.
 extensions = [
     "sphinx.ext.duration",
+    "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "attributetable"
 ]
 
-if on_rtd:
-    extensions.append("sphinxcontrib.napoleon")
-else:
-    extensions.append("sphinx.ext.napoleon")
+needs_sphinx = "4.2.0"
 
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
@@ -71,8 +67,8 @@ intersphinx_mapping = {
 # builtin "default.css".
 html_theme = "furo"
 html_logo = "logo.png"
-html_static_path = ["./_static"]
-html_css_files = ["css/custom.css"]
+#html_static_path = ["./_static"]
+#html_css_files = ["css/custom.css"]
 
 html_theme_options = {
 }
