@@ -42,7 +42,7 @@ if on_rtd:
 else:
     extensions.append("sphinx.ext.napoleon")
 
-needs_sphinx = "4.2.0"
+needs_sphinx = "4.0.2"
 
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
