@@ -15,6 +15,8 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.append(os.path.abspath("extensions"))
 
+on_rtd = os.environ.get("READTHEDOCS") == "True"
+
 # -- Project information -----------------------------------------------------
 
 project = "Lavapy"
@@ -29,12 +31,16 @@ release = "0.1.2"
 # ones.
 extensions = [
     "sphinx.ext.duration",
-    "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "attributetable"
 ]
+
+if on_rtd:
+    extensions.append("sphinxcontrib.napoleon")
+else:
+    extensions.append("sphinx.ext.napoleon")
 
 needs_sphinx = "4.2.0"
 
