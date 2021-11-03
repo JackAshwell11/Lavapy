@@ -16,12 +16,13 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-import lavapy
+import re
 
 project = "Lavapy"
 copyright = "2021, Aspect1103"
 author = "Aspect1103"
-release = lavapy.__version__
+with open(os.path.join(os.path.abspath(".."), "lavapy", "__init__.py")) as init:
+    release = re.search(r'__version__ = "([\'0-9\'].[\'0-9\'].[\'0-9\'])"', init.read()).group(1)
 
 # -- General configuration ---------------------------------------------------
 
