@@ -51,16 +51,16 @@ class Node:
 
     Attributes
     ----------
-    bot: Union[:class:`Bot`, :class:`AutoShardedBot`]
-        The discord.py :class:`Bot` or :class:`AutoShardedBot` object.
+    bot: Union[:class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
+        The discord.py Bot or AutoShardedBot object.
     host: str
         The IP address of the Lavalink server.
     port: int
         The port of the Lavalink server.
     password: str
         The password to the Lavalink server.
-    region: Optional[:class:`VoiceRegion`]
-        The discord.py :class:`VoiceRegion` to assign to this node.
+    region: Optional[:class:`discord.VoiceRegion`]
+        The discord.py VoiceRegion to assign to this node.
     identifier: str
         The unique identifier for this node.
     session: aiohttp.ClientSession
@@ -82,8 +82,16 @@ class Node:
     def __repr__(self) -> str:
         return f"<Lavapy Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region}) (Players={len(self.players)})>"
 
-    async def connect(self):
-        """Initialise the websocket to the Lavalink server."""
+    async def connect(self) -> None:
+        """|coro|
+
+        Initialise the websocket to the Lavalink server.
+
+        Raises
+        ------
+        WebsocketAlreadyExists
+            The websocket for this :class:`Node` already exists.
+        """
         logger.debug(f"Connecting to the Lavalink server at: {self.host}:{self.port}")
         if self._websocket is None:
             self._websocket = Websocket(self)
@@ -91,7 +99,8 @@ class Node:
             raise WebsocketAlreadyExists("Websocket already initialised")
 
     async def getData(self, dest: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
-        """
+        """|coro|
+
         Make a request to Lavalink with a given query and return a response.
 
         Parameters
@@ -100,6 +109,11 @@ class Node:
             The request to send to Lavalink and get a response for.
         params: Dict[str, str]
             A dict containing additional info to send to Lavalink.
+
+        Returns
+        -------
+        Tuple[Dict[str, Any], ClientResponse]
+            A tuple containing the response from Lavalink as well as a ClientResponse object to determine the status of the request.
         """
         logger.debug(f"Getting data with destination: {dest}")
         headers = {
@@ -110,7 +124,8 @@ class Node:
         return data, req
 
     async def send(self, payload: Dict[str, Any]) -> None:
-        """
+        """|coro|
+
         Send a payload to Lavalink without a response.
 
         Parameters

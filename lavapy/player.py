@@ -36,6 +36,7 @@ from .exceptions import InvalidIdentifier
 from .node import Node
 from .pool import NodePool
 from .tracks import Track
+from .queue import Queue
 
 __all__ = ("Player",)
 
@@ -50,10 +51,11 @@ class Player(VoiceProtocol):
 
     Examples
     --------
-        .. code::
-            @commands.command()
-            async def connect(self, channel: discord.VoiceChannel):
-                voice_client = await channel.connect(cls=lavapy.Player)
+    .. code-block:: python
+
+       @commands.command()
+       async def connect(self, channel: discord.VoiceChannel):
+           voice_client = await channel.connect(cls=lavapy.Player)
 
     .. warning::
         This class should not be created manually but can be subclassed to add additional functionality.
@@ -78,6 +80,10 @@ class Player(VoiceProtocol):
         The currently playing track
     volume: int
         The volume the player should play at
+    equalizer: Equalizer
+        The currently applied :class:`Equalizer`.
+    queue: Queue
+        A :class:`Queue` object to line up tracks.
     _voiceState: Dict[str, Any]
         A dict which stores server and state updates
     _connected: bool
@@ -98,12 +104,13 @@ class Player(VoiceProtocol):
         self.node: Optional[Node] = NodePool.getNode()
         self.track: Optional[Track] = None
         self.volume: int = 100
+        self.equalizer: Equalizer = Equalizer.flat()
+        self.queue: Queue = Queue()
         self._voiceState: Dict[str, Any] = {}
         self._connected: bool = False
         self._paused: bool = False
         self._lastUpdateTime: Optional[datetime.datetime] = None
         self._lastPosition: Optional[float] = None
-        self._equalizer: Equalizer = Equalizer.flat()
 
     def __repr__(self) -> str:
         return f"<Lavapy Player (ChannelID={self.channel.id}) (GuildID={self.guild.id})>"
@@ -124,11 +131,6 @@ class Player(VoiceProtocol):
 
         timeSinceLastUpdate = (datetime.datetime.now(timezone.utc) - self._lastUpdateTime).total_seconds()
         return min(self._lastPosition + timeSinceLastUpdate, self.track.length)
-
-    @property
-    def equalizer(self) -> Equalizer:
-        """Returns the currently applied Equalizer"""
-        return self._equalizer
 
     @property
     def isConnected(self) -> bool:
@@ -210,7 +212,8 @@ class Player(VoiceProtocol):
             await self.node.send(voiceUpdate)
 
     async def connect(self, timeout: float, reconnect: bool) -> None:
-        """
+        """|coro|
+
         Connects the player to a voice channel
 
         Parameters

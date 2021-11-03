@@ -27,32 +27,37 @@ __all__ = ("LavapyException",
            "InvalidIdentifier",
            "WebsocketAlreadyExists",
            "LavalinkException",
-           "LoadTrackError")
+           "LoadTrackError",
+           "QueueEmpty")
 
 
 class LavapyException(Exception):
-    """Base Lavapy exception"""
+    """Base Lavapy exception."""
 
 
 class NoNodesConnected(LavapyException):
-    """Exception raised when an operation is attempted with nodes and there none connected"""
+    """Exception raised when an operation is attempted with nodes and there none connected."""
 
 
 class NodeOccupied(LavapyException):
-    """Exception raised when node identifiers conflict"""
+    """Exception raised when node identifiers conflict."""
 
 
 class InvalidIdentifier(LavapyException):
-    """Exception raised when an invalid ID is passed somewhere in Lavapy"""
+    """Exception raised when an invalid ID is passed somewhere in Lavapy."""
 
 
 class WebsocketAlreadyExists(LavapyException):
-    """Exception raised when a new websocket connection is attempted but it already exists"""
+    """Exception raised when a new websocket connection is attempted but it already exists."""
 
 
 class LavalinkException(LavapyException):
-    """Exception raised when an error occurs communicating with lavalink"""
+    """Exception raised when an error occurs communicating with Lavalink."""
 
 
 class LoadTrackError(LavapyException):
-    """Exception raised when an error occurred when loading a track"""
+    """Exception raised when an error occurred when loading a track."""
+
+
+class QueueEmpty(LavapyException):
+    """Exception raised when attempting to get a track from an empty queue."""

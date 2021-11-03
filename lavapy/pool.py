@@ -44,21 +44,21 @@ class NodePool:
 
     @property
     def nodes(self) -> Dict[str, Node]:
-        """A mapping of identifiers to :class:'Node' objects."""
+        """Returns a mapping of identifiers to :class:`Node` objects."""
         return self._nodes
 
 
     @classmethod
     def getNode(cls, identifier: Optional[str] = None, region: Optional[VoiceRegion] = None) -> Node:
         """
-        Retrieves a :class:`Node` either based on identifier, voice region or neither (randomly).
+        Retrieves a :class:`Node` object based on identifier, :class:`discord.VoiceRegion` or neither (randomly).
 
         Parameters
         ----------
         identifier: Optional[str]
             The unique identifier for the desired node.
-        region: Optional[:class:`VoiceRegion`]
-            The VoiceRegion a specific node is assigned to.
+        region: Optional[:class:`discord.VoiceRegion`]
+            The discord.py VoiceRegion a specific node is assigned to.
 
         Raises
         ------
@@ -70,7 +70,7 @@ class NodePool:
         Returns
         -------
         Node
-            A Lavapy :class:`Node` object.
+            A Lavapy Node object.
         """
         if not cls._nodes:
             raise NoNodesConnected("There are currently no nodes connected")
@@ -91,13 +91,14 @@ class NodePool:
 
     @classmethod
     async def createNode(cls, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> None:
-        """
+        """|coro|
+
         Creates a Lavapy :class:`Node` object and stores it for later use.
 
         Parameters
         ----------
-        bot: Union[:class:`Bot`, :class:`AutoShardedBot`]
-            The discord.py :class:`Bot` or :class:`AutoShardedBot` object.
+        bot: Union[:class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
+            The discord.py Bot or AutoShardedBot object.
         host: str
             The IP address of the Lavalink server.
         port: int
@@ -105,7 +106,7 @@ class NodePool:
         password: str
             The password to the Lavalink server.
         region: Optional[:class:`VoiceRegion`]
-            The discord.py :class:`VoiceRegion` to assign to this node.
+            The discord.py VoiceRegion to assign to this node.
         identifier: Optional[str]
             The unique identifier for this node. If not supplied, it will be generated for you.
 

@@ -23,10 +23,80 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+from typing import List, TYPE_CHECKING
+
+from .exceptions import QueueEmpty
+
+if TYPE_CHECKING:
+    from .tracks import Track, YoutubePlaylist
+
+
+__all__ = ("Queue",)
+
 
 class Queue:
     """
     A class representing a usable Queue.
     """
-    def __init__(self):
-        pass
+    def __init__(self) -> None:
+        self._queue = []
+
+    @property
+    def queue(self) -> List[Track]:
+        """Returns a list of :class:`Track` objects."""
+        return self._queue
+
+    @property
+    def count(self) -> int:
+        """Returns the size of the queue."""
+        return len(self._queue)
+
+    @property
+    def isEmpty(self) -> bool:
+        """Returns whether or not the queue is empty."""
+        return not self._queue
+
+    def get(self) -> Track:
+        """
+        Gets the next :class:`Track` in the queue.
+
+        Raises
+        ------
+        QueueEmpty
+            The current queue is empty.
+
+        Returns
+        -------
+        Track
+            The next Track in the queue.
+        """
+        if self.isEmpty:
+            raise QueueEmpty("Queue is empty")
+        return self._queue.pop()
+
+    def add(self, track: Track) -> None:
+        """
+        Adds a :class:`Track` to the queue.
+
+        Parameters
+        ----------
+        track: Track
+            The Track to add to the queue.
+        """
+        self._queue.append(track)
+
+    def addPlaylist(self, playlist: YoutubePlaylist) -> None:
+        """
+        Adds a :class:`YoutubePlaylist` to the queue.
+
+        Parameters
+        ----------
+        playlist: YoutubePlaylist
+            The YoutubePlaylist to add to the queue.
+        """
+        for track in playlist.tracks:
+            self.add(track)
+
+    def clear(self) -> None:
+        """Clears all :class`Track` objects in the queue."""
+        self.queue.clear()

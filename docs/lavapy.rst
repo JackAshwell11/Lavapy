@@ -42,6 +42,12 @@ Equalizer
 .. autoclass:: Equalizer
     :members:
 
+Queue
+-----
+
+.. autoclass:: Queue
+    :members:
+
 Exceptions
 ----------
 

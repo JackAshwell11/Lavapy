@@ -18,6 +18,11 @@ Help and Support
     quickstart
     examples
 
+.. toctree::
+    :hidden:
+
+    faq
+
 Documentation
 -------------
 

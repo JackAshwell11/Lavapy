@@ -29,6 +29,7 @@ from .exceptions import *
 from .node import *
 from .player import *
 from .pool import *
+from .queue import *
 from .tracks import *
 
 __title__ = "Lavapy"

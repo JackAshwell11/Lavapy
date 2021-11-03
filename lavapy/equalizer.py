@@ -23,10 +23,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import List, Tuple, Dict, Union, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .player import Player
+from typing import List, Tuple, Dict, Union
 
 __all__ = ("Equalizer",)
 
@@ -42,7 +39,7 @@ class Equalizer:
     name: str
         A string to name this Equalizer.
     eq: List[Dict[str, Union[int, float]]]
-        A list of {'band': int, 'gain': float} pairs
+        A list of {'band': int, 'gain': float} pairs.
     """
 
     def __init__(self, levels: List[Tuple[int, float]], name: str) -> None:
@@ -52,11 +49,23 @@ class Equalizer:
 
     @staticmethod
     def _setup(levels: List[Tuple[int, float]]) -> List[Dict[str, Union[int, float]]]:
-        """A function to convert self.levels into a dict for sending to Lavalink"""
+        """
+        A function to convert self.levels into a dict for sending to Lavalink.
+
+        Parameters
+        ----------
+        levels: List[Tuple[int, float]]
+            A list of tuple pairs containing a band int and gain float.
+
+        Returns
+        -------
+        List[Dict[str, Union[int, float]]]
+            A list of {'band': int, 'gain': float} pairs.
+        """
         return [{"band": level[0], "gain": level[1]} for level in levels]
 
     @classmethod
-    def build(cls, levels: List[Tuple[int, float]], name: str = "CustomEqualizer"):
+    def build(cls, levels: List[Tuple[int, float]], name: str = "CustomEqualizer") -> Equalizer:
         """
         Build a custom Equalizer class with the given levels.
 
@@ -66,6 +75,11 @@ class Equalizer:
             A custom list of tuple pairs containing a band int and gain float. You will have to construct this yourself.
         name: str
             An optional string to name this Equalizer. If this is not supplied, it will be set to 'CustomEqualizer'.
+
+        Returns
+        -------
+        Equalizer
+            A custom Equalizer object.
         """
         return cls(levels, name)
 
@@ -74,7 +88,12 @@ class Equalizer:
         """
         A Flat Equalizer. This will not provide a cut or boost to any frequency.
 
-        This is the default EQ for :class:`Player`
+        This is the default EQ for :class:`Player`.
+
+        Returns
+        -------
+        Equalizer
+            A Flat Equalizer object.
         """
         levels = [(0, 0.0), (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0),
                   (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0),

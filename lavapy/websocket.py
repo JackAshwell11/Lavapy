@@ -55,7 +55,6 @@ class Websocket:
     connection: ClientWebSocketResponse
         The actual websocket connection to the Lavalink server.
     """
-
     def __init__(self, node: Node) -> None:
         self.node: Node = node
         self.open: bool = False
@@ -84,7 +83,7 @@ class Websocket:
         self.open = True
         logger.debug(f"Connection established with node: {self.node.__repr__()}")
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Closes the connection to the Lavalink server."""
         logger.debug(f"Closing connection for node: {self.node.__repr__()}")
         await self.connection.close()
@@ -101,8 +100,15 @@ class Websocket:
             elif msg.type is WSMsgType.CLOSED:
                 await asyncio.sleep(backoff.delay())
 
-    async def processListener(self, data: Dict[str, Any]):
-        """Processes data received from the Lavalink server gathered in :class:`listener()`."""
+    async def processListener(self, data: Dict[str, Any]) -> None:
+        """
+        Processes data received from the Lavalink server gathered in :class:`listener()`.
+
+        Parameters
+        ----------
+        data: Dict[str, Any]
+            The raw data received from Lavalink.
+        """
         op = data.get("op")
         if op == "playerUpdate":
             guild = self.node.bot.get_guild(int(data["guildId"]))
