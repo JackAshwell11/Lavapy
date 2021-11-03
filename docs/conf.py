@@ -16,10 +16,12 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
+import lavapy
+
 project = "Lavapy"
 copyright = "2021, Aspect1103"
 author = "Aspect1103"
-release = "0.1.2"
+release = lavapy.__version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -46,6 +48,9 @@ rst_prolog = """
 .. _corourl: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
 
+# The suffix(es) of source filenames.
+source_suffix = ".rst"
+
 # Link to other sphinx documentation
 intersphinx_mapping = {
     "py": ("https://docs.python.org/3", None),
@@ -62,3 +67,9 @@ intersphinx_mapping = {
 # builtin "default.css".
 html_theme = "furo"
 html_logo = "logo.png"
+
+# The master toctree document.
+master_doc = "index"
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = "friendly"
