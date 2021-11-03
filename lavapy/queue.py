@@ -21,38 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-__all__ = ("LavapyException",
-           "NoNodesConnected",
-           "NodeOccupied",
-           "InvalidIdentifier",
-           "WebsocketAlreadyExists",
-           "LavalinkException",
-           "LoadTrackError")
+from __future__ import annotations
 
 
-class LavapyException(Exception):
-    """Base Lavapy exception"""
-
-
-class NoNodesConnected(LavapyException):
-    """Exception raised when an operation is attempted with nodes and there none connected"""
-
-
-class NodeOccupied(LavapyException):
-    """Exception raised when node identifiers conflict"""
-
-
-class InvalidIdentifier(LavapyException):
-    """Exception raised when an invalid ID is passed somewhere in Lavapy"""
-
-
-class WebsocketAlreadyExists(LavapyException):
-    """Exception raised when a new websocket connection is attempted but it already exists"""
-
-
-class LavalinkException(LavapyException):
-    """Exception raised when an error occurs communicating with lavalink"""
-
-
-class LoadTrackError(LavapyException):
-    """Exception raised when an error occurred when loading a track"""
+class Queue:
+    """
+    A class representing a usable Queue.
+    """
+    def __init__(self):
+        pass

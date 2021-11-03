@@ -31,11 +31,11 @@ release = "0.1.2"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-	"sphinx.ext.duration",
-	"sphinx.ext.napoleon",
-	"sphinx.ext.autodoc",
-	"sphinx.ext.intersphinx",
-	"attributetable"
+    "sphinx.ext.duration",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "attributetable"
 ]
 
 napoleon_google_docstring = False
@@ -52,9 +52,9 @@ exclude_patterns = []
 
 # Link to other sphinx documentation
 intersphinx_mapping = {
-	"py": ("https://docs.python.org/3", None),
-	"aio": ('https://docs.aiohttp.org/en/stable/', None),
-	"dpy": ('https://discordpy.readthedocs.io/en/latest/', None),
+    "py": ("https://docs.python.org/3", None),
+    "aio": ('https://docs.aiohttp.org/en/stable/', None),
+    "dpy": ('https://discordpy.readthedocs.io/en/latest/', None),
 }
 
 

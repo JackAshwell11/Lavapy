@@ -35,7 +35,7 @@ from .exceptions import WebsocketAlreadyExists
 from .websocket import Websocket
 
 if TYPE_CHECKING:
-	from .player import Player
+    from .player import Player
 
 __all__ = ("Node",)
 
@@ -43,80 +43,80 @@ logger = logging.getLogger(__name__)
 
 
 class Node:
-	"""
-	Lavapy Node object.
+    """
+    Lavapy Node object.
 
-	.. warning::
-		This class should not be created manually. Please use :meth:`NodePool.create_node()` instead.
+    .. warning::
+        This class should not be created manually. Please use :meth:`NodePool.create_node()` instead.
 
-	Attributes
-	----------
-	bot: Union[:class:`Bot`, :class:`AutoShardedBot`]
-		The discord.py :class:`Bot` or :class:`AutoShardedBot` object.
-	host: str
-		The IP address of the Lavalink server.
-	port: int
-		The port of the Lavalink server.
-	password: str
-		The password to the Lavalink server.
-	region: Optional[:class:`VoiceRegion`]
-		The discord.py :class:`VoiceRegion` to assign to this node.
-	identifier: str
-		The unique identifier for this node.
-	session: aiohttp.ClientSession
-		The aiohttp session used for sending and getting data.
-	players: List[Player]
-		A list containing all Lavapy Players which are connected to this node.
-	"""
-	def __init__(self, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
-		self.bot: Union[Bot, AutoShardedBot] = bot
-		self.host: str = host
-		self.port: int = port
-		self.password: str = password
-		self.region: Optional[VoiceRegion] = region
-		self.identifier: str = identifier
-		self.session: aiohttp.ClientSession = aiohttp.ClientSession()
-		self.players: List[Player] = []
-		self._websocket: Optional[Websocket] = None
+    Attributes
+    ----------
+    bot: Union[:class:`Bot`, :class:`AutoShardedBot`]
+        The discord.py :class:`Bot` or :class:`AutoShardedBot` object.
+    host: str
+        The IP address of the Lavalink server.
+    port: int
+        The port of the Lavalink server.
+    password: str
+        The password to the Lavalink server.
+    region: Optional[:class:`VoiceRegion`]
+        The discord.py :class:`VoiceRegion` to assign to this node.
+    identifier: str
+        The unique identifier for this node.
+    session: aiohttp.ClientSession
+        The aiohttp session used for sending and getting data.
+    players: List[Player]
+        A list containing all Lavapy Players which are connected to this node.
+    """
+    def __init__(self, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
+        self.bot: Union[Bot, AutoShardedBot] = bot
+        self.host: str = host
+        self.port: int = port
+        self.password: str = password
+        self.region: Optional[VoiceRegion] = region
+        self.identifier: str = identifier
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession()
+        self.players: List[Player] = []
+        self._websocket: Optional[Websocket] = None
 
-	def __repr__(self) -> str:
-		return f"<Lavapy Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region}) (Players={len(self.players)})>"
+    def __repr__(self) -> str:
+        return f"<Lavapy Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region}) (Players={len(self.players)})>"
 
-	async def connect(self):
-		"""Initialise the websocket to the Lavalink server."""
-		logger.debug(f"Connecting to the Lavalink server at: {self.host}:{self.port}")
-		if self._websocket is None:
-			self._websocket = Websocket(self)
-		else:
-			raise WebsocketAlreadyExists("Websocket already initialised")
+    async def connect(self):
+        """Initialise the websocket to the Lavalink server."""
+        logger.debug(f"Connecting to the Lavalink server at: {self.host}:{self.port}")
+        if self._websocket is None:
+            self._websocket = Websocket(self)
+        else:
+            raise WebsocketAlreadyExists("Websocket already initialised")
 
-	async def getData(self, dest: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
-		"""
-		Make a request to Lavalink with a given query and return a response.
+    async def getData(self, dest: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
+        """
+        Make a request to Lavalink with a given query and return a response.
 
-		Parameters
-		----------
-		dest: str
-			The request to send to Lavalink and get a response for.
-		params: Dict[str, str]
-			A dict containing additional info to send to Lavalink.
-		"""
-		logger.debug(f"Getting data with destination: {dest}")
-		headers = {
-			"Authorization": self.password
-		}
-		async with await self.session.get(dest, headers=headers, params=params) as req:
-			data = await req.json()
-		return data, req
+        Parameters
+        ----------
+        dest: str
+            The request to send to Lavalink and get a response for.
+        params: Dict[str, str]
+            A dict containing additional info to send to Lavalink.
+        """
+        logger.debug(f"Getting data with destination: {dest}")
+        headers = {
+            "Authorization": self.password
+        }
+        async with await self.session.get(dest, headers=headers, params=params) as req:
+            data = await req.json()
+        return data, req
 
-	async def send(self, payload: Dict[str, Any]) -> None:
-		"""
-		Send a payload to Lavalink without a response.
+    async def send(self, payload: Dict[str, Any]) -> None:
+        """
+        Send a payload to Lavalink without a response.
 
-		Parameters
-		----------
-		payload: Dict[str, Any]
-			The payload to send to Lavalink.
-		"""
-		logger.debug(f"Sending payload: {payload}")
-		await self._websocket.connection.send_json(payload)
+        Parameters
+        ----------
+        payload: Dict[str, Any]
+            The payload to send to Lavalink.
+        """
+        logger.debug(f"Sending payload: {payload}")
+        await self._websocket.connection.send_json(payload)
