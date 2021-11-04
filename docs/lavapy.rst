@@ -10,7 +10,7 @@ Abstract Base Classes
     :members:
 
 NodePool
-----
+--------
 
 .. autoclass:: NodePool
     :members:
@@ -72,20 +72,20 @@ Queue
 Exceptions
 ----------
 
-.. py:exception:: LavapyException
-.. py:exception:: NoNodesConnected
+.. autoexception:: LavapyException
+.. autoexception:: NoNodesConnected
     :show-inheritance:
-.. py:exception:: NodeOccupied
+.. autoexception:: NodeOccupied
     :show-inheritance:
-.. py:exception:: InvalidIdentifier
+.. autoexception:: InvalidIdentifier
     :show-inheritance:
-.. py:exception:: WebsocketAlreadyExists
+.. autoexception:: WebsocketAlreadyExists
     :show-inheritance:
-.. py:exception:: LavalinkException
+.. autoexception:: LavalinkException
     :show-inheritance:
-.. py:exception:: LoadTrackError
+.. autoexception:: LoadTrackError
     :show-inheritance:
-.. py:exception:: QueueEmpty
+.. autoexception:: QueueEmpty
     :show-inheritance:
 
 
