@@ -6,12 +6,16 @@
 Lavapy
 ======
 
+.. image:: https://img.shields.io/pypi/pyversions/Lavapy
+    :target: https://pypi.org/project/Lavapy/
+    :align: center
+
 .. image:: https://img.shields.io/pypi/v/Lavapy
     :target: https://pypi.org/project/Lavapy/
     :align: center
 
-.. image:: https://img.shields.io/pypi/pyversions/Lavapy
-    :target: https://pypi.org/project/Lavapy/
+.. image:: https://readthedocs.org/projects/lavapy/badge/?version=latest
+    :target: https://lavapy.readthedocs.io/en/latest/?badge=latest
     :align: center
 
 .. image:: https://img.shields.io/github/license/Aspect1103/Lavapy
