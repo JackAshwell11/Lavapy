@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from .node import Node
 
 __all__ = ("Track",
+           "Playlist",
            "YoutubeTrack",
            "SoundcloudTrack",
            "YoutubePlaylist",)
