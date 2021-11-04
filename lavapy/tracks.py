@@ -34,8 +34,9 @@ if TYPE_CHECKING:
 
 __all__ = ("Track",
            "Playlist",
-           "YoutubeTrack",
            "SoundcloudTrack",
+           "YoutubeTrack",
+           "YoutubeMusicTrack",
            "YoutubePlaylist",)
 
 logger = logging.getLogger(__name__)
@@ -113,15 +114,6 @@ class Playlist(Playable):
     """Base class for all Lavapy playlists. This is just here as a placeholder for future upgrades."""
 
 
-class YoutubeTrack(Track):
-    """A track created using a search to Youtube. This subclasses :class:`Track` and :class:`YoutubeBase` and as such should be treated as one with additions."""
-
-    _searchType: str = "ytsearch:"
-
-    def __repr__(self):
-        return f"<Lavapy YoutubeTrack (Identifier={self.identifier})>"
-
-
 class SoundcloudTrack(Track):
     """A track created using a search to Soundcloud. This subclasses :class:`Track` and as such should be treated as one with additions."""
 
@@ -134,6 +126,24 @@ class SoundcloudTrack(Track):
     async def identifier(cls, node: Optional[Node], identifier: str) -> Optional[Playable]:
         """DO NOT USE THIS METHOD SINCE SOUNDCLOUD IDENTIFIERS ARE BROKEN."""
         raise NotImplementedError("Currently Soundcloud identifiers can't be gotten, so this function is useless.")
+
+
+class YoutubeTrack(Track):
+    """A track created using a search to Youtube. This subclasses :class:`Track` and :class:`YoutubeBase` and as such should be treated as one with additions."""
+
+    _searchType: str = "ytsearch:"
+
+    def __repr__(self):
+        return f"<Lavapy YoutubeTrack (Identifier={self.identifier})>"
+
+
+class YoutubeMusicTrack(Track):
+    """A track created using a search to Youtube Music. This subclasses :class:`Track` and :class:`YoutubeBase` and as such should be treated as one with additions."""
+
+    _searchType: str = "ytmsearch:"
+
+    def __repr__(self):
+        return f"<Lavapy YoutubeMusicTrack (Identifier={self.identifier})>"
 
 
 class YoutubePlaylist(Playlist):
