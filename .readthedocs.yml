@@ -10,6 +10,7 @@ sphinx:
 python:
   version: "3.8"
   install:
-    - requirements: docs/requirements.txt
+    - requirements: requirements.txt
+    - requirements: docs/requirementsRTD.txt
     - method: pip
       path: .
