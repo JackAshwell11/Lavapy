@@ -81,6 +81,9 @@ class Track(Playable):
         self.title: str = info["title"]
         self.uri: str = info["uri"]
 
+    def __repr__(self):
+        return f"<Lavapy Track (Identifier={self.identifier}) (Type={self.type})>"
+
     @classmethod
     async def query(cls, query: str, node: Optional[Node] = None, returnFirst: bool = True) -> Optional[Union[Track, List[Track]]]:
         """
@@ -102,7 +105,7 @@ class Track(Playable):
         """
         node = cls.checkNode(node)
         logger.info(f"Getting {cls} with query: {query}")
-        tracks = await cls.getInfo(cls, node,f"http://{node.host}:{node.port}/loadtracks?identifier={cls._searchType}{quote(query)}", None)
+        tracks = await cls.getInfo(cls, node, f"http://{node.host}:{node.port}/loadtracks?identifier={cls._searchType}{quote(query)}", None)
         if tracks is not None:
             if returnFirst:
                 return tracks[0]
@@ -112,6 +115,9 @@ class Track(Playable):
 
 class Playlist(Playable):
     """Base class for all Lavapy playlists. This is just here as a placeholder for future upgrades."""
+
+    def __repr__(self):
+        return f"<Lavapy Playlist>"
 
 
 class SoundcloudTrack(Track):

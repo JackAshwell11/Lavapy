@@ -61,3 +61,7 @@ class LoadTrackError(LavapyException):
 
 class QueueEmpty(LavapyException):
     """Exception raised when attempting to get a track from an empty queue."""
+
+
+class BuildTrackError(LavapyException):
+    """Exception raised when an error occurred when building a track."""

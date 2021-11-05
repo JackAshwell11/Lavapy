@@ -27,7 +27,6 @@ import logging
 from typing import Optional, Dict, Union, List, TYPE_CHECKING
 
 from .exceptions import LavalinkException, LoadTrackError
-from .pool import NodePool
 
 if TYPE_CHECKING:
     from .node import Node
@@ -57,6 +56,8 @@ class Playable:
             A valid Node object.
         """
         if node is None:
+            # Avoid a circular dependency with node.buildTrack()
+            from .pool import NodePool
             node = NodePool.getNode()
         return node
 

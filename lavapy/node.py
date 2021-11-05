@@ -31,11 +31,13 @@ from aiohttp import ClientResponse
 from discord.enums import VoiceRegion
 from discord.ext.commands import Bot, AutoShardedBot
 
-from .exceptions import WebsocketAlreadyExists
+from .exceptions import WebsocketAlreadyExists, BuildTrackError
 from .websocket import Websocket
+from .tracks import Track
 
 if TYPE_CHECKING:
     from .player import Player
+    from .tracks import Track
 
 __all__ = ("Node",)
 
@@ -135,3 +137,26 @@ class Node:
         """
         logger.debug(f"Sending payload: {payload}")
         await self._websocket.connection.send_json(payload)
+
+    async def buildTrack(self, id: str) -> Track:
+        """|coro|
+
+        Builds a track from a base64 :class:`Track` ID.
+
+        Parameters
+        ----------
+        id: str
+            The base 64 track ID.
+
+        Returns
+        -------
+        Track
+            A Lavapy Track object.
+        """
+        payload = {
+            "track": id
+        }
+        track, response = await self.getData(f"http://{self.host}:{self.port}/decodetrack?track=", payload)
+        if response.status != 200:
+            raise BuildTrackError
+        return Track(id, track)

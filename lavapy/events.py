@@ -23,7 +23,17 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-__all__ = ("LavapyEvent",)
+from typing import Dict
+
+from .tracks import Track
+
+__all__ = ("LavapyEvent",
+           "TrackEvent",
+           "TrackStartEvent",
+           "TrackEndEvent",
+           "TrackExceptionEvent",
+           "TrackStuckEvent",
+           "WebsocketClosedEvent")
 
 
 class LavapyEvent:
@@ -38,3 +48,38 @@ class LavapyEvent:
         async def onLavapyTrackStart(self, DO):
             ...code
     """
+    def __init__(self, event: str):
+        self.event = event
+
+
+class TrackEvent(LavapyEvent):
+    """Base Lavapy event for all track events."""
+    def __init__(self, event: str, track: Track):
+        super().__init__(event)
+        self.track = track
+
+
+class TrackStartEvent(TrackEvent):
+    """Sent when a track starts playing."""
+
+
+class TrackEndEvent(TrackEvent):
+    """Sent when a track ends playing."""
+    def __init__(self, event: str, track: Track, reason: str):
+        super().__init__(event, track)
+        self.reason = reason
+
+
+class TrackExceptionEvent(TrackEvent):
+    """Sent when a track exception occurs in Lavalink."""
+    def __init__(self, event: str, track: Track, exception: Dict[str, str]):
+        super().__init__(event, track)
+        self.exception = exception
+
+
+class TrackStuckEvent(TrackEvent):
+    """Sent when a track stuck occurs in Lavalink."""
+
+
+class WebsocketClosedEvent(LavapyEvent):
+    """"""

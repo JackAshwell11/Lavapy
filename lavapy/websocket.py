@@ -31,6 +31,7 @@ from aiohttp import WSMsgType
 from aiohttp.client_ws import ClientWebSocketResponse
 
 from .backoff import ExponentialBackoff
+from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketClosedEvent
 
 if TYPE_CHECKING:
     from .node import Node
@@ -125,8 +126,22 @@ class Websocket:
             player = [player for player in self.node.players if player.guild == guild][0]
             player.updateState(data)
         elif op == "event":
-            print(data)
-            return
+            event = await self.getEventPayload(data["type"], data)
+            print(event)
         elif op == "stats":
             # TODO: Implement
             return
+
+    async def getEventPayload(self, name: str, data) -> LavapyEvent:
+        if name == "WebSocketClosedEvent":
+            print(name, data)
+
+        track = await self.node.buildTrack(data["track"])
+        if name == "TrackStartEvent":
+            return TrackStartEvent(name, track)
+        elif name == "TrackEndEvent":
+            return TrackEndEvent(name, track, data["reason"])
+        elif name == "TrackExceptionEvent":
+            return TrackExceptionEvent(name, track, data["exception"])
+        elif name == "TrackStuckEvent":
+            print(name, data)
