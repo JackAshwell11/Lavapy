@@ -39,13 +39,12 @@ class LavapyEvent:
     """
     Base Lavapy event. Every event inherits from this.
 
-    If you want to listen to these events, use a :class:`discord.ext.commands.Bot.listen()`:
+    If you want to listen to these events, use a :meth:`discord.ext.commands.Bot.listen()`:
 
     .. code-block:: python
 
         @bot.listen
         async def onLavapyTrackStart(self, DO):
-            ...code
 
     Attributes
     ----------
@@ -60,7 +59,7 @@ class LavapyEvent:
 
     @property
     def listenerArgs(self) -> None:
-        """Returns the arguments sent to :class:`discord.ext.commands.Bot.listen()`."""
+        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
         return None
 
 
@@ -82,7 +81,7 @@ class TrackStartEvent(LavapyEvent):
 
     @property
     def listenerArgs(self) -> Track:
-        """Returns the arguments sent to :class:`discord.ext.commands.Bot.listen()`."""
+        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
         return self.track
 
 
@@ -107,7 +106,7 @@ class TrackEndEvent(LavapyEvent):
 
     @property
     def listenerArgs(self) -> Tuple[Track, str]:
-        """Returns the arguments sent to :class:`discord.ext.commands.Bot.listen()`."""
+        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
         return self.track, self.reason
 
 
@@ -137,7 +136,7 @@ class TrackExceptionEvent(LavapyEvent):
 
     @property
     def listenerArgs(self) -> Tuple[Track, str]:
-        """Returns the arguments sent to :class:`discord.ext.commands.Bot.listen()`."""
+        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
         return self.track, self.exception
 
 
@@ -162,7 +161,7 @@ class TrackStuckEvent(LavapyEvent):
 
     @property
     def listenerArgs(self) -> Tuple[Track, int]:
-        """Returns the arguments sent to :class:`discord.ext.commands.Bot.listen()`."""
+        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
         return self.track, self.threshold
 
 
@@ -190,5 +189,5 @@ class WebsocketClosedEvent(LavapyEvent):
 
     @property
     def listenerArgs(self) -> Tuple[str, int, bool]:
-        """Returns the arguments sent to :class:`discord.ext.commands.Bot.listen()`."""
+        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
         return self.reason, self.code, self.byRemote
