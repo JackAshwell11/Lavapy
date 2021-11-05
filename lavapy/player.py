@@ -143,7 +143,7 @@ class Player(VoiceProtocol):
         """
         # State updates are sent in milliseconds so need to be converted to seconds (/1000)
         state: Dict[str, Any] = state.get("state")
-        self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, timezone.utc)
+        self._lastUpdateTime = datetime.fromtimestamp(state.get("time")/1000, timezone.utc)
 
         self._lastPosition = state.get("position", 0)/1000
 

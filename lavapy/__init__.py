@@ -27,6 +27,7 @@ from .backoff import *
 from .abc import *
 from .backoff import *
 from .equalizer import *
+from .events import *
 from .exceptions import *
 from .node import *
 from .player import *

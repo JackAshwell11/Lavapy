@@ -9,6 +9,12 @@ Abstract Base Classes
 .. autoclass:: Playable
     :members:
 
+Event Reference
+---------------
+
+.. autoclass:: LavapyEvent
+    :members:
+
 NodePool
 --------
 

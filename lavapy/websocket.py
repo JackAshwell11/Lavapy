@@ -124,9 +124,9 @@ class Websocket:
             guild = self.node.bot.get_guild(int(data["guildId"]))
             player = [player for player in self.node.players if player.guild == guild][0]
             player.updateState(data)
-        elif op == "stats":
-            # TODO: Implement
-            return
         elif op == "event":
+            print(data)
+            return
+        elif op == "stats":
             # TODO: Implement
             return

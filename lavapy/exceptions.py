@@ -32,7 +32,7 @@ __all__ = ("LavapyException",
 
 
 class LavapyException(Exception):
-    """Base Lavapy exception."""
+    """Base Lavapy exception. Every exception inherits from this."""
 
 
 class NoNodesConnected(LavapyException):

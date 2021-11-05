@@ -23,4 +23,18 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-__all__ = ("",)
+__all__ = ("LavapyEvent",)
+
+
+class LavapyEvent:
+    """
+    Base Lavapy event. Every event inherits from this.
+
+    If you want to listen to these events, use a :class:`discord.ext.commands.Bot.listen()`:
+
+    .. code-block:: python
+
+        @bot.listen
+        async def onLavapyTrackStart(self, DO):
+            ...code
+    """
