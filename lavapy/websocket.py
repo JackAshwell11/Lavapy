@@ -26,7 +26,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from asyncio import Task
-from typing import Dict, Any, Optional, TYPE_CHECKING
+from typing import Dict, Any, Optional, Tuple, TYPE_CHECKING
 from aiohttp import WSMsgType
 from aiohttp.client_ws import ClientWebSocketResponse
 
@@ -35,6 +35,7 @@ from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionE
 
 if TYPE_CHECKING:
     from .node import Node
+    from .player import Player
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +65,29 @@ class Websocket:
         self._listener: Optional[Task] = None
         asyncio.create_task(self.connect())
 
+    def __repr__(self) -> str:
+        return f"<Lavapy Websocket (Domain={self.node.host}:{self.node.port}) (Connected={self.connected})>"
+
     @property
     def isConnected(self) -> bool:
         """Returns whether the websocket is connected or not."""
         return self.connected and self.open
+
+    def getPlayer(self, guildID) -> Player:
+        """
+        Returns a Lavapy :class:`Player` object based on a specific guildID.
+
+        Parameters
+        ----------
+        guildID: int
+            The guild ID to get a Lavapy Player object for.
+
+        Returns
+        -------
+        Player
+            A Lavapy Player object.
+        """
+        return [player for player in self.node.players if player.guild.id == guildID][0]
 
     async def connect(self) -> None:
         """|coro|
@@ -80,8 +100,7 @@ class Websocket:
             "Client-Name": "Lavapy"
         }
         logger.debug(f"Attempting connection with headers: {headers}")
-        self.connection = await self.node.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers,
-                                                             heartbeat=60)
+        self.connection = await self.node.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers, heartbeat=60)
         self._listener = self.node.bot.loop.create_task(self.listener())
         self.connected = True
         self.open = True
@@ -113,7 +132,7 @@ class Websocket:
     async def processListener(self, data: Dict[str, Any]) -> None:
         """|coro|
 
-        Processes data received from the Lavalink server gathered in :class:`listener()`.
+        Processes data received from the Lavalink server gathered in :meth:`listener()`.
 
         Parameters
         ----------
@@ -122,26 +141,42 @@ class Websocket:
         """
         op = data.get("op")
         if op == "playerUpdate":
-            guild = self.node.bot.get_guild(int(data["guildId"]))
-            player = [player for player in self.node.players if player.guild == guild][0]
+            player = self.getPlayer(int(data["guildId"]))
             player.updateState(data)
         elif op == "event":
-            event = await self.getEventPayload(data["type"], data)
-            print(event)
+            player, event = await self.getEventPayload(data["type"], data)
+            self.node.bot.dispatch(f"lavapy_{event.event}", player, event.listenerArgs)
         elif op == "stats":
             # TODO: Implement
             return
 
-    async def getEventPayload(self, name: str, data) -> LavapyEvent:
+    async def getEventPayload(self, name: str, data: Dict[str, Any]) -> Tuple[Player, LavapyEvent]:
+        """|coro|
+
+        Processes events received from Lavalink sent from :meth:`processListener()`.
+
+        Parameters
+        ----------
+        name: str
+            The event name.
+        data: Dict[str, Any]
+            The event payload sent by Lavalink.
+
+        Returns
+        -------
+        Tuple[Player, LavapyEvent]
+            A tuple containing a Lavapy Player and a Lavapy Event.
+        """
+        player = self.getPlayer(int(data["guildId"]))
         if name == "WebSocketClosedEvent":
-            print(name, data)
+            return player, WebsocketClosedEvent(data["reason"], data["code"], data["byRemote"])
 
         track = await self.node.buildTrack(data["track"])
         if name == "TrackStartEvent":
-            return TrackStartEvent(name, track)
+            return player, TrackStartEvent(track)
         elif name == "TrackEndEvent":
-            return TrackEndEvent(name, track, data["reason"])
+            return player, TrackEndEvent(track, data["reason"])
         elif name == "TrackExceptionEvent":
-            return TrackExceptionEvent(name, track, data["exception"])
+            return player, TrackExceptionEvent(track, data["exception"])
         elif name == "TrackStuckEvent":
-            print(name, data)
+            return player, TrackStuckEvent(track, data["thresholdMs"])

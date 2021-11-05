@@ -47,7 +47,7 @@ class Equalizer:
         self.name: str = name
         self.eq: List[Dict[str, Union[int, float]]] = self._setup(levels)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Lavapy Equalizer (Name={self.name}) (Levels={self.levels})>"
 
     @staticmethod

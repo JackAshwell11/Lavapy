@@ -15,6 +15,21 @@ Event Reference
 .. autoclass:: LavapyEvent
     :members:
 
+.. autoclass:: TrackStartEvent
+    :members:
+
+.. autoclass:: TrackEndEvent
+    :members:
+
+.. autoclass:: TrackExceptionEvent
+    :members:
+
+.. autoclass:: TrackStuckEvent
+    :members:
+
+.. autoclass:: WebsocketClosedEvent
+    :members:
+
 NodePool
 --------
 

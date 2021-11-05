@@ -40,6 +40,9 @@ logger = logging.getLogger(__name__)
 class Playable:
     """The base class for all Lavapy playable objects."""
 
+    def __repr__(self) -> str:
+        return f"<Lavapy Playable>"
+
     @staticmethod
     def checkNode(node) -> Node:
         """

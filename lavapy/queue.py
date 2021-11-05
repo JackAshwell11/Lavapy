@@ -41,6 +41,9 @@ class Queue:
     def __init__(self) -> None:
         self._queue = []
 
+    def __repr__(self) -> str:
+        return f"<Lavapy Queue (Queue={self._queue})>"
+
     @property
     def queue(self) -> List[Track]:
         """Returns a list of :class:`Track` objects."""

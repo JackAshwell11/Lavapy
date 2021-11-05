@@ -81,7 +81,7 @@ class Track(Playable):
         self.title: str = info["title"]
         self.uri: str = info["uri"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Lavapy Track (Identifier={self.identifier}) (Type={self.type})>"
 
     @classmethod
