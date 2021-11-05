@@ -37,7 +37,6 @@ from .tracks import Track
 
 if TYPE_CHECKING:
     from .player import Player
-    from .tracks import Track
 
 __all__ = ("Node",)
 

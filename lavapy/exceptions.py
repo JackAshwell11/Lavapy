@@ -28,7 +28,8 @@ __all__ = ("LavapyException",
            "WebsocketAlreadyExists",
            "LavalinkException",
            "LoadTrackError",
-           "QueueEmpty")
+           "QueueEmpty",
+           "BuildTrackError")
 
 
 class LavapyException(Exception):

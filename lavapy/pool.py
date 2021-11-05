@@ -104,7 +104,7 @@ class NodePool:
             The port of the Lavalink server.
         password: str
             The password to the Lavalink server.
-        region: Optional[:class:`VoiceRegion`]
+        region: Optional[:class:`discord.VoiceRegion`]
             The discord.py VoiceRegion to assign to this node.
         identifier: Optional[str]
             The unique identifier for this node. If not supplied, it will be generated for you.

@@ -108,5 +108,7 @@ Exceptions
     :show-inheritance:
 .. autoexception:: QueueEmpty
     :show-inheritance:
+.. autoexception:: BuildTrackError
+    :show-inheritance:
 
 

@@ -23,9 +23,10 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Dict, Tuple
+from typing import Dict, Tuple, TYPE_CHECKING
 
-from .tracks import Track
+if TYPE_CHECKING:
+    from .tracks import Track
 
 __all__ = ("LavapyEvent",
            "TrackStartEvent",
@@ -39,12 +40,7 @@ class LavapyEvent:
     """
     Base Lavapy event. Every event inherits from this.
 
-    If you want to listen to these events, use a :meth:`discord.ext.commands.Bot.listen()`:
-
-    .. code-block:: python
-
-        @bot.listen
-        async def onLavapyTrackStart(self, DO):
+    If you want to listen to these events, use a :meth:`discord.ext.commands.Bot.listen()`.
 
     Attributes
     ----------
@@ -65,7 +61,13 @@ class LavapyEvent:
 
 class TrackStartEvent(LavapyEvent):
     """
-    Fired when a track starts playing.
+    Fired when a track starts playing. This can be listened to with:
+
+    .. code-block:: python
+
+        @bot.listen()
+        async def on_lavapy_track_start(player, track):
+            pass
 
     Attributes
     ----------
@@ -87,7 +89,13 @@ class TrackStartEvent(LavapyEvent):
 
 class TrackEndEvent(LavapyEvent):
     """
-    Fired when a track stops playing.
+    Fired when a track stops playing. This can be listened to with:
+
+    .. code-block:: python
+
+        @bot.listen()
+        async def on_lavapy_track_end(player, track, reason):
+            pass
 
     Attributes
     ----------
@@ -112,7 +120,13 @@ class TrackEndEvent(LavapyEvent):
 
 class TrackExceptionEvent(LavapyEvent):
     """
-    Fired when a track error has occurred in Lavalink.
+    Fired when a track error has occurred in Lavalink. This can be listened to with:
+
+    .. code-block:: python
+
+        @bot.listen()
+        async def on_lavapy_track_exception(player, track, exception):
+            pass
 
     Attributes
     ----------
@@ -142,7 +156,13 @@ class TrackExceptionEvent(LavapyEvent):
 
 class TrackStuckEvent(LavapyEvent):
     """
-    Fired when a track is stuck and cannot be played.
+    Fired when a track is stuck and cannot be played. This can be listened to with:
+
+    .. code-block:: python
+
+        @bot.listen()
+        async def on_lavapy_track_stuck(player, track, threshold):
+            pass
 
     Attributes
     ----------
@@ -167,7 +187,13 @@ class TrackStuckEvent(LavapyEvent):
 
 class WebsocketClosedEvent(LavapyEvent):
     """
-    Fired when a websocket connection to a node is closed.
+    Fired when a websocket connection to a node is closed. This can be listened to with:
+
+    .. code-block:: python
+
+        @bot.listen()
+        async def on_lavapy_websocket_closed(player, reason, code, byRemote):
+            pass
 
     Attributes
     ----------
