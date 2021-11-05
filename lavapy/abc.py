@@ -62,7 +62,8 @@ class Playable:
 
     @staticmethod
     async def getInfo(cls, node: Node, dest: str, params: Optional[Dict[str, str]]) -> Optional[Union[YoutubePlaylist, Track, List[Track]]]:
-        """
+        """|coro|
+
         Actual function which gets and processes the track or playlist info received from Lavalink.
 
         Parameters
@@ -106,7 +107,8 @@ class Playable:
 
     @classmethod
     async def identifier(cls, node: Optional[Node], identifier: str) -> Optional[Playable]:
-        """
+        """|coro|
+
         Gets a :class:`YoutubeTrack` or :class:`YoutubePlaylist` from Youtube based on a given identifier. This will return only one result if the identifier leads to a track.
 
         Parameters

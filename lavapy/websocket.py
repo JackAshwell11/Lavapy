@@ -69,7 +69,10 @@ class Websocket:
         return self.connected and self.open
 
     async def connect(self) -> None:
-        """Establishes the connection to the Lavalink server."""
+        """|coro|
+
+        Establishes the connection to the Lavalink server.
+        """
         headers = {
             "Authorization": self.node.password,
             "User-Id": str(self.node.bot.user.id),
@@ -84,14 +87,20 @@ class Websocket:
         logger.debug(f"Connection established with node: {self.node.__repr__()}")
 
     async def disconnect(self) -> None:
-        """Closes the connection to the Lavalink server."""
+        """|coro|
+
+        Closes the connection to the Lavalink server.
+        """
         logger.debug(f"Closing connection for node: {self.node.__repr__()}")
         await self.connection.close()
         self.connected = False
         self.open = False
 
     async def listener(self) -> None:
-        """Continuously pings the Lavalink server for updates and events."""
+        """|coro|
+
+        Continuously pings the Lavalink server for updates and events.
+        """
         while True:
             backoff = ExponentialBackoff()
             msg = await self.connection.receive()
@@ -101,7 +110,8 @@ class Websocket:
                 await asyncio.sleep(backoff.delay())
 
     async def processListener(self, data: Dict[str, Any]) -> None:
-        """
+        """|coro|
+
         Processes data received from the Lavalink server gathered in :class:`listener()`.
 
         Parameters

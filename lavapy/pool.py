@@ -47,7 +47,6 @@ class NodePool:
         """Returns a mapping of identifiers to :class:`Node` objects."""
         return self._nodes
 
-
     @classmethod
     def getNode(cls, identifier: Optional[str] = None, region: Optional[VoiceRegion] = None) -> Node:
         """

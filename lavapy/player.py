@@ -45,9 +45,7 @@ logger = logging.getLogger(__name__)
 
 class Player(VoiceProtocol):
     """
-    Lavapy Player object
-
-    This class subclasses :class:`discord.VoiceProtocol` and such should be treated as one with additions.
+    Lavapy Player object. This subclasses :class:`discord.VoiceProtocol` and such should be treated as one with additions.
 
     Examples
     --------
@@ -58,44 +56,31 @@ class Player(VoiceProtocol):
            voice_client = await channel.connect(cls=lavapy.Player)
 
     .. warning::
-        This class should not be created manually but can be subclassed to add additional functionality.
-        You should instead use :meth:`discord.VoiceChannel.connect()` and pass the player object to the cls kwarg.
+        This class should not be created manually but can be subclassed to add additional functionality. You should instead use :meth:`discord.VoiceChannel.connect()` and pass the player object to the cls kwarg.
 
     Parameters
     ----------
     bot: Union[Bot, AutoShardedBot]
-        The discord.py Bot or AutoShardedBot
+        The discord.py Bot or AutoShardedBot.
     channel: VoiceChannel
-        A discord.py voice channel for the player to connect to
+        A discord.py VoiceChannel for the player to connect to.
 
     Attributes
     ----------
     bot: Union[Bot, AutoShardedBot]
-        The discord.py Bot or AutoShardedBot
+        The discord.py Bot or AutoShardedBot.
     channel: VoiceChannel
-        A discord.py voice channel for the player to connect to
+        A discord.py VoiceChannel for the player to connect to.
     node: Optional[Node]
-        The Lavapy Node object which is used for communicating with Lavalink
+        The Lavapy Node object which is used for communicating with Lavalink.
     track: Optional[Track]
-        The currently playing track
+        The currently playing track.
     volume: int
-        The volume the player should play at
+        The volume the player should play at.
     equalizer: Equalizer
-        The currently applied :class:`Equalizer`.
+        The currently applied Equalizer.
     queue: Queue
-        A :class:`Queue` object to line up tracks.
-    _voiceState: Dict[str, Any]
-        A dict which stores server and state updates
-    _connected: bool
-        A bool stating if the player is connected to a channel
-    _paused: bool
-        A bool stating if the player is currently paused
-    _lastUpdateTime: Optional[datetime.datetime]
-        The time at which Lavalink sent the last player update
-    _lastPosition: Optional[float]
-        The position the track was at when Lavalink sent the last player update
-    _equalizer: Equalizer
-        The currently applied equalizer to the player
+        A Queue object which can be used to line up tracks and retrieve them.
     """
     def __init__(self, bot: Union[Bot, AutoShardedBot], channel: VoiceChannel) -> None:
         super().__init__(bot, channel)
@@ -117,12 +102,12 @@ class Player(VoiceProtocol):
 
     @property
     def guild(self) -> Guild:
-        """Returns the guild this player is in"""
+        """Returns the :class:`discord.Guild`: this player is in."""
         return self.channel.guild
 
     @property
     def position(self) -> float:
-        """The current position of the track in seconds. If nothing is playing, this returns 0"""
+        """The current position of the track in seconds. If nothing is playing, this returns 0."""
         if not self.isPlaying:
             return 0
 
@@ -134,27 +119,27 @@ class Player(VoiceProtocol):
 
     @property
     def isConnected(self) -> bool:
-        """Returns whether the player is connected to a channel"""
+        """Returns whether the player is connected to a channel."""
         return self._connected
 
     @property
     def isPlaying(self) -> bool:
-        """Returns whether the player is currently playing a track"""
+        """Returns whether the player is currently playing a track."""
         return self.isConnected and self.track is not None
 
     @property
     def isPaused(self) -> bool:
-        """Returns whether the player is currently paused"""
+        """Returns whether the player is currently paused."""
         return self._paused
 
     def updateState(self, state: Dict[str, Any]) -> None:
         """
-        Updates self._lastUpdateTime and self._lastPosition with Lavalink's player updates
+        Stores the last update time and the last position.
 
         Parameters
         ----------
         state: Dict[str, Any]
-            The raw info sent by Lavalink
+            The raw info sent by Lavalink.
         """
         # State updates are sent in milliseconds so need to be converted to seconds (/1000)
         state: Dict[str, Any] = state.get("state")
@@ -163,25 +148,27 @@ class Player(VoiceProtocol):
         self._lastPosition = state.get("position", 0)/1000
 
     async def on_voice_server_update(self, data: Dict[str, str]) -> None:
-        """
-        Called when the bot connects to a voice channel
+        """|coro|
+
+        Called when the bot connects to a voice channel.
 
         Parameters
         ----------
         data: Dict[str, str]
-            The raw info sent by discord about the voice channel
+            The raw info sent by Discord about the voice channel.
         """
         self._voiceState.update({"event": data})
         await self.sendVoiceUpdate()
 
     async def on_voice_state_update(self, data: Dict[str, Any]) -> None:
-        """
-        Called when the bot's voice state changes
+        """|coro|
+
+        Called when the bot's voice state changes.
 
         Parameters
         ----------
         data: Dict[str, Any]
-            The raw info sent by discord about the bot's voice state
+            The raw info sent by Discord about the bot's voice state.
         """
         self._voiceState.update({"sessionId": data["session_id"]})
 
@@ -199,7 +186,10 @@ class Player(VoiceProtocol):
         await self.sendVoiceUpdate()
 
     async def sendVoiceUpdate(self) -> None:
-        """Sends data collected from on_voice_server_update and on_voice_state_update to Lavalink"""
+        """|coro|
+
+        Sends data collected from on_voice_server_update and on_voice_state_update to Lavalink.
+        """
         if {"sessionId", "event"} == self._voiceState.keys():
             logger.debug(f"Dispatching voice update: {self.channel.id}")
 
@@ -214,14 +204,14 @@ class Player(VoiceProtocol):
     async def connect(self, timeout: float, reconnect: bool) -> None:
         """|coro|
 
-        Connects the player to a voice channel
+        Connects the player to a voice channel.
 
         Parameters
         ----------
         timeout: float
-            The timeout for the connection
+            The timeout for the connection.
         reconnect: bool
-            A bool stating if reconnection is expected
+            A bool stating if reconnection is expected.
         """
         await self.guild.change_voice_state(channel=self.channel)
         self.node.players.append(self)
@@ -230,13 +220,14 @@ class Player(VoiceProtocol):
         logger.info(f"Connected to voice channel: {self.channel.id}")
 
     async def disconnect(self, *, force: bool = False) -> None:
-        """
-        Disconnects the player from a voice channel
+        """|coro|
+
+        Disconnects the player from a voice channel.
 
         Parameters
         ----------
         force: bool
-            Whether to force the disconnection. This is currently not used
+            Whether to force the disconnection. This is currently not used.
         """
         await self.guild.change_voice_state(channel=None)
         self.node.players.remove(self)
@@ -245,23 +236,24 @@ class Player(VoiceProtocol):
         logger.info(f"Disconnected from voice channel: {self.channel.id}")
 
     async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
-        """
-        Plays a given track
+        """|coro|
+
+        Plays a given track.
 
         Parameters
         ----------
         track: Track
-            The track to play
+            The track to play.
         startTime: int
-            The position in milliseconds to start at. By default, this is the beginning
+            The position in milliseconds to start at. By default, this is the beginning.
         endTime: int
-            The position in milliseconds to end at. By default, this is the end
+            The position in milliseconds to end at. By default, this is the end.
         volume: int
-            The volume at which the player should play the track at. By default, this is 100
+            The volume at which the player should play the track at. By default, this is 100.
         replace: bool
-            A bool stating if the current track should be replaced or not. By default, this is True
+            A bool stating if the current track should be replaced or not. By default, this is True.
         pause: bool
-            A bool stating if the track should start paused. By default, this is False
+            A bool stating if the track should start paused. By default, this is False.
         """
         if self.isPlaying and not replace:
             return
@@ -283,7 +275,10 @@ class Player(VoiceProtocol):
         logger.debug(f"Started playing track: {self.track.title} in {self.channel.id}")
 
     async def stop(self) -> None:
-        """Stops the currently playing track"""
+        """|coro|
+
+        Stops the currently playing track.
+        """
         stop = {
             "op": "stop",
             "guildId": str(self.guild.id)
@@ -295,21 +290,28 @@ class Player(VoiceProtocol):
         logger.debug(f"Stopped playing track: {tempTrack.title} in {self.channel.id}")
 
     async def pause(self) -> None:
-        """Pauses the player if it was playing"""
+        """|coro|
+
+        Pauses the player if it was playing.
+        """
         await self._togglePause(True)
 
     async def resume(self) -> None:
-        """Resumes the player if it was paused"""
+        """|coro|
+
+        Resumes the player if it was paused.
+        """
         await self._togglePause(False)
 
     async def _togglePause(self, pause: bool) -> None:
-        """
-        Toggles the player's pause state
+        """|coro|
+
+        Toggles the player's pause state.
 
         Parameters
         ----------
         pause: bool
-            A bool stating whether the player's paused state should be True or False
+            A bool stating whether the player's paused state should be True or False.
         """
         pause = {
             "op": "pause",
@@ -322,13 +324,14 @@ class Player(VoiceProtocol):
         logger.debug(f"Toggled pause: {pause} in {self.channel.id}")
 
     async def seek(self, position: int) -> None:
-        """
-        Seek to a given position
+        """|coro|
+
+        Seek to a given position.
 
         Parameters
         ----------
         position: int
-            The position to seek to
+            The position to seek to.
         """
         if position > self.track.length:
             raise InvalidIdentifier("Seek position is bigger than track length")
@@ -342,13 +345,14 @@ class Player(VoiceProtocol):
         logger.debug(f"Seeked to position: {position}")
 
     async def setVolume(self, volume: int) -> None:
-        """
-        Changes the player's volume
+        """|coro|
+
+        Changes the player's volume.
 
         Parameters
         ----------
         volume: int
-            The new player volume
+            The new player volume.
         """
         self.volume = max(min(volume, 1000), 0)
         volume = {
@@ -361,36 +365,38 @@ class Player(VoiceProtocol):
         logger.debug(f"Set volume to: {volume}")
 
     async def moveTo(self, channel: VoiceChannel) -> None:
-        """
-        Moves the player to another channel
+        """|coro|
+
+        Moves the player to another :class:`discord.VoiceChannel`.
 
         Parameters
         ----------
         channel: VoiceChannel
-            The voice channel to move to
+            The voice channel to move to.
         """
         await self.guild.change_voice_state(channel=channel)
 
     async def setEqualizer(self, eq: Equalizer) -> None:
-        """
-        Sets the player's equalizer
+        """|coro|
+
+        Sets the player's Equalizer.
 
         Parameters
         ----------
         eq: Equalizer
-            The equalizer to change to
+            The Equalizer to change to.
         """
         if not isinstance(eq, Equalizer):
             return
-        self._equalizer = eq
+        self.equalizer = eq
         equalizer = {
             "op": "equalizer",
             "guildId": str(self.guild.id),
-            "bands": self._equalizer.eq
+            "bands": self.equalizer.eq
         }
         await self.node.send(equalizer)
 
-        logger.debug(f"Changed equalizer to: {self._equalizer}")
+        logger.debug(f"Changed equalizer to: {self.equalizer}")
 
 # async def destroy(self) -> None:
 #     destroy = {
