@@ -27,12 +27,6 @@ Player
 .. autoclass:: Player
     :members:
 
-Queue
------
-
-.. autoclass:: Queue
-    :members:
-
 Tracks
 ------
 
@@ -59,9 +53,17 @@ Playlists
     :members:
     :show-inheritance:
 
+Queue
+-----
+
+.. autoclass:: Queue
+    :members:
+
 Filters
 ---------
 
+.. autoclass:: FilterName
+    :members:
 .. autoclass:: LavapyFilter
     :members:
 .. autoclass:: Equalizer
@@ -89,13 +91,6 @@ Filters
     :members:
     :show-inheritance:
 .. autoclass:: LowPass
-    :members:
-    :show-inheritance:
-
-Enums
------
-
-.. autoclass:: FilterName
     :members:
     :show-inheritance:
 

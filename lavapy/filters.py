@@ -42,6 +42,7 @@ __all__ = ("FilterName",
 
 
 class FilterName(Enum):
+    """Stores all the names of each :class:`LavapyFilter`."""
     Equalizer = "equalizer"
     Karaoke = "karaoke"
     Timescale = "timescale"
