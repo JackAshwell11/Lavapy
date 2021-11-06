@@ -26,12 +26,12 @@ from __future__ import annotations
 import datetime
 import logging
 from datetime import datetime, timezone
-from typing import Union, Optional, Any, Dict
+from typing import Union, Optional, Any, Dict, Type
 
 from discord import VoiceProtocol, VoiceChannel, Guild
 from discord.ext.commands import Bot, AutoShardedBot
 
-from .filters import FilterName, LavapyFilter
+from .filters import LavapyFilter
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
 from .node import Node
 from .pool import NodePool
@@ -405,22 +405,22 @@ class Player(VoiceProtocol):
 
         logger.debug(f"Added filter: {name} with payload {filter._payload}")
 
-    async def removeFilter(self, name: FilterName) -> None:
+    async def removeFilter(self, filter: Type[LavapyFilter]) -> None:
         """|coro|
 
         Removes a specific filter based on its name.
 
         Parameters
         ----------
-        name: FilterName
-            The name of the filter to remove.
+        filter: Type[LavapyFilter]
+            The filter to remove. This must be a non-initialised class like `lavapy.Equalizer`.
 
         Raises
         ------
         FilterNotApplied
             The specific filter is not applied.
         """
-        name = name.value
+        name = filter.name
         if name not in self.filters.keys():
             raise FilterNotApplied(f"{name} is not applied.")
 

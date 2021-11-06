@@ -23,13 +23,11 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from enum import Enum
 from typing import List, Tuple, Dict, Union, Any
 
 from .exceptions import InvalidFilterArgument
 
-__all__ = ("FilterName",
-           "LavapyFilter",
+__all__ = ("LavapyFilter",
            "Equalizer",
            "Karaoke",
            "Timescale",
@@ -41,30 +39,11 @@ __all__ = ("FilterName",
            "LowPass")
 
 
-class FilterName(Enum):
-    """Stores all the names of each :class:`LavapyFilter`."""
-    Equalizer = "equalizer"
-    Karaoke = "karaoke"
-    Timescale = "timescale"
-    Tremolo = "tremolo"
-    Vibrato = "vibrato"
-    Rotation = "rotation"
-    Distortion = "distortion"
-    ChannelMix = "channelMix"
-    LowPass = "lowPass"
-
-
 class LavapyFilter:
-    """
-    Base Lavapy Filter. Event filters inherit from this.
+    """Base Lavapy Filter. Event filters inherit from this."""
+    name = ""
 
-    Attributes
-    ----------
-    name: str
-        The filter's name.
-    """
-    def __init__(self, name: FilterName):
-        self.name: str = name.value
+    def __init__(self) -> None:
         self._payload: Any = {}
 
     def __repr__(self) -> str:
@@ -82,9 +61,10 @@ class Equalizer(LavapyFilter):
     name: str
         A string to name this Equalizer.
     """
+    name = "equalizer"
 
     def __init__(self, levels: List[Tuple[int, float]], name: str) -> None:
-        super().__init__(FilterName.Equalizer)
+        super().__init__()
         self.levels: List[Tuple[int, float]] = levels
         self.name: str = name
         self._payload: List[Dict[str, Union[int, float]]] = self._setup(levels)
@@ -161,8 +141,10 @@ class Karaoke(LavapyFilter):
     filterWidth: float
         to do. This defaults to 100.0.
     """
+    name = "karaoke"
+
     def __init__(self, level: float = 1.0, monoLevel: float = 1.0, filterBand: float = 220.0, filterWidth: float = 100.0) -> None:
-        super().__init__(FilterName.Karaoke)
+        super().__init__()
         self.level = self._payload["level"] = level
         self.monoLevel = self._payload["monoLevel"] = monoLevel
         self.filterBand = self._payload["filterBand"] = filterBand
@@ -174,7 +156,7 @@ class Karaoke(LavapyFilter):
 
 class Timescale(LavapyFilter):
     """
-    Changes the sped, pitch and rate of a track.
+    Changes the speed, pitch and rate of a track.
 
     Attributes
     ----------
@@ -185,8 +167,10 @@ class Timescale(LavapyFilter):
     rate: float
         to do.. This defaults to 1.0.
     """
+    name = "timescale"
+
     def __init__(self, speed: float = 1.0, pitch: float = 1.0, rate: float = 1.0) -> None:
-        super().__init__(FilterName.Timescale)
+        super().__init__()
         self.speed = self._payload["speed"] = speed
         self.pitch = self._payload["pitch"] = pitch
         self.rate = self._payload["rate"] = rate
@@ -213,8 +197,10 @@ class Tremolo(LavapyFilter):
     InvalidFilterArgument
         An invalid filter argument has been passed.
     """
+    name = "tremolo"
+
     def __init__(self, frequency: float = 2.0, depth: float = 0.5) -> None:
-        super().__init__(FilterName.Tremolo)
+        super().__init__()
         if frequency < 0.0:
             raise InvalidFilterArgument("Frequency must be more than 0.")
         if depth < 0.0 or depth > 1.0:
@@ -242,8 +228,10 @@ class Vibrato(LavapyFilter):
     InvalidFilterArgument
         An invalid filter argument has been passed.
     """
+    name = "vibrato"
+
     def __init__(self, frequency: float = 2.0, depth: float = 0.5) -> None:
-        super().__init__(FilterName.Vibrato)
+        super().__init__()
         if frequency < 0.0 or frequency > 14.0:
             raise InvalidFilterArgument("Frequency must be between 0 and 14.")
         if depth < 0.0 or depth > 1.0:
@@ -266,8 +254,10 @@ class Rotation(LavapyFilter):
     rotationHz: float
         The frequency of the audio rotating around the listener in hertz (0.2 is similar to the example above). This defaults to 0.0.
     """
+    name = "rotation"
+
     def __init__(self, rotationHz: float = 0.0) -> None:
-        super().__init__(FilterName.Rotation)
+        super().__init__()
         self.rotationHz = self._payload["rotationHz"] = rotationHz
 
     def __repr__(self) -> str:
@@ -297,8 +287,10 @@ class Distortion(LavapyFilter):
     scale: float
         to do. This defaults to 1.0.
     """
+    name = "distortion"
+
     def __init__(self, sinOffset: float = 0.0, sinScale: float = 1.0, cosOffset: float = 0.0, cosScale: float = 1.0, tanOffset: float = 0.0, tanScale: float = 1.0, offset: float = 0.0, scale: float = 1.0) -> None:
-        super().__init__(FilterName.Distortion)
+        super().__init__()
         self.sinOffset = self._payload["sinOffset"] = sinOffset
         self.sinScale = self._payload["sinScale"] = sinScale
         self.cosOffset = self._payload["cosOffset"] = cosOffset
@@ -327,8 +319,10 @@ class ChannelMix(LavapyFilter):
     rightToRight: float
         to do. This must be between 0 and 1. This defaults to 1.0.
     """
+    name = "channelMix"
+
     def __init__(self, leftToLeft: float = 1.0, leftToRight: float = 0.0, rightToLeft: float = 0.0, rightToRight: float = 1.0) -> None:
-        super().__init__(FilterName.ChannelMix)
+        super().__init__()
         if leftToLeft < 0.0 or leftToLeft > 1.0:
             raise InvalidFilterArgument("LeftToLeft must be between 0 and 1.")
         if leftToRight < 0.0 or leftToRight > 1.0:
@@ -355,8 +349,10 @@ class LowPass(LavapyFilter):
     smoothing: float
         to do. This defaults to 20.0.
     """
+    name = "lowPass"
+
     def __init__(self, smoothing: float = 20.0) -> None:
-        super().__init__(FilterName.LowPass)
+        super().__init__()
         self.smoothing = self._payload["smoothing"] = smoothing
 
     def __repr__(self) -> str:
