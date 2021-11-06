@@ -14,21 +14,21 @@ Event Reference
 
 .. autoclass:: LavapyEvent
     :members:
-
 .. autoclass:: TrackStartEvent
     :members:
-
+    :show-inheritance:
 .. autoclass:: TrackEndEvent
     :members:
-
+    :show-inheritance:
 .. autoclass:: TrackExceptionEvent
     :members:
-
+    :show-inheritance:
 .. autoclass:: TrackStuckEvent
     :members:
-
+    :show-inheritance:
 .. autoclass:: WebsocketClosedEvent
     :members:
+    :show-inheritance:
 
 NodePool
 --------

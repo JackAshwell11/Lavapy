@@ -23,10 +23,11 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Dict, Tuple, TYPE_CHECKING
+from typing import Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .tracks import Track
+    from .player import Player
 
 __all__ = ("LavapyEvent",
            "TrackStartEvent",
@@ -42,21 +43,27 @@ class LavapyEvent:
 
     If you want to listen to these events, use a :meth:`discord.ext.commands.Bot.listen()`.
 
+    Parameters
+    ----------
+    player: Player
+        A Lavapy Player object.
+
     Attributes
     ----------
     event: str
         The event name which has been dispatched.
     """
-    def __init__(self, event: str) -> None:
+    def __init__(self, event: str, player: Player) -> None:
         self.event = event
+        self._payload = {"player": player}
 
     def __repr__(self) -> str:
-        return f"<Lavapy LavapyEvent (Event={self.event})>"
+        return f"<Lavapy LavapyEvent (Payload={self.payload})>"
 
     @property
-    def listenerArgs(self) -> None:
-        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
-        return None
+    def payload(self) -> Dict[str, Any]:
+        """Returns a dict containing the payload sent to :meth:`discord.ext.commands.Bot.dispatch()`. This must be sent to `**kwargs`."""
+        return self._payload
 
 
 class TrackStartEvent(LavapyEvent):
@@ -69,22 +76,19 @@ class TrackStartEvent(LavapyEvent):
         async def on_lavapy_track_start(player, track):
             pass
 
-    Attributes
+    Parameters
     ----------
+    player: Player
+        A Lavapy Player object.
     track: Track
         A Lavapy Track object.
     """
-    def __init__(self, track: Track) -> None:
-        super().__init__("track_start")
-        self.track = track
+    def __init__(self, player: Player, track: Track) -> None:
+        super().__init__("track_start", player)
+        self._payload["track"] = track
 
     def __repr__(self) -> str:
-        return f"<Lavapy TrackStartEvent (Track={self.track.identifier})>"
-
-    @property
-    def listenerArgs(self) -> Track:
-        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
-        return self.track
+        return f"<Lavapy TrackStartEvent (Payload={self.payload})>"
 
 
 class TrackEndEvent(LavapyEvent):
@@ -97,25 +101,22 @@ class TrackEndEvent(LavapyEvent):
         async def on_lavapy_track_end(player, track, reason):
             pass
 
-    Attributes
+    Parameters
     ----------
+    player: Player
+        A Lavapy Player object.
     track: Track
         A Lavapy Track object.
-    reason: str
-        The reason the track stopped playing.
+    data: Dict[str, Any]
+        The raw event data.
     """
-    def __init__(self, track: Track, reason: str) -> None:
-        super().__init__("track_end")
-        self.track = track
-        self.reason = reason
+    def __init__(self, player: Player, track: Track, data: Dict[str, Any]) -> None:
+        super().__init__("track_end", player)
+        self._payload["track"] = track
+        self._payload["reason"] = data["reason"]
 
     def __repr__(self) -> str:
-        return f"<Lavapy TrackStopEvent (Track={self.track.identifier}) (Reason={self.reason})>"
-
-    @property
-    def listenerArgs(self) -> Tuple[Track, str]:
-        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
-        return self.track, self.reason
+        return f"<Lavapy TrackStopEvent (Payload={self.payload})>"
 
 
 class TrackExceptionEvent(LavapyEvent):
@@ -128,30 +129,27 @@ class TrackExceptionEvent(LavapyEvent):
         async def on_lavapy_track_exception(player, track, exception):
             pass
 
-    Attributes
+    Parameters
     ----------
+    player: Player
+        A Lavapy Player object.
     track: Track
         A Lavapy Track object.
-    exception: str
-        The exception that occurred in Lavalink.
+    data: Dict[str, Any]
+        The raw event data.
     """
-    def __init__(self, track: Track, exception: Dict[str, str]) -> None:
-        super().__init__("track_exception")
-        self.track = track
-        if exception.get("error"):
+    def __init__(self, player: Player, track: Track, data: Dict[str, Any]) -> None:
+        super().__init__("track_exception", player)
+        self._payload["track"] = track
+        if data.get("error"):
             # User is running Lavalink <= 3.3
-            self.exception = exception["error"]
+            self._payload["exception"] = data["error"]
         else:
             # User is running Lavalink >= 3.4
-            self.exception = exception["exception"]
+            self._payload["exception"] = data["exception"]
 
     def __repr__(self) -> str:
-        return f"<Lavapy TrackExceptionEvent (Track={self.track.identifier}) (Exception={self.exception})>"
-
-    @property
-    def listenerArgs(self) -> Tuple[Track, str]:
-        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
-        return self.track, self.exception
+        return f"<Lavapy TrackExceptionEvent (Payload={self.payload})>"
 
 
 class TrackStuckEvent(LavapyEvent):
@@ -164,25 +162,22 @@ class TrackStuckEvent(LavapyEvent):
         async def on_lavapy_track_stuck(player, track, threshold):
             pass
 
-    Attributes
+    Parameters
     ----------
+    player: Player
+        A Lavapy Player object.
     track: Track
         A Lavapy Track object.
-    threshold: str
-        The exception that occurred in Lavalink.
+    data: Dict[str, Any]
+        The raw event data.
     """
-    def __init__(self, track: Track, threshold: int) -> None:
-        super().__init__("track_stuck")
-        self.track = track
-        self.threshold = threshold
+    def __init__(self, player: Player, track: Track, data: Dict[str, Any]) -> None:
+        super().__init__("track_stuck", player)
+        self._payload["track"] = track
+        self._payload["threshold"] = data["thresholdMs"]
 
     def __repr__(self) -> str:
-        return f"<Lavapy TrackStuckEvent (Track={self.track.identifier}) (Threshold={self.threshold})>"
-
-    @property
-    def listenerArgs(self) -> Tuple[Track, int]:
-        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
-        return self.track, self.threshold
+        return f"<Lavapy TrackStuckEvent (Payload={self.payload})>"
 
 
 class WebsocketClosedEvent(LavapyEvent):
@@ -195,25 +190,18 @@ class WebsocketClosedEvent(LavapyEvent):
         async def on_lavapy_websocket_closed(player, reason, code, byRemote):
             pass
 
-    Attributes
+    Parameters
     ----------
-    reason: str
-        The reason the websocket was closed.
-    code: int
-        The discord error code that was sent.
-    byRemote: bool
-        A bool stating if the connection was closed remotely or not.
+    player: Player
+        A Lavapy Player object.
+    data: Dict[str, Any]
+        The raw event data.
     """
-    def __init__(self, reason: str, code: int, byRemote: bool) -> None:
-        super().__init__("websocket_closed")
-        self.reason = reason
-        self.code = code
-        self.byRemote = byRemote
+    def __init__(self, player: Player, data: Dict[str, Any]) -> None:
+        super().__init__("websocket_closed", player)
+        self._payload["reason"] = data["reason"]
+        self._payload["code"] = data["code"]
+        self._payload["byRemote"] = data["byRemote"]
 
     def __repr__(self) -> str:
-        return f"<Lavapy WebsocketClosedEvent (Reason={self.reason}) (Code={self.code}) (ByRemote={self.byRemote})>"
-
-    @property
-    def listenerArgs(self) -> Tuple[str, int, bool]:
-        """Returns the arguments sent to :meth:`discord.ext.commands.Bot.listen()`."""
-        return self.reason, self.code, self.byRemote
+        return f"<Lavapy WebsocketClosedEvent (Payload={self.payload})>"

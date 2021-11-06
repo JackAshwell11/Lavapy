@@ -144,13 +144,13 @@ class Websocket:
             player = self.getPlayer(int(data["guildId"]))
             player.updateState(data)
         elif op == "event":
-            player, event = await self.getEventPayload(data["type"], data)
-            self.node.bot.dispatch(f"lavapy_{event.event}", player, event.listenerArgs)
+            event = await self.getEventPayload(data["type"], data)
+            await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
         elif op == "stats":
             # TODO: Implement
             return
 
-    async def getEventPayload(self, name: str, data: Dict[str, Any]) -> Tuple[Player, LavapyEvent]:
+    async def getEventPayload(self, name: str, data: Dict[str, Any]) -> LavapyEvent:
         """|coro|
 
         Processes events received from Lavalink sent from :meth:`processListener()`.
@@ -164,19 +164,33 @@ class Websocket:
 
         Returns
         -------
-        Tuple[Player, LavapyEvent]
-            A tuple containing a Lavapy Player and a Lavapy Event.
+        Tuple[str, Dict[str, Any]]
+            A tuple containing the event name and the event payload.
         """
         player = self.getPlayer(int(data["guildId"]))
         if name == "WebSocketClosedEvent":
-            return player, WebsocketClosedEvent(data["reason"], data["code"], data["byRemote"])
+            return WebsocketClosedEvent(player, data)
 
         track = await self.node.buildTrack(data["track"])
         if name == "TrackStartEvent":
-            return player, TrackStartEvent(track)
+            return TrackStartEvent(player, track)
         elif name == "TrackEndEvent":
-            return player, TrackEndEvent(track, data["reason"])
+            return TrackEndEvent(player, track, data)
         elif name == "TrackExceptionEvent":
-            return player, TrackExceptionEvent(track, data["exception"])
+            return TrackExceptionEvent(player, track, data)
         elif name == "TrackStuckEvent":
-            return player, TrackStuckEvent(track, data["thresholdMs"])
+            return TrackStuckEvent(player, track, data)
+
+    async def dispatchEvent(self, event: str, payload: Dict[str, Any]) -> None:
+        """|coro|
+
+        Dispatches events to discord.
+
+        Parameters
+        ----------
+        event: str
+            The event name.
+        payload: Dict[str, Any]
+            The payload to dispatch with the event.
+        """
+        self.node.bot.dispatch(event, **payload)
