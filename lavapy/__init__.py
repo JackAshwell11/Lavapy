@@ -23,7 +23,6 @@ SOFTWARE.
 """
 import logging
 
-from .abc import *
 from .backoff import *
 from .events import *
 from .exceptions import *

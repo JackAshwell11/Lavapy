@@ -40,7 +40,7 @@ __all__ = ("LavapyFilter",
 
 
 class LavapyFilter:
-    """Base Lavapy Filter. Event filters inherit from this."""
+    """Base Lavapy Filter. Every filter inherit from this."""
     name = ""
 
     def __init__(self) -> None:
