@@ -3,12 +3,6 @@
 API Reference
 =============
 
-Abstract Base Classes
----------------------
-
-.. autoclass:: Playable
-    :members:
-
 NodePool
 --------
 
@@ -20,16 +14,21 @@ Node
 
 .. autoclass:: Node
     :members:
+.. autoclass:: Stats
+    :members:
 
 Player
 ------
 
 .. autoclass:: Player
     :members:
+.. autoclass:: Queue
+    :members:
 
-Tracks
-------
-
+Playables
+---------
+.. autoclass:: Playable
+    :members:
 .. autoclass:: Track
     :members:
     :show-inheritance:
@@ -42,22 +41,12 @@ Tracks
 .. autoclass:: YoutubeMusicTrack
     :members:
     :show-inheritance:
-
-Playlists
----------
-
 .. autoclass:: Playlist
     :members:
     :show-inheritance:
 .. autoclass:: YoutubePlaylist
     :members:
     :show-inheritance:
-
-Queue
------
-
-.. autoclass:: Queue
-    :members:
 
 Filters
 ---------
@@ -114,12 +103,6 @@ Events
 .. autoclass:: WebsocketClosedEvent
     :members:
     :show-inheritance:
-
-Stats
------
-
-.. autoclass:: Stats
-    :members:
 
 Exceptions
 ----------
