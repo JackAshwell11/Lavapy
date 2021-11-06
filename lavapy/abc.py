@@ -93,11 +93,11 @@ class Playable:
         """
         data, response = await node.getData(dest, params)
         if response.status != 200:
-            raise LavalinkException("Invalid response from lavalink")
+            raise LavalinkException("Invalid response from lavalink.")
 
         loadType = data.get("loadType")
         if loadType == "LOAD_FAILED":
-            raise LoadTrackError(f"Track failed to load with data: {data}")
+            raise LoadTrackError(f"Track failed to load with data: {data}.")
         elif loadType == "NO_MATCHES":
             return None
         elif loadType == "TRACK_LOADED":

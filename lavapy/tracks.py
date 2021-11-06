@@ -167,7 +167,7 @@ class YoutubePlaylist(Playlist):
     """
     def __init__(self, name: str, selectedTrack: int, trackArr: List[Dict[str, Any]]):
         self.name: str = name
-        self.selectedTrack = selectedTrack
+        self.selectedTrack: int = selectedTrack
         self.tracks: List[Track] = [YoutubeTrack(track["track"], track["info"]) for track in trackArr]
 
     def __repr__(self):

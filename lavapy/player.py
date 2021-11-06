@@ -31,8 +31,8 @@ from typing import Union, Optional, Any, Dict
 from discord import VoiceProtocol, VoiceChannel, Guild
 from discord.ext.commands import Bot, AutoShardedBot
 
-from .equalizer import Equalizer
-from .exceptions import InvalidIdentifier
+from .filters import FilterName, LavapyFilter
+from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
 from .node import Node
 from .pool import NodePool
 from .tracks import Track
@@ -77,8 +77,8 @@ class Player(VoiceProtocol):
         The currently playing track.
     volume: int
         The volume the player should play at.
-    equalizer: Equalizer
-        The currently applied Equalizer.
+    filters: Dict[str, LavapyFilter]
+        The currently applied filters.
     queue: Queue
         A Queue object which can be used to line up tracks and retrieve them.
     """
@@ -89,7 +89,7 @@ class Player(VoiceProtocol):
         self.node: Optional[Node] = NodePool.getNode()
         self.track: Optional[Track] = None
         self.volume: int = 100
-        self.equalizer: Equalizer = Equalizer.flat()
+        self.filters: Dict[str, LavapyFilter] = {}
         self.queue: Queue = Queue()
         self._voiceState: Dict[str, Any] = {}
         self._connected: bool = False
@@ -332,9 +332,14 @@ class Player(VoiceProtocol):
         ----------
         position: int
             The position to seek to.
+
+        Raises
+        ------
+        InvalidIdentifier
+            Seek position is bigger than the track length.
         """
         if position > self.track.length:
-            raise InvalidIdentifier("Seek position is bigger than track length")
+            raise InvalidIdentifier("Seek position is bigger than track length.")
         seek = {
             "op": "seek",
             "guildId": str(self.guild.id),
@@ -376,27 +381,67 @@ class Player(VoiceProtocol):
         """
         await self.guild.change_voice_state(channel=channel)
 
-    async def setEqualizer(self, eq: Equalizer) -> None:
+    async def addFilter(self, filter: LavapyFilter) -> None:
         """|coro|
 
-        Sets the player's Equalizer.
+        Adds a :class:`LavapyFilter` to the player.
 
         Parameters
         ----------
-        eq: Equalizer
-            The Equalizer to change to.
-        """
-        if not isinstance(eq, Equalizer):
-            return
-        self.equalizer = eq
-        equalizer = {
-            "op": "equalizer",
-            "guildId": str(self.guild.id),
-            "bands": self.equalizer.eq
-        }
-        await self.node.send(equalizer)
+        filter: LavapyFilter
+            The LavapyFilter to apply to the player.
 
-        logger.debug(f"Changed equalizer to: {self.equalizer}")
+        Raises
+        ------
+        FilterAlreadyExists
+            The specific filter is already applied.
+        """
+        name = filter.name
+        if filter.name in self.filters.keys():
+            raise FilterAlreadyExists(f"Filter <{name}> is already applied. Please remove it first.")
+
+        self.filters[name] = filter
+        await self._updateFilters()
+
+        logger.debug(f"Added filter: {name} with payload {filter._payload}")
+
+    async def removeFilter(self, name: FilterName) -> None:
+        """|coro|
+
+        Removes a specific filter based on its name.
+
+        Parameters
+        ----------
+        name: FilterName
+            The name of the filter to remove.
+
+        Raises
+        ------
+        FilterNotApplied
+            The specific filter is not applied.
+        """
+        name = name.value
+        if name not in self.filters.keys():
+            raise FilterNotApplied(f"{name} is not applied.")
+
+        del self.filters[name]
+        await self._updateFilters()
+
+        logger.debug(f"Removed filter: {name}")
+
+    async def _updateFilters(self) -> None:
+        """|coro|
+
+        Collects all applied filters and sends them to Lavalink.
+        """
+        filterPayload = {
+            "op": "filters",
+            "guildId": str(self.guild.id),
+            "volume": self.volume/100,
+        }
+        for key, value in self.filters.items():
+            filterPayload[value.name] = value._payload
+        await self.node.send(filterPayload)
 
 # async def destroy(self) -> None:
 #     destroy = {

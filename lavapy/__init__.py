@@ -23,12 +23,11 @@ SOFTWARE.
 """
 import logging
 
-from .backoff import *
 from .abc import *
 from .backoff import *
-from .equalizer import *
 from .events import *
 from .exceptions import *
+from .filters import *
 from .node import *
 from .player import *
 from .pool import *

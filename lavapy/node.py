@@ -97,7 +97,7 @@ class Node:
         if self._websocket is None:
             self._websocket = Websocket(self)
         else:
-            raise WebsocketAlreadyExists("Websocket already initialised")
+            raise WebsocketAlreadyExists("Websocket already initialised.")
 
     async def getData(self, dest: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
         """|coro|
@@ -147,6 +147,11 @@ class Node:
         id: str
             The base 64 track ID.
 
+        Raises
+        ------
+        BuildTrackError
+            An error occurred while building the track.
+
         Returns
         -------
         Track
@@ -157,5 +162,5 @@ class Node:
         }
         track, response = await self.getData(f"http://{self.host}:{self.port}/decodetrack?track=", payload)
         if response.status != 200:
-            raise BuildTrackError
+            raise BuildTrackError("A error occurred while building the track.")
         return Track(id, track)

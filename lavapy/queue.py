@@ -39,7 +39,7 @@ class Queue:
     A class representing a usable Queue.
     """
     def __init__(self) -> None:
-        self._queue = []
+        self._queue: List[Track] = []
 
     def __repr__(self) -> str:
         return f"<Lavapy Queue (Queue={self._queue})>"

@@ -54,15 +54,12 @@ Tracks
 .. autoclass:: Track
     :members:
     :show-inheritance:
-
 .. autoclass:: SoundcloudTrack
     :members:
     :show-inheritance:
-
 .. autoclass:: YoutubeTrack
     :members:
     :show-inheritance:
-
 .. autoclass:: YoutubeMusicTrack
     :members:
     :show-inheritance:
@@ -73,16 +70,42 @@ Playlists
 .. autoclass:: Playlist
     :members:
     :show-inheritance:
-
 .. autoclass:: YoutubePlaylist
     :members:
     :show-inheritance:
 
-Equalizer
+Filters
 ---------
 
+.. autoclass:: LavapyFilter
+    :members:
 .. autoclass:: Equalizer
     :members:
+    :show-inheritance:
+.. autoclass:: Karaoke
+    :members:
+    :show-inheritance:
+.. autoclass:: Timescale
+    :members:
+    :show-inheritance:
+.. autoclass:: Tremolo
+    :members:
+    :show-inheritance:
+.. autoclass:: Vibrato
+    :members:
+    :show-inheritance:
+.. autoclass:: Rotation
+    :members:
+    :show-inheritance:
+.. autoclass:: Distortion
+    :members:
+    :show-inheritance:
+.. autoclass:: ChannelMix
+    :members:
+    :show-inheritance:
+.. autoclass:: LowPass
+    :members:
+    :show-inheritance:
 
 Queue
 -----
@@ -110,5 +133,7 @@ Exceptions
     :show-inheritance:
 .. autoexception:: BuildTrackError
     :show-inheritance:
-
-
+.. autoexception:: FilterAlreadyExists
+    :show-inheritance:
+.. autoexception:: FilterNotApplied
+    :show-inheritance:

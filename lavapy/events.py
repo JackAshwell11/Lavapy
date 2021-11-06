@@ -54,8 +54,8 @@ class LavapyEvent:
         The event name which has been dispatched.
     """
     def __init__(self, event: str, player: Player) -> None:
-        self.event = event
-        self._payload = {"player": player}
+        self.event: str = event
+        self._payload: Dict[str, Any] = {"player": player}
 
     def __repr__(self) -> str:
         return f"<Lavapy LavapyEvent (Payload={self.payload})>"
@@ -85,7 +85,7 @@ class TrackStartEvent(LavapyEvent):
     """
     def __init__(self, player: Player, track: Track) -> None:
         super().__init__("track_start", player)
-        self._payload["track"] = track
+        self._payload["track"]: Dict[str, Any] = track
 
     def __repr__(self) -> str:
         return f"<Lavapy TrackStartEvent (Payload={self.payload})>"
@@ -112,8 +112,8 @@ class TrackEndEvent(LavapyEvent):
     """
     def __init__(self, player: Player, track: Track, data: Dict[str, Any]) -> None:
         super().__init__("track_end", player)
-        self._payload["track"] = track
-        self._payload["reason"] = data["reason"]
+        self._payload["track"]: Dict[str, Any] = track
+        self._payload["reason"]: Dict[str, Any] = data["reason"]
 
     def __repr__(self) -> str:
         return f"<Lavapy TrackStopEvent (Payload={self.payload})>"
@@ -140,13 +140,13 @@ class TrackExceptionEvent(LavapyEvent):
     """
     def __init__(self, player: Player, track: Track, data: Dict[str, Any]) -> None:
         super().__init__("track_exception", player)
-        self._payload["track"] = track
+        self._payload["track"]: Dict[str, Any] = track
         if data.get("error"):
             # User is running Lavalink <= 3.3
-            self._payload["exception"] = data["error"]
+            self._payload["exception"]: Dict[str, Any] = data["error"]
         else:
             # User is running Lavalink >= 3.4
-            self._payload["exception"] = data["exception"]
+            self._payload["exception"]: Dict[str, Any] = data["exception"]
 
     def __repr__(self) -> str:
         return f"<Lavapy TrackExceptionEvent (Payload={self.payload})>"
@@ -173,8 +173,8 @@ class TrackStuckEvent(LavapyEvent):
     """
     def __init__(self, player: Player, track: Track, data: Dict[str, Any]) -> None:
         super().__init__("track_stuck", player)
-        self._payload["track"] = track
-        self._payload["threshold"] = data["thresholdMs"]
+        self._payload["track"]: Dict[str, Any] = track
+        self._payload["threshold"]: Dict[str, Any] = data["thresholdMs"]
 
     def __repr__(self) -> str:
         return f"<Lavapy TrackStuckEvent (Payload={self.payload})>"
@@ -199,9 +199,9 @@ class WebsocketClosedEvent(LavapyEvent):
     """
     def __init__(self, player: Player, data: Dict[str, Any]) -> None:
         super().__init__("websocket_closed", player)
-        self._payload["reason"] = data["reason"]
-        self._payload["code"] = data["code"]
-        self._payload["byRemote"] = data["byRemote"]
+        self._payload["reason"]: Dict[str, Any] = data["reason"]
+        self._payload["code"]: Dict[str, Any] = data["code"]
+        self._payload["byRemote"]: Dict[str, Any] = data["byRemote"]
 
     def __repr__(self) -> str:
         return f"<Lavapy WebsocketClosedEvent (Payload={self.payload})>"

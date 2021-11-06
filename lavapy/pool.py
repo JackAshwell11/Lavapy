@@ -72,17 +72,17 @@ class NodePool:
             A Lavapy Node object.
         """
         if not cls._nodes:
-            raise NoNodesConnected("There are currently no nodes connected")
+            raise NoNodesConnected("There are currently no nodes connected.")
         if identifier is not None:
             try:
                 node = cls._nodes[identifier]
                 return node
             except KeyError:
-                raise InvalidIdentifier(f"No nodes with the identifier <{identifier}>")
+                raise InvalidIdentifier(f"No nodes with the identifier <{identifier}>.")
         elif region is not None:
             possibleNodes = [node for node in cls._nodes.values() if node.region is region]
             if not possibleNodes:
-                raise NoNodesConnected(f"No nodes exist for region <{region}>")
+                raise NoNodesConnected(f"No nodes exist for region <{region}>.")
         else:
             possibleNodes = cls._nodes.values()
         return sorted(possibleNodes, key=lambda x: len(x.players))[0]
@@ -118,7 +118,7 @@ class NodePool:
             identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
 
         if identifier in cls._nodes:
-            raise NodeOccupied(f"A node with the identifier <{identifier}> already exists")
+            raise NodeOccupied(f"A node with the identifier <{identifier}> already exists.")
 
         node = Node(bot, host, port, password, region, identifier)
         await node.connect()

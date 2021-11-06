@@ -29,7 +29,10 @@ __all__ = ("LavapyException",
            "LavalinkException",
            "LoadTrackError",
            "QueueEmpty",
-           "BuildTrackError")
+           "BuildTrackError",
+           "InvalidFilterArgument",
+           "FilterAlreadyExists",
+           "FilterNotApplied")
 
 
 class LavapyException(Exception):
@@ -66,3 +69,15 @@ class QueueEmpty(LavapyException):
 
 class BuildTrackError(LavapyException):
     """Exception raised when an error occurred when building a track."""
+
+
+class InvalidFilterArgument(LavapyException):
+    """Exception raised when an invalid argument is passed to a filter."""
+
+
+class FilterAlreadyExists(LavapyException):
+    """Exception raised when a new filter is attempted to be applied but it already exists."""
+
+
+class FilterNotApplied(LavapyException):
+    """Exception raised when a filter is attempted to be removed but it is not applied."""
