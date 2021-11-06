@@ -9,27 +9,6 @@ Abstract Base Classes
 .. autoclass:: Playable
     :members:
 
-Event Reference
----------------
-
-.. autoclass:: LavapyEvent
-    :members:
-.. autoclass:: TrackStartEvent
-    :members:
-    :show-inheritance:
-.. autoclass:: TrackEndEvent
-    :members:
-    :show-inheritance:
-.. autoclass:: TrackExceptionEvent
-    :members:
-    :show-inheritance:
-.. autoclass:: TrackStuckEvent
-    :members:
-    :show-inheritance:
-.. autoclass:: WebsocketClosedEvent
-    :members:
-    :show-inheritance:
-
 NodePool
 --------
 
@@ -46,6 +25,13 @@ Player
 ------
 
 .. autoclass:: Player
+    :members:
+    :show-inheritance:
+
+Queue
+-----
+
+.. autoclass:: Queue
     :members:
 
 Tracks
@@ -107,11 +93,33 @@ Filters
     :members:
     :show-inheritance:
 
-Queue
+Enums
 -----
 
-.. autoclass:: Queue
+.. autoclass:: FilterName
     :members:
+    :show-inheritance:
+
+Events
+------
+
+.. autoclass:: LavapyEvent
+    :members:
+.. autoclass:: TrackStartEvent
+    :members:
+    :show-inheritance:
+.. autoclass:: TrackEndEvent
+    :members:
+    :show-inheritance:
+.. autoclass:: TrackExceptionEvent
+    :members:
+    :show-inheritance:
+.. autoclass:: TrackStuckEvent
+    :members:
+    :show-inheritance:
+.. autoclass:: WebsocketClosedEvent
+    :members:
+    :show-inheritance:
 
 Exceptions
 ----------
