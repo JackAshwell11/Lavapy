@@ -121,7 +121,7 @@ class Playlist(Playable):
 
 
 class SoundcloudTrack(Track):
-    """A track created using a search to Soundcloud. This subclasses :class:`Track` and as such should be treated as one with additions."""
+    """A track created using a search to Soundcloud."""
 
     _searchType: str = "scsearch:"
 
@@ -135,7 +135,7 @@ class SoundcloudTrack(Track):
 
 
 class YoutubeTrack(Track):
-    """A track created using a search to Youtube. This subclasses :class:`Track` and :class:`YoutubeBase` and as such should be treated as one with additions."""
+    """A track created using a search to Youtube."""
 
     _searchType: str = "ytsearch:"
 
@@ -144,7 +144,7 @@ class YoutubeTrack(Track):
 
 
 class YoutubeMusicTrack(Track):
-    """A track created using a search to Youtube Music. This subclasses :class:`Track` and :class:`YoutubeBase` and as such should be treated as one with additions."""
+    """A track created using a search to Youtube Music."""
 
     _searchType: str = "ytmsearch:"
 
@@ -154,7 +154,7 @@ class YoutubeMusicTrack(Track):
 
 class YoutubePlaylist(Playlist):
     """
-    A Lavapy YoutubePlaylist object. This subclasses :class:`YoutubeBase` and as such should be treated as one with additions.
+    A Lavapy YoutubePlaylist object.
 
     Attributes
     ----------

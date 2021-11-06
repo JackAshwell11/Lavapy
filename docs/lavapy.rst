@@ -26,7 +26,6 @@ Player
 
 .. autoclass:: Player
     :members:
-    :show-inheritance:
 
 Queue
 -----
