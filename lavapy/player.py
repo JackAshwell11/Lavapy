@@ -386,6 +386,9 @@ class Player(VoiceProtocol):
 
         Adds a :class:`LavapyFilter` to the player.
 
+        .. warning::
+            This requires Lavalink 3.4 or greater..
+
         Parameters
         ----------
         filter: LavapyFilter
@@ -405,10 +408,13 @@ class Player(VoiceProtocol):
 
         logger.debug(f"Added filter: {name} with payload {filter._payload}")
 
-    async def removeFilter(self, filter: Type[LavapyFilter]) -> None:
+    async def removeFilter(self, filter: Union[LavapyFilter, Type[LavapyFilter]]) -> None:
         """|coro|
 
         Removes a specific filter based on its name.
+
+        .. warning::
+            This requires Lavalink 3.4 or greater.
 
         Parameters
         ----------

@@ -31,7 +31,8 @@ from aiohttp import WSMsgType
 from aiohttp.client_ws import ClientWebSocketResponse
 
 from .backoff import ExponentialBackoff
-from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketClosedEvent
+from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketOpenEvent, WebsocketClosedEvent
+from .stats import Stats
 
 if TYPE_CHECKING:
     from .node import Node
@@ -104,7 +105,9 @@ class Websocket:
         self._listener = self.node.bot.loop.create_task(self.listener())
         self.connected = True
         self.open = True
+        event = WebsocketOpenEvent(self.node)
         logger.debug(f"Connection established with node: {self.node.__repr__()}")
+        await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
 
     async def disconnect(self) -> None:
         """|coro|
@@ -147,8 +150,7 @@ class Websocket:
             event = await self.getEventPayload(data["type"], data)
             await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
         elif op == "stats":
-            # TODO: Implement
-            return
+            self.node.stats = Stats(self.node, data)
 
     async def getEventPayload(self, name: str, data: Dict[str, Any]) -> LavapyEvent:
         """|coro|

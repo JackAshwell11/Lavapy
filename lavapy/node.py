@@ -37,6 +37,7 @@ from .tracks import Track
 
 if TYPE_CHECKING:
     from .player import Player
+    from .stats import Stats
 
 __all__ = ("Node",)
 
@@ -68,6 +69,8 @@ class Node:
         The aiohttp session used for sending and getting data.
     players: List[Player]
         A list containing all Lavapy Players which are connected to this node.
+    stats: Optional[Stats]
+        Useful information sent by Lavalink about this node.
     """
     def __init__(self, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
         self.bot: Union[Bot, AutoShardedBot] = bot
@@ -78,6 +81,7 @@ class Node:
         self.identifier: str = identifier
         self.session: aiohttp.ClientSession = aiohttp.ClientSession()
         self.players: List[Player] = []
+        self.stats: Optional[Stats] = None
         self._websocket: Optional[Websocket] = None
 
     def __repr__(self) -> str:

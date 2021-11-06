@@ -89,7 +89,7 @@ class NodePool:
 
 
     @classmethod
-    async def createNode(cls, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> None:
+    async def createNode(cls, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
         Creates a Lavapy :class:`Node` object and stores it for later use.
@@ -113,6 +113,11 @@ class NodePool:
         ------
         NodeOccupied
             If a node with the identifier already exists.
+
+        Returns
+        -------
+        Node:
+            A Lavapy Node object.
         """
         if identifier is None:
             identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
@@ -121,6 +126,6 @@ class NodePool:
             raise NodeOccupied(f"A node with the identifier <{identifier}> already exists.")
 
         node = Node(bot, host, port, password, region, identifier)
-        await node.connect()
-
         cls._nodes[identifier] = node
+        await node.connect()
+        return node

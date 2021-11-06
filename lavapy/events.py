@@ -23,17 +23,19 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Dict, Any, TYPE_CHECKING
+from typing import Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .tracks import Track
     from .player import Player
+    from .node import Node
 
 __all__ = ("LavapyEvent",
            "TrackStartEvent",
            "TrackEndEvent",
            "TrackExceptionEvent",
            "TrackStuckEvent",
+           "WebsocketOpenEvent",
            "WebsocketClosedEvent")
 
 
@@ -53,9 +55,11 @@ class LavapyEvent:
     event: str
         The event name which has been dispatched.
     """
-    def __init__(self, event: str, player: Player) -> None:
+    def __init__(self, event: str, player: Optional[Player]) -> None:
         self.event: str = event
-        self._payload: Dict[str, Any] = {"player": player}
+        self._payload: Dict[str, Any] = {}
+        if player is not None:
+            self._payload["player"]: Dict[str, Any] = player
 
     def __repr__(self) -> str:
         return f"<Lavapy LavapyEvent (Payload={self.payload})>"
@@ -178,6 +182,29 @@ class TrackStuckEvent(LavapyEvent):
 
     def __repr__(self) -> str:
         return f"<Lavapy TrackStuckEvent (Payload={self.payload})>"
+
+
+class WebsocketOpenEvent(LavapyEvent):
+    """
+    Fired when a websocket connection to a node is open. This can be listened to with:
+
+    .. code-block:: python
+
+        @bot.listen()
+        async def on_lavapy_websocket_open(node):
+            pass
+
+    Parameters
+    ----------
+    node: Node
+        A Lavapy Node object.
+    """
+    def __init__(self, node: Node) -> None:
+        super().__init__("websocket_open", None)
+        self._payload["node"]: Dict[str, Any] = node
+
+    def __repr__(self) -> str:
+        return f"<Lavapy WebsocketOpenEvent (Payload={self.payload})>"
 
 
 class WebsocketClosedEvent(LavapyEvent):

@@ -115,6 +115,12 @@ Events
     :members:
     :show-inheritance:
 
+Stats
+-----
+
+.. autoclass:: Stats
+    :members:
+
 Exceptions
 ----------
 
