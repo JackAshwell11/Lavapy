@@ -84,8 +84,8 @@ A simple and easy example to connect to a voice channel and play a Youtube song 
             player: lavapy.Player = ctx.voice_client
 
         # Get tracks based on the given search query
-        tracks = await player.getYoutubeTracks(" ".join(query))
-        await player.play(tracks[0])
+        track = await lavapy.YoutubeTrack.queryGet(" ".join(query), player.node)
+        await player.play(track)
 
 
     bot.loop.create_task(initialiseNodes())

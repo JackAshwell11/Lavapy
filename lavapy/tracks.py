@@ -116,7 +116,7 @@ class Playable:
             return cls(playlistInfo["name"], playlistInfo["selectedTrack"], data["tracks"])
 
     @classmethod
-    async def getIdentifier(cls, node: Optional[Node], identifier: str) -> Optional[Union[Track, Playlist]]:
+    async def identifierGet(cls, node: Optional[Node], identifier: str) -> Optional[Union[Track, Playlist]]:
         """|coro|
 
         Gets a :class:`YoutubeTrack` or :class:`YoutubePlaylist` from Youtube based on a given identifier. This will return only one result if the identifier leads to a track.
