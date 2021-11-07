@@ -105,7 +105,7 @@ class Player(VoiceProtocol):
 
     @property
     def filters(self) -> Dict[str, LavapyFilter]:
-        """Returns the currently applied :class:`LavapyFilter`s if there are any."""
+        """Returns all the currently applied :class:`LavapyFilter` objects if there are any."""
         return self._filters
 
     @property
@@ -230,7 +230,7 @@ class Player(VoiceProtocol):
     async def disconnect(self, *, force: bool = False) -> None:
         """|coro|
 
-        Disconnects the player from a :class:`discord.VoiceChannel.
+        Disconnects the player from a :class:`discord.VoiceChannel`.
 
         Parameters
         ----------
@@ -240,6 +240,7 @@ class Player(VoiceProtocol):
         await self.guild.change_voice_state(channel=None)
         self.node.players.remove(self)
         self._connected = False
+        self.cleanup()
 
         logger.info(f"Disconnected from voice channel: {self.channel.id}")
 

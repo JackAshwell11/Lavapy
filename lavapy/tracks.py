@@ -166,7 +166,7 @@ class Track(Playable):
 
     @property
     def id(self) -> str:
-        """Returns the base64 ID of the :class:`Track"""
+        """Returns the base64 ID of the :class:`Track`."""
         return self._id
 
     @property

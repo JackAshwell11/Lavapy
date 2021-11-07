@@ -98,7 +98,7 @@ class Node:
 
     @property
     def players(self) -> List[Player]:
-        """Returns a list containing all Lavapy :class:`Player`s which are connected to this node."""
+        """Returns a list of all Lavapy :class:`Player` objects which are connected to this node."""
         return self._players
 
     @property
