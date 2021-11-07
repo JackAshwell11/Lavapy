@@ -25,20 +25,20 @@ from __future__ import annotations
 
 import string
 import random
-from typing import Dict, Union, Optional
+from typing import Dict, Optional
 
 from discord import VoiceRegion
-from discord.ext.commands import Bot, AutoShardedBot
 
 from .exceptions import NoNodesConnected, InvalidIdentifier, NodeOccupied
 from .node import Node
+from .utils import ClientType
 
 __all__ = ("NodePool",)
 
 
 class NodePool:
     """
-    Lavapy NodePool class. This holds all the :class:'Node' objects created with :meth:`create_node()`.
+    Lavapy NodePool class. This holds all the :class:`Node` objects created with :meth:`create_node()`.
     """
     _nodes: Dict[str, Node] = {}
 
@@ -55,9 +55,9 @@ class NodePool:
         Parameters
         ----------
         identifier: Optional[str]
-            The unique identifier for the desired node.
+            The unique identifier for the desired :class:`Node`.
         region: Optional[:class:`discord.VoiceRegion`]
-            The discord.py VoiceRegion a specific node is assigned to.
+            The :class:`discord.VoiceRegion` a specific node is assigned to.
 
         Raises
         ------
@@ -69,7 +69,7 @@ class NodePool:
         Returns
         -------
         Node
-            A Lavapy Node object.
+            A Lavapy :class:`Node` object.
         """
         if not cls._nodes:
             raise NoNodesConnected("There are currently no nodes connected.")
@@ -89,15 +89,15 @@ class NodePool:
 
 
     @classmethod
-    async def createNode(cls, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> Node:
+    async def createNode(cls, client: ClientType, host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
         Creates a Lavapy :class:`Node` object and stores it for later use.
 
         Parameters
         ----------
-        bot: Union[:class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
-            The discord.py Bot or AutoShardedBot object.
+        client: Union[:class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
+            The :class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot` or :class:`discord.ext.commands.AutoShardedBot` to assign to this node.
         host: str
             The IP address of the Lavalink server.
         port: int
@@ -105,19 +105,19 @@ class NodePool:
         password: str
             The password to the Lavalink server.
         region: Optional[:class:`discord.VoiceRegion`]
-            The discord.py VoiceRegion to assign to this node.
+            The :class:`discord.VoiceRegion` to assign to this node.
         identifier: Optional[str]
             The unique identifier for this node. If not supplied, it will be generated for you.
 
         Raises
         ------
         NodeOccupied
-            If a node with the identifier already exists.
+            A node with the given identifier already exists.
 
         Returns
         -------
         Node:
-            A Lavapy Node object.
+            A Lavapy :class:`Node` object.
         """
         if identifier is None:
             identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
@@ -125,7 +125,7 @@ class NodePool:
         if identifier in cls._nodes:
             raise NodeOccupied(f"A node with the identifier <{identifier}> already exists.")
 
-        node = Node(bot, host, port, password, region, identifier)
+        node = Node(client, host, port, password, region, identifier)
         cls._nodes[identifier] = node
         await node.connect()
         return node

@@ -30,9 +30,9 @@ from typing import Dict, Any, Optional, Tuple, TYPE_CHECKING
 from aiohttp import WSMsgType
 from aiohttp.client_ws import ClientWebSocketResponse
 
-from .backoff import ExponentialBackoff
+from .utils import ExponentialBackoff
 from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketOpenEvent, WebsocketClosedEvent
-from .stats import Stats
+from .utils import Stats
 
 if TYPE_CHECKING:
     from .node import Node
@@ -47,22 +47,15 @@ class Websocket:
     """
     Lavapy Websocket object.
 
-    Attributes
+    Parameters
     ----------
     node: Node
         The Lavapy :class:`Node` object which manages this websocket.
-    open: bool
-        A bool stating whether the connection to Lavalink is open or not.
-    connected: bool
-        A bool stating if the websocket is connected to Lavalink or not.
-    connection: ClientWebSocketResponse
-        The actual websocket connection to the Lavalink server.
     """
     def __init__(self, node: Node) -> None:
-        self.node: Node = node
-        self.open: bool = False
-        self.connected: bool = False
-        self.connection: Optional[ClientWebSocketResponse] = None
+        self._node: Node = node
+        self._connected: bool = False
+        self._connection: Optional[ClientWebSocketResponse] = None
         self._listener: Optional[Task] = None
         asyncio.create_task(self.connect())
 
@@ -70,23 +63,43 @@ class Websocket:
         return f"<Lavapy Websocket (Domain={self.node.host}:{self.node.port}) (Connected={self.connected})>"
 
     @property
-    def isConnected(self) -> bool:
-        """Returns whether the websocket is connected or not."""
-        return self.connected and self.open
+    def node(self) -> Node:
+        """Returns the Lavapy :class:`Node` which manages this websocket."""
+        return self._node
 
-    def getPlayer(self, guildID) -> Player:
+    @property
+    def connected(self) -> bool:
+        """Returns whether the websocket is connected or not."""
+        return self._connected
+
+    @property
+    def connection(self) -> Optional[ClientWebSocketResponse]:
+        """Returns the websocket connection."""
+        return self._connection
+
+    @connection.setter
+    def connection(self, newConnection: ClientWebSocketResponse) -> None:
+        """Sets the websocket connection."""
+        self._connection = newConnection
+
+    @property
+    def listener(self) -> Optional[Task]:
+        """Returns the :class:`asyncio.Task` which pings the Lavalink server for updates."""
+        return self._listener
+
+    def getPlayer(self, guildID: int) -> Player:
         """
-        Returns a Lavapy :class:`Player` object based on a specific guildID.
+        Returns a Lavapy :class:`Player` object based on a specific :class:`discord.Guild` ID.
 
         Parameters
         ----------
         guildID: int
-            The guild ID to get a Lavapy Player object for.
+            The :class:`discord.Guild` ID to get a Lavapy :class:`Player` object for.
 
         Returns
         -------
         Player
-            A Lavapy Player object.
+            A Lavapy :class:`Player` object.
         """
         return [player for player in self.node.players if player.guild.id == guildID][0]
 
@@ -97,14 +110,13 @@ class Websocket:
         """
         headers = {
             "Authorization": self.node.password,
-            "User-Id": str(self.node.bot.user.id),
+            "User-Id": str(self.node.client.user.id),
             "Client-Name": "Lavapy"
         }
         logger.debug(f"Attempting connection with headers: {headers}")
         self.connection = await self.node.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers, heartbeat=60)
-        self._listener = self.node.bot.loop.create_task(self.listener())
-        self.connected = True
-        self.open = True
+        self._listener = self.node.client.loop.create_task(self.createListener())
+        self._connected = True
         event = WebsocketOpenEvent(self.node)
         logger.debug(f"Connection established with node: {self.node.__repr__()}")
         await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
@@ -116,10 +128,9 @@ class Websocket:
         """
         logger.debug(f"Closing connection for node: {self.node.__repr__()}")
         await self.connection.close()
-        self.connected = False
-        self.open = False
+        self._connected = False
 
-    async def listener(self) -> None:
+    async def createListener(self) -> None:
         """|coro|
 
         Continuously pings the Lavalink server for updates and events.
@@ -145,7 +156,7 @@ class Websocket:
         op = data.get("op")
         if op == "playerUpdate":
             player = self.getPlayer(int(data["guildId"]))
-            player.updateState(data)
+            player._updateState(data)
         elif op == "event":
             event = await self.getEventPayload(data["type"], data)
             await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
@@ -169,10 +180,10 @@ class Websocket:
         Tuple[str, Dict[str, Any]]
             A tuple containing the event name and the event payload.
         """
-        player = self.getPlayer(int(data["guildId"]))
         if name == "WebSocketClosedEvent":
-            return WebsocketClosedEvent(player, data)
+            return WebsocketClosedEvent(self.node, data)
 
+        player = self.getPlayer(int(data["guildId"]))
         track = await self.node.buildTrack(data["track"])
         if name == "TrackStartEvent":
             return TrackStartEvent(player, track)
@@ -186,13 +197,13 @@ class Websocket:
     async def dispatchEvent(self, event: str, payload: Dict[str, Any]) -> None:
         """|coro|
 
-        Dispatches events to discord.
+        Dispatches events to Discord.
 
         Parameters
         ----------
         event: str
             The event name.
         payload: Dict[str, Any]
-            The payload to dispatch with the event.
+            The payload to dispatch with the event. This is sent to `**kwargs`.
         """
-        self.node.bot.dispatch(event, **payload)
+        self.node.client.dispatch(event, **payload)

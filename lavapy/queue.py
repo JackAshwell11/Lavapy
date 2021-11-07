@@ -51,27 +51,27 @@ class Queue:
 
     @property
     def count(self) -> int:
-        """Returns the size of the queue."""
+        """Returns the size of the :class:`Queue`."""
         return len(self._queue)
 
     @property
     def isEmpty(self) -> bool:
-        """Returns whether or not the queue is empty."""
+        """Returns whether the :class:`Queue` is empty or not."""
         return not self._queue
 
     def get(self) -> Track:
         """
-        Gets the next :class:`Track` in the queue.
+        Gets the next :class:`Track` in the :class:`Queue`.
 
         Raises
         ------
         QueueEmpty
-            The current queue is empty.
+            The current :class:`Queue` is empty.
 
         Returns
         -------
         Track
-            The next Track in the queue.
+            The next :class:`Track` in the :class:`Queue`.
         """
         if self.isEmpty:
             raise QueueEmpty("Queue is empty")
@@ -79,27 +79,27 @@ class Queue:
 
     def add(self, track: Track) -> None:
         """
-        Adds a :class:`Track` to the queue.
+        Adds a :class:`Track` to the :class:`Queue`.
 
         Parameters
         ----------
         track: Track
-            The Track to add to the queue.
+            The :class:`Track` to add to the :class:`Queue`.
         """
         self._queue.append(track)
 
     def addPlaylist(self, playlist: YoutubePlaylist) -> None:
         """
-        Adds a :class:`YoutubePlaylist` to the queue.
+        Adds a :class:`YoutubePlaylist` to the :class:`Queue``.
 
         Parameters
         ----------
         playlist: YoutubePlaylist
-            The YoutubePlaylist to add to the queue.
+            The :class:`YoutubePlaylist` to add to the :class:`Queue`.
         """
         for track in playlist.tracks:
             self.add(track)
 
     def clear(self) -> None:
-        """Clears all :class`Track` objects in the queue."""
+        """Clears all :class`Track` objects in the :class:`Queue`."""
         self.queue.clear()

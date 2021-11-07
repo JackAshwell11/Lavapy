@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from typing import Dict, Any
+
 __all__ = ("LavapyException",
            "NoNodesConnected",
            "NodeOccupied",
@@ -39,8 +41,34 @@ class LavapyException(Exception):
     """Base Lavapy exception. Every exception inherits from this."""
 
 
+class LavalinkException(LavapyException):
+    """
+    Base exception raised when an error occurs communicating with Lavalink.
+
+    Parameters
+    ----------
+    msg: str
+        The error message.
+    data: Dict[str, Any]
+        A dict containing the response from Lavalink.
+    """
+    def __init__(self, msg: str, data: Dict[str, Any]) -> None:
+        super().__init__(msg)
+        if data.get("error"):
+            # User is running Lavalink <= 3.3
+            self._severity: str = data["error"]["severity"]
+        else:
+            # User is running Lavalink >= 3.4
+            self._severity: str = data["exception"]["severity"]
+
+    @property
+    def severity(self) -> str:
+        """Returns the severity of the error."""
+        return self._severity
+
+
 class NoNodesConnected(LavapyException):
-    """Exception raised when an operation is attempted with nodes and there none connected."""
+    """Exception raised when an operation is attempted with nodes and there are none connected."""
 
 
 class NodeOccupied(LavapyException):
@@ -55,11 +83,7 @@ class WebsocketAlreadyExists(LavapyException):
     """Exception raised when a new websocket connection is attempted but it already exists."""
 
 
-class LavalinkException(LavapyException):
-    """Exception raised when an error occurs communicating with Lavalink."""
-
-
-class LoadTrackError(LavapyException):
+class LoadTrackError(LavalinkException):
     """Exception raised when an error occurred when loading a track."""
 
 
@@ -67,7 +91,7 @@ class QueueEmpty(LavapyException):
     """Exception raised when attempting to get a track from an empty queue."""
 
 
-class BuildTrackError(LavapyException):
+class BuildTrackError(LavalinkException):
     """Exception raised when an error occurred when building a track."""
 
 

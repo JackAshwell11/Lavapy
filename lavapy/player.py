@@ -29,7 +29,6 @@ from datetime import datetime, timezone
 from typing import Union, Optional, Any, Dict, Type
 
 from discord import VoiceProtocol, VoiceChannel, Guild
-from discord.ext.commands import Bot, AutoShardedBot
 
 from .filters import LavapyFilter
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
@@ -37,6 +36,7 @@ from .node import Node
 from .pool import NodePool
 from .tracks import Track
 from .queue import Queue
+from .utils import ClientType
 
 __all__ = ("Player",)
 
@@ -60,37 +60,20 @@ class Player(VoiceProtocol):
 
     Parameters
     ----------
-    bot: Union[Bot, AutoShardedBot]
-        The discord.py Bot or AutoShardedBot.
+    client: Union[:class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
+        A :class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`.
     channel: VoiceChannel
-        A discord.py VoiceChannel for the player to connect to.
-
-    Attributes
-    ----------
-    bot: Union[Bot, AutoShardedBot]
-        The discord.py Bot or AutoShardedBot.
-    channel: VoiceChannel
-        A discord.py VoiceChannel for the player to connect to.
-    node: Optional[Node]
-        The Lavapy Node object which is used for communicating with Lavalink.
-    track: Optional[Track]
-        The currently playing track.
-    volume: int
-        The volume the player should play at.
-    filters: Dict[str, LavapyFilter]
-        The currently applied filters.
-    queue: Queue
-        A Queue object which can be used to line up tracks and retrieve them.
+        A :class:`discord.VoiceChannel` for the player to connect to.
     """
-    def __init__(self, bot: Union[Bot, AutoShardedBot], channel: VoiceChannel) -> None:
-        super().__init__(bot, channel)
-        self.bot: Union[Bot, AutoShardedBot] = bot
+    def __init__(self, client: ClientType, channel: VoiceChannel) -> None:
+        super().__init__(client, channel)
+        self.client: ClientType = client
         self.channel: VoiceChannel = channel
-        self.node: Optional[Node] = NodePool.getNode()
-        self.track: Optional[Track] = None
-        self.volume: int = 100
-        self.filters: Dict[str, LavapyFilter] = {}
-        self.queue: Queue = Queue()
+        self._node: Optional[Node] = NodePool.getNode()
+        self._track: Optional[Track] = None
+        self._volume: int = 100
+        self._filters: Dict[str, LavapyFilter] = {}
+        self._queue: Queue = Queue()
         self._voiceState: Dict[str, Any] = {}
         self._connected: bool = False
         self._paused: bool = False
@@ -106,8 +89,33 @@ class Player(VoiceProtocol):
         return self.channel.guild
 
     @property
+    def node(self) -> Optional[Node]:
+        """Returns the Lavapy :class:`Node` this player is connected to."""
+        return self._node
+
+    @property
+    def track(self) -> Optional[Track]:
+        """Returns the currently playing :class:`Track` if there is one."""
+        return self._track
+
+    @property
+    def volume(self) -> int:
+        """Returns the current volume."""
+        return self._volume
+
+    @property
+    def filters(self) -> Dict[str, LavapyFilter]:
+        """Returns the currently applied :class:`LavapyFilter`s if there are any."""
+        return self._filters
+
+    @property
+    def queue(self) -> Queue:
+        """Returns a :class:`Queue` object which can be used to line up and retrieve tracks."""
+        return self._queue
+
+    @property
     def position(self) -> float:
-        """The current position of the track in seconds. If nothing is playing, this returns 0."""
+        """Returns the current position of the :class:`Track` in seconds. If nothing is playing, this returns 0."""
         if not self.isPlaying:
             return 0
 
@@ -119,20 +127,20 @@ class Player(VoiceProtocol):
 
     @property
     def isConnected(self) -> bool:
-        """Returns whether the player is connected to a channel."""
+        """Returns whether the :class:`Player` is connected to a channel or not."""
         return self._connected
 
     @property
     def isPlaying(self) -> bool:
-        """Returns whether the player is currently playing a track."""
+        """Returns whether the :class:`Player` is currently playing a track or not."""
         return self.isConnected and self.track is not None
 
     @property
     def isPaused(self) -> bool:
-        """Returns whether the player is currently paused."""
+        """Returns whether the :class:`Player` is currently paused or not."""
         return self._paused
 
-    def updateState(self, state: Dict[str, Any]) -> None:
+    def _updateState(self, state: Dict[str, Any]) -> None:
         """
         Stores the last update time and the last position.
 
@@ -150,7 +158,7 @@ class Player(VoiceProtocol):
     async def on_voice_server_update(self, data: Dict[str, str]) -> None:
         """|coro|
 
-        Called when the bot connects to a voice channel.
+        Called when the client connects to a voice channel.
 
         Parameters
         ----------
@@ -158,17 +166,17 @@ class Player(VoiceProtocol):
             The raw info sent by Discord about the voice channel.
         """
         self._voiceState.update({"event": data})
-        await self.sendVoiceUpdate()
+        await self._sendVoiceUpdate()
 
     async def on_voice_state_update(self, data: Dict[str, Any]) -> None:
         """|coro|
 
-        Called when the bot's voice state changes.
+        Called when the client's voice state changes.
 
         Parameters
         ----------
         data: Dict[str, Any]
-            The raw info sent by Discord about the bot's voice state.
+            The raw info sent by Discord about the client's voice state.
         """
         self._voiceState.update({"sessionId": data["session_id"]})
 
@@ -178,14 +186,14 @@ class Player(VoiceProtocol):
             self._voiceState.clear()
             return
 
-        channel = self.bot.get_channel(channelID)
+        channel = self.client.get_channel(channelID)
         if channel != self.channel:
             logger.debug(f"Moved player to channel: {channel.id}")
             self.channel = channel
 
-        await self.sendVoiceUpdate()
+        await self._sendVoiceUpdate()
 
-    async def sendVoiceUpdate(self) -> None:
+    async def _sendVoiceUpdate(self) -> None:
         """|coro|
 
         Sends data collected from on_voice_server_update and on_voice_state_update to Lavalink.
@@ -204,7 +212,7 @@ class Player(VoiceProtocol):
     async def connect(self, timeout: float, reconnect: bool) -> None:
         """|coro|
 
-        Connects the player to a voice channel.
+        Connects the player to a :class:`discord.VoiceChannel`.
 
         Parameters
         ----------
@@ -222,7 +230,7 @@ class Player(VoiceProtocol):
     async def disconnect(self, *, force: bool = False) -> None:
         """|coro|
 
-        Disconnects the player from a voice channel.
+        Disconnects the player from a :class:`discord.VoiceChannel.
 
         Parameters
         ----------
@@ -238,22 +246,22 @@ class Player(VoiceProtocol):
     async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         """|coro|
 
-        Plays a given track.
+        Plays a given :class:`Track`.
 
         Parameters
         ----------
         track: Track
-            The track to play.
+            The :class:`Track` to play.
         startTime: int
             The position in milliseconds to start at. By default, this is the beginning.
         endTime: int
             The position in milliseconds to end at. By default, this is the end.
         volume: int
-            The volume at which the player should play the track at. By default, this is 100.
+            The volume at which the player should play the track at.
         replace: bool
-            A bool stating if the current track should be replaced or not. By default, this is True.
+            A bool stating if the current track should be replaced or not.
         pause: bool
-            A bool stating if the track should start paused. By default, this is False.
+            A bool stating if the track should start paused.
         """
         if self.isPlaying and not replace:
             return
@@ -268,8 +276,8 @@ class Player(VoiceProtocol):
         }
         if endTime > 0:
             newTrack["endTime"] = str(endTime)
-        self.track = track
-        self.volume = volume
+        self._track = track
+        self._volume = volume
         await self.node.send(newTrack)
 
         logger.debug(f"Started playing track: {self.track.title} in {self.channel.id}")
@@ -277,14 +285,14 @@ class Player(VoiceProtocol):
     async def stop(self) -> None:
         """|coro|
 
-        Stops the currently playing track.
+        Stops the currently playing :class:`Track`.
         """
         stop = {
             "op": "stop",
             "guildId": str(self.guild.id)
         }
         tempTrack = self.track
-        self.track = None
+        self._track = None
         await self.node.send(stop)
 
         logger.debug(f"Stopped playing track: {tempTrack.title} in {self.channel.id}")
@@ -292,14 +300,14 @@ class Player(VoiceProtocol):
     async def pause(self) -> None:
         """|coro|
 
-        Pauses the player if it was playing.
+        Pauses the :class:`Player` if it was playing.
         """
         await self._togglePause(True)
 
     async def resume(self) -> None:
         """|coro|
 
-        Resumes the player if it was paused.
+        Resumes the :class:`Player` if it was paused.
         """
         await self._togglePause(False)
 
@@ -352,14 +360,14 @@ class Player(VoiceProtocol):
     async def setVolume(self, volume: int) -> None:
         """|coro|
 
-        Changes the player's volume.
+        Changes the :class:`Player`'s volume.
 
         Parameters
         ----------
         volume: int
-            The new player volume.
+            The new volume.
         """
-        self.volume = max(min(volume, 1000), 0)
+        self._volume = max(min(volume, 1000), 0)
         volume = {
             "op": "volume",
             "guildId": str(self.guild.id),
@@ -377,7 +385,7 @@ class Player(VoiceProtocol):
         Parameters
         ----------
         channel: VoiceChannel
-            The voice channel to move to.
+            The :class:`VoiceChannel` to move to.
         """
         await self.guild.change_voice_state(channel=channel)
 
@@ -392,12 +400,12 @@ class Player(VoiceProtocol):
         Parameters
         ----------
         filter: LavapyFilter
-            The LavapyFilter to apply to the player.
+            The :class:`LavapyFilter` to apply to the player.
 
         Raises
         ------
         FilterAlreadyExists
-            The specific filter is already applied.
+            The specific :class:`LavapyFilter` is already applied.
         """
         name = filter.name
         if filter.name in self.filters.keys():
@@ -406,25 +414,25 @@ class Player(VoiceProtocol):
         self.filters[name] = filter
         await self._updateFilters()
 
-        logger.debug(f"Added filter: {name} with payload {filter._payload}")
+        logger.debug(f"Added filter: {name} with payload {filter.payload}")
 
     async def removeFilter(self, filter: Union[LavapyFilter, Type[LavapyFilter]]) -> None:
         """|coro|
 
-        Removes a specific filter based on its name.
+        Removes a :class:`LavapyFilter` based on its name.
 
         .. warning::
             This requires Lavalink 3.4 or greater.
 
         Parameters
         ----------
-        filter: Type[LavapyFilter]
-            The filter to remove. This must be a non-initialised class like `lavapy.Equalizer`.
+        filter: Union[LavapyFilter, Type[LavapyFilter]]
+            The :class`LavapyFilter` to remove. This can either be a non-initialised class like `lavapy.Equalizer` or an initialised one like `lavapy.Equalizer.flat()`.
 
         Raises
         ------
         FilterNotApplied
-            The specific filter is not applied.
+            The specific :class:`LavapyFilter` is not applied.
         """
         name = filter.name
         if name not in self.filters.keys():
@@ -446,7 +454,7 @@ class Player(VoiceProtocol):
             "volume": self.volume/100,
         }
         for key, value in self.filters.items():
-            filterPayload[value.name] = value._payload
+            filterPayload[value.name] = value.payload
         await self.node.send(filterPayload)
 
 # async def destroy(self) -> None:

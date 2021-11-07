@@ -44,25 +44,25 @@ logger = logging.getLogger(__name__)
 
 
 class Playable:
-    """The base class for all Lavapy playable objects."""
+    """The base class for all Lavapy Playable objects."""
 
     def __repr__(self) -> str:
         return f"<Lavapy Playable>"
 
     @staticmethod
-    def checkNode(node) -> Node:
+    def _checkNode(node) -> Node:
         """
         Checks if a :class:`Node` is valid. If not, it will pick a random one from the :class:`NodePool`.
 
         Parameters
         ----------
         node: Node
-            The Node to check.
+            The :class:`Node` to check.
 
         Returns
         -------
         Node
-            A valid Node object.
+            A valid :class:`Node` object.
         """
         if node is None:
             # Avoid a circular dependency with node.buildTrack()
@@ -71,17 +71,17 @@ class Playable:
         return node
 
     @staticmethod
-    async def getInfo(cls, node: Node, dest: str, params: Optional[Dict[str, str]]) -> Optional[Union[YoutubePlaylist, Track, List[Track]]]:
+    async def _getInfo(cls, node: Node, dest: str, params: Optional[Dict[str, str]]) -> Optional[Union[Track, Playlist, List[Track]]]:
         """|coro|
 
-        Actual function which gets and processes the track or playlist info received from Lavalink.
+        Gets and processes the track or playlist info received from Lavalink.
 
         Parameters
         ----------
         cls
             The class to return an instance of.
         node: Node
-            The Node to use for searching.
+            The :class:`Node` to use for searching.
         dest: str
             The request to send to Lavalink and get a response for.
         params: Optional[Dict[str, str]]
@@ -94,16 +94,16 @@ class Playable:
 
         Returns
         -------
-        Optional[Union[YoutubePlaylist, Track, List[Track]]]
-            A YoutubePlaylist object, an individual Track object or a list of Track objects.
+        Optional[Union[Track, Playlist, List[Track]]]
+            A Lavapy :class:`Track` object or a Lavapy :class:`Playlist` or a list of :class:`Track` objects.
         """
-        data, response = await node.getData(dest, params)
+        data, response = await node._getData(dest, params)
         if response.status != 200:
-            raise LavalinkException("Invalid response from lavalink.")
+            raise LavalinkException("Invalid response from lavalink.", data)
 
         loadType = data.get("loadType")
         if loadType == "LOAD_FAILED":
-            raise LoadTrackError(f"Track failed to load with data: {data}.")
+            raise LoadTrackError(f"Track failed to load with data: {data}.", data)
         elif loadType == "NO_MATCHES":
             return None
         elif loadType == "TRACK_LOADED":
@@ -116,7 +116,7 @@ class Playable:
             return cls(playlistInfo["name"], playlistInfo["selectedTrack"], data["tracks"])
 
     @classmethod
-    async def identifier(cls, node: Optional[Node], identifier: str) -> Optional[Playable]:
+    async def getIdentifier(cls, node: Optional[Node], identifier: str) -> Optional[Union[Track, Playlist]]:
         """|coro|
 
         Gets a :class:`YoutubeTrack` or :class:`YoutubePlaylist` from Youtube based on a given identifier. This will return only one result if the identifier leads to a track.
@@ -130,58 +130,87 @@ class Playable:
 
         Returns
         -------
-        Optional[Union[YoutubeTrack, YoutubePlaylist]]
-            A YoutubeTrack object or a YoutubePlaylist object.
+        Optional[Playable]
+            A Lavapy :class:`Playable` object.
         """
-        node = cls.checkNode(node)
+        node = cls._checkNode(node)
         logger.info(f"Getting {cls} with identifier: {identifier}")
-        return await cls.getInfo(cls, node, f"http://{node.host}:{node.port}/loadtracks", {"identifier": identifier})
+        return await cls._getInfo(cls, node, f"http://{node.host}:{node.port}/loadtracks", {"identifier": identifier})
 
 
 class Track(Playable):
     """
-    The base class for all Lavapy track objects.
+    The base class for all Lavapy Track objects.
 
-    Attributes
+    Parameters
     ----------
     id: str
-        The unique base64 track ID which can be used to rebuild a track.
+        The unique base64 ID which can be used to rebuild a :class:`Track`.
     info: Dict[str, Any]
         The raw track info.
-    identifier: str
-        The track's unique identifier.
-    isSeekable: bool
-        A bool stating if a track can be seeked or not.
-    author: str
-        The author of the track.
-    length: int
-        The duration of the track in seconds.
-    isStream: bool
-        A bool stating if a track is a stream or not.
-    type: str
-        The source site of the track.
-    title: str
-        The title of the track.
-    uri: str
-        The track's URI.
     """
     def __init__(self, id: str, info: Dict[str, Any]) -> None:
-        self.id: str = id
-        self.info: Dict[str, Any] = info
-        self.identifier: str = info["identifier"]
-        self.isSeekable: bool = info["isSeekable"]
-        self.author: str = info["author"]
-        self.length: int = info["length"]
-        self.isStream: bool = info["isStream"]
-        self.type: str = info["sourceName"]
-        self.title: str = info["title"]
-        self.uri: str = info["uri"]
+        self._id: str = id
+        self._info: Dict[str, Any] = info
+        self._identifier: str = info["identifier"]
+        self._isSeekable: bool = info["isSeekable"]
+        self._author: str = info["author"]
+        self._length: int = info["length"]
+        self._isStream: bool = info["isStream"]
+        self._type: str = info["sourceName"]
+        self._title: str = info["title"]
+        self._uri: str = info["uri"]
 
     def __repr__(self) -> str:
         return f"<Lavapy Track (Identifier={self.identifier}) (Type={self.type})>"
 
+    @property
+    def id(self) -> str:
+        """Returns the base64 ID of the :class:`Track"""
+        return self._id
+
+    @property
+    def identifier(self) -> str:
+        """Returns the :class:`Track`'s unique identifier."""
+        return self._identifier
+
+    @property
+    def isSeekable(self) -> bool:
+        """Returns whether a :class:`Track` is seekable or not"""
+        return self._isSeekable
+
+    @property
+    def author(self) -> str:
+        """Returns the author of the :class:`Track`."""
+        return self._author
+
+    @property
+    def length(self) -> int:
+        """Returns the duration of the :class:`Track` in seconds."""
+        return self._length
+
+    @property
+    def isStream(self) -> bool:
+        """Returns whether the :class:`Track` is a stream or not."""
+        return self._isStream
+
+    @property
+    def type(self) -> str:
+        """Returns the source site of the :class:`Track`."""
+        return self._type
+
+    @property
+    def title(self) -> str:
+        """Returns the title of the :class:`Track`."""
+        return self._title
+
+    @property
+    def uri(self) -> str:
+        """Returns the URI of the :class:`Track`."""
+        return self._uri
+
     @classmethod
-    async def query(cls, query: str, node: Optional[Node] = None, returnFirst: bool = True) -> Optional[Union[Track, List[Track]]]:
+    async def queryGet(cls, query: str, node: Optional[Node] = None, returnFirst: bool = True) -> Optional[Union[Track, List[Track]]]:
         """
         Gets an :class:`Track` based on a given query. This will return multiple search results.
 
@@ -199,9 +228,9 @@ class Track(Playable):
         Optional[Union[Track, List[Track]]]
             An individual Track object or a list of Track objects.
         """
-        node = cls.checkNode(node)
+        node = cls._checkNode(node)
         logger.info(f"Getting {cls} with query: {query}")
-        tracks = await cls.getInfo(cls, node, f"http://{node.host}:{node.port}/loadtracks?identifier={cls._searchType}{quote(query)}", None)
+        tracks: Optional[Track, List[Track]] = await cls._getInfo(cls, node, f"http://{node.host}:{node.port}/loadtracks?identifier={cls._searchType}{quote(query)}", None)
         if tracks is not None:
             if returnFirst:
                 return tracks[0]
@@ -210,24 +239,19 @@ class Track(Playable):
 
 
 class Playlist(Playable):
-    """Base class for all Lavapy playlists. This is just here as a placeholder for future upgrades."""
+    """The base class for all Lavapy Playlists. This is just here as a placeholder for future upgrades."""
 
     def __repr__(self):
         return f"<Lavapy Playlist>"
 
 
 class SoundcloudTrack(Track):
-    """A track created using a search to Soundcloud."""
+    """A track created using a search to Soundcloud. Currently it is not advised to get SoundcloudTracks via an identifier."""
 
     _searchType: str = "scsearch:"
 
     def __repr__(self):
         return f"<Lavapy SoundcloudTrack (Identifier={self.identifier})>"
-
-    @classmethod
-    async def identifier(cls, node: Optional[Node], identifier: str) -> Optional[Playable]:
-        """DO NOT USE THIS METHOD SINCE SOUNDCLOUD IDENTIFIERS ARE BROKEN."""
-        raise NotImplementedError("Currently Soundcloud identifiers can't be gotten, so this function is useless.")
 
 
 class YoutubeTrack(Track):
@@ -252,19 +276,34 @@ class YoutubePlaylist(Playlist):
     """
     A Lavapy YoutubePlaylist object.
 
-    Attributes
+    Parameters
     ----------
     name: str
         The playlist's name.
     selectedTrack: int
-        The currently selected track to play.
+        The currently selected :class:`Track`.
     trackArr: List[Dict[str, Any]]
         A list of dicts containing raw track info.
     """
     def __init__(self, name: str, selectedTrack: int, trackArr: List[Dict[str, Any]]):
-        self.name: str = name
-        self.selectedTrack: int = selectedTrack
-        self.tracks: List[Track] = [YoutubeTrack(track["track"], track["info"]) for track in trackArr]
+        self._name: str = name
+        self._selectedTrack: int = selectedTrack
+        self._tracks: List[Track] = [YoutubeTrack(track["track"], track["info"]) for track in trackArr]
 
     def __repr__(self):
         return f"<Lavapy YoutubePlaylist (Name={self.name}) (Track count={len(self.tracks)})>"
+
+    @property
+    def name(self) -> str:
+        """Returns the name of the playlist."""
+        return self._name
+
+    @property
+    def selectedTrack(self) -> int:
+        """Returns the currently selected :class:`Track`."""
+        return self._selectedTrack
+
+    @property
+    def tracks(self) -> List[Track]:
+        """Returns a list of :class:`Track` objects."""
+        return self._tracks

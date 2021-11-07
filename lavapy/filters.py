@@ -49,12 +49,17 @@ class LavapyFilter:
     def __repr__(self) -> str:
         return f"<Lavapy Filter (Payload={self._payload})>"
 
+    @property
+    def payload(self) -> Any:
+        """Returns the payload to be sent to Lavalink."""
+        return self._payload
+
 
 class Equalizer(LavapyFilter):
     """
     A class representing a usable Equalizer.
 
-    Attributes
+    Parameters
     ---------
     levels: List[Tuple[int, float]]
         A list of tuple pairs containing a band int and gain float.
@@ -65,17 +70,27 @@ class Equalizer(LavapyFilter):
 
     def __init__(self, levels: List[Tuple[int, float]], name: str) -> None:
         super().__init__()
-        self.levels: List[Tuple[int, float]] = levels
-        self.name: str = name
+        self._levels: List[Tuple[int, float]] = levels
+        self._equalizerName: str = name
         self._payload: List[Dict[str, Union[int, float]]] = self._setup(levels)
 
     def __repr__(self) -> str:
         return f"<Lavapy Equalizer (Name={self.name}) (Levels={self.levels})>"
 
+    @property
+    def levels(self) -> List[Tuple[int, float]]:
+        """Returns a list of tuple pairs containing a band int and gain float."""
+        return self._levels
+
+    @property
+    def equalizerName(self) -> str:
+        """Returns the name of this :class:`Equalizer`."""
+        return self._equalizerName
+
     @staticmethod
     def _setup(levels: List[Tuple[int, float]]) -> List[Dict[str, Union[int, float]]]:
         """
-        A function to convert self.levels into a dict for sending to Lavalink.
+        A function to convert self._levels into a dict for sending to Lavalink.
 
         Parameters
         ----------
@@ -92,14 +107,14 @@ class Equalizer(LavapyFilter):
     @classmethod
     def build(cls, levels: List[Tuple[int, float]], name: str = "CustomEqualizer") -> Equalizer:
         """
-        Build a custom Equalizer class with the given levels.
+        Build a custom :class:`Equalizer` class with the given levels.
 
         Parameters
         ----------
         levels: List[Tuple[int, float]]
             A custom list of tuple pairs containing a band int and gain float. You will have to construct this yourself.
         name: str
-            An optional string to name this Equalizer. If this is not supplied, it will be set to 'CustomEqualizer'.
+            An optional string to name this :class:`Equalizer`. If this is not supplied, it will be set to 'CustomEqualizer'.
 
         Returns
         -------
@@ -111,14 +126,12 @@ class Equalizer(LavapyFilter):
     @classmethod
     def flat(cls) -> Equalizer:
         """
-        A Flat Equalizer. This will not provide a cut or boost to any frequency.
-
-        This is the default EQ for :class:`Player`.
+        A Flat :class:`Equalizer`. This will not provide a cut or boost to any frequency.
 
         Returns
         -------
         Equalizer
-            A Flat Equalizer object.
+            A Flat :class:`Equalizer` object.
         """
         levels = [(0, 0.0), (1, 0.0), (2, 0.0), (3, 0.0), (4, 0.0),
                   (5, 0.0), (6, 0.0), (7, 0.0), (8, 0.0), (9, 0.0),
@@ -133,13 +146,13 @@ class Karaoke(LavapyFilter):
     Attributes
     ----------
     level: float
-        to do. This defaults to 1.0.
+        to do.
     monoLevel: float
-        to do. This defaults to 1.0.
+        to do.
     filterBand: float
-        to do. This defaults to 220.0.
+        to do.
     filterWidth: float
-        to do. This defaults to 100.0.
+        to do.
     """
     name = "karaoke"
 
@@ -161,11 +174,11 @@ class Timescale(LavapyFilter):
     Attributes
     ----------
     speed: float
-        to do. This defaults to 1.0.
+        to do.
     pitch: float
-        to do. This defaults to 1.0.
+        to do.
     rate: float
-        to do.. This defaults to 1.0.
+        to do.
     """
     name = "timescale"
 
@@ -188,9 +201,9 @@ class Tremolo(LavapyFilter):
     Attributes
     ----------
     frequency: float
-        to do. This must be bigger than 0. This defaults to 2.0.
+        to do. This must be bigger than 0.
     depth: float
-        to do. This must be between 0 and 1. This defaults to 0.5.
+        to do. This must be between 0 and 1.
 
     Raises
     ------
@@ -219,9 +232,9 @@ class Vibrato(LavapyFilter):
     Attributes
     ----------
     frequency: float
-        to do. This must be between 0 and 14. This defaults to 2.0.
+        to do. This must be between 0 and 14.
     depth: float
-        to do. This must be between 0 and 1. This defaults to 0.5.
+        to do. This must be between 0 and 1.
 
     Raises
     ------
@@ -245,14 +258,14 @@ class Vibrato(LavapyFilter):
 
 class Rotation(LavapyFilter):
     """
-    Rotates the sound around the stereo channels/user headphones aka Audio Panning
+    Rotates the sound around the stereo channels/user headphones aka Audio Panning.
 
     Here is an `Example <https://en.wikipedia.org/wiki/File:Fuse_Electronics_Tremolo_MK-III_Quick_Demo.ogv>`_ (without the reverb).
 
     Parameters
     ----------
     rotationHz: float
-        The frequency of the audio rotating around the listener in hertz (0.2 is similar to the example above). This defaults to 0.0.
+        The frequency of the audio rotating around the listener in hertz (0.2 is similar to the example above).
     """
     name = "rotation"
 
@@ -271,21 +284,21 @@ class Distortion(LavapyFilter):
     Attributes
     ----------
     sinOffset: float
-        to do. This defaults to 0.0.
+        to do.
     sinScale: float
-        to do. This defaults to 1.0.
+        to do.
     cosOffset: float
-        to do. This defaults to 0.0.
+        to do.
     cosScale: float
-        to do. This defaults to 1.0.
+        to do.
     tanOffset: float
-        to do. This defaults to 0.0.
+        to do.
     tanScale: float
-        to do. This defaults to 1.0.
+        to do.
     offset: float
-        to do. This defaults to 0.0.
+        to do.
     scale: float
-        to do. This defaults to 1.0.
+        to do.
     """
     name = "distortion"
 
@@ -311,13 +324,13 @@ class ChannelMix(LavapyFilter):
     Attributes
     ----------
     leftToLeft: float
-        to do. This must be between 0 and 1. This defaults to 1.0.
+        to do. This must be between 0 and 1.
     leftToRight: float
-        to do. This must be between 0 and 1. This defaults to 0.0.
+        to do. This must be between 0 and 1.
     rightToLeft: float
-        to do. This must be between 0 and 1. This defaults to 0.0.
+        to do. This must be between 0 and 1.
     rightToRight: float
-        to do. This must be between 0 and 1. This defaults to 1.0.
+        to do. This must be between 0 and 1.
     """
     name = "channelMix"
 
@@ -347,7 +360,7 @@ class LowPass(LavapyFilter):
     Attributes
     ----------
     smoothing: float
-        to do. This defaults to 20.0.
+        to do.
     """
     name = "lowPass"
 

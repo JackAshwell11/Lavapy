@@ -47,22 +47,24 @@ class LavapyEvent:
 
     Parameters
     ----------
-    player: Player
-        A Lavapy Player object.
-
-    Attributes
-    ----------
     event: str
-        The event name which has been dispatched.
+        The event name.
+    player: Optional[Player]
+        A Lavapy :class:`Player` object.
     """
     def __init__(self, event: str, player: Optional[Player]) -> None:
-        self.event: str = event
+        self._event: str = event
         self._payload: Dict[str, Any] = {}
         if player is not None:
             self._payload["player"]: Dict[str, Any] = player
 
     def __repr__(self) -> str:
         return f"<Lavapy LavapyEvent (Payload={self.payload})>"
+
+    @property
+    def event(self) -> str:
+        """Returns the event name."""
+        return self._event
 
     @property
     def payload(self) -> Dict[str, Any]:
@@ -72,7 +74,7 @@ class LavapyEvent:
 
 class TrackStartEvent(LavapyEvent):
     """
-    Fired when a track starts playing. This can be listened to with:
+    Fired when a :class:`Track` starts playing. This can be listened to with:
 
     .. code-block:: python
 
@@ -83,9 +85,9 @@ class TrackStartEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy :class:`Player` object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy :class:`Track` object.
     """
     def __init__(self, player: Player, track: Track) -> None:
         super().__init__("track_start", player)
@@ -97,7 +99,7 @@ class TrackStartEvent(LavapyEvent):
 
 class TrackEndEvent(LavapyEvent):
     """
-    Fired when a track stops playing. This can be listened to with:
+    Fired when a :class:`Track` stops playing. This can be listened to with:
 
     .. code-block:: python
 
@@ -108,9 +110,9 @@ class TrackEndEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy :class:`Player` object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy :class:`Track` object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -125,7 +127,7 @@ class TrackEndEvent(LavapyEvent):
 
 class TrackExceptionEvent(LavapyEvent):
     """
-    Fired when a track error has occurred in Lavalink. This can be listened to with:
+    Fired when a :class:`Track` error has occurred in Lavalink. This can be listened to with:
 
     .. code-block:: python
 
@@ -136,9 +138,9 @@ class TrackExceptionEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy :class:`Player` object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy :class:`Track` object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -158,7 +160,7 @@ class TrackExceptionEvent(LavapyEvent):
 
 class TrackStuckEvent(LavapyEvent):
     """
-    Fired when a track is stuck and cannot be played. This can be listened to with:
+    Fired when a :class:`Track` is stuck and cannot be played. This can be listened to with:
 
     .. code-block:: python
 
@@ -169,9 +171,9 @@ class TrackStuckEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy :class:`Player` object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy :class:`Track` object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -186,7 +188,7 @@ class TrackStuckEvent(LavapyEvent):
 
 class WebsocketOpenEvent(LavapyEvent):
     """
-    Fired when a websocket connection to a node is open. This can be listened to with:
+    Fired when a websocket connection to a :class:`Node` is open. This can be listened to with:
 
     .. code-block:: python
 
@@ -197,7 +199,7 @@ class WebsocketOpenEvent(LavapyEvent):
     Parameters
     ----------
     node: Node
-        A Lavapy Node object.
+        A Lavapy :class:`Node` object.
     """
     def __init__(self, node: Node) -> None:
         super().__init__("websocket_open", None)
@@ -209,23 +211,24 @@ class WebsocketOpenEvent(LavapyEvent):
 
 class WebsocketClosedEvent(LavapyEvent):
     """
-    Fired when a websocket connection to a node is closed. This can be listened to with:
+    Fired when a websocket connection to a :class:`Node` is closed. This can be listened to with:
 
     .. code-block:: python
 
         @bot.listen()
-        async def on_lavapy_websocket_closed(player, reason, code, byRemote):
+        async def on_lavapy_websocket_closed(node, reason, code, byRemote):
             pass
 
     Parameters
     ----------
-    player: Player
-        A Lavapy Player object.
+    node: Node
+        A Lavapy :class:`Node` object.
     data: Dict[str, Any]
         The raw event data.
     """
-    def __init__(self, player: Player, data: Dict[str, Any]) -> None:
-        super().__init__("websocket_closed", player)
+    def __init__(self, node: Node, data: Dict[str, Any]) -> None:
+        super().__init__("websocket_closed", None)
+        self._payload["node"]: Dict[str, Any] = node
         self._payload["reason"]: Dict[str, Any] = data["reason"]
         self._payload["code"]: Dict[str, Any] = data["code"]
         self._payload["byRemote"]: Dict[str, Any] = data["byRemote"]

@@ -32,6 +32,9 @@ Playables
 .. autoclass:: Track
     :members:
     :show-inheritance:
+.. autoclass:: Playlist
+    :members:
+    :show-inheritance:
 .. autoclass:: SoundcloudTrack
     :members:
     :show-inheritance:
@@ -41,9 +44,6 @@ Playables
 .. autoclass:: YoutubeMusicTrack
     :members:
     :show-inheritance:
-.. autoclass:: Playlist
-    :members:
-    :show-inheritance:
 .. autoclass:: YoutubePlaylist
     :members:
     :show-inheritance:
@@ -51,8 +51,6 @@ Playables
 Filters
 ---------
 
-.. autoclass:: FilterName
-    :members:
 .. autoclass:: LavapyFilter
     :members:
 .. autoclass:: Equalizer
@@ -108,6 +106,8 @@ Exceptions
 ----------
 
 .. autoexception:: LavapyException
+.. autoexception:: LavalinkException
+    :show-inheritance:
 .. autoexception:: NoNodesConnected
     :show-inheritance:
 .. autoexception:: NodeOccupied
@@ -115,8 +115,6 @@ Exceptions
 .. autoexception:: InvalidIdentifier
     :show-inheritance:
 .. autoexception:: WebsocketAlreadyExists
-    :show-inheritance:
-.. autoexception:: LavalinkException
     :show-inheritance:
 .. autoexception:: LoadTrackError
     :show-inheritance:

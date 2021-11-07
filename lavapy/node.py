@@ -24,20 +24,20 @@ SOFTWARE.
 from __future__ import annotations
 
 import logging
-from typing import Union, Optional, List, Dict, Any, Tuple, TYPE_CHECKING
+from typing import Optional, List, Dict, Any, Tuple, TYPE_CHECKING
 import aiohttp
 from aiohttp import ClientResponse
 
 from discord.enums import VoiceRegion
-from discord.ext.commands import Bot, AutoShardedBot
 
 from .exceptions import WebsocketAlreadyExists, BuildTrackError
 from .websocket import Websocket
 from .tracks import Track
+from .utils import ClientType
 
 if TYPE_CHECKING:
     from .player import Player
-    from .stats import Stats
+    from .utils import Stats
 
 __all__ = ("Node",)
 
@@ -50,42 +50,71 @@ class Node:
 
     .. warning::
         This class should not be created manually. Please use :meth:`NodePool.create_node()` instead.
-
-    Attributes
-    ----------
-    bot: Union[:class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
-        The discord.py Bot or AutoShardedBot object.
-    host: str
-        The IP address of the Lavalink server.
-    port: int
-        The port of the Lavalink server.
-    password: str
-        The password to the Lavalink server.
-    region: Optional[:class:`discord.VoiceRegion`]
-        The discord.py VoiceRegion to assign to this node.
-    identifier: str
-        The unique identifier for this node.
-    session: aiohttp.ClientSession
-        The aiohttp session used for sending and getting data.
-    players: List[Player]
-        A list containing all Lavapy Players which are connected to this node.
-    stats: Optional[Stats]
-        Useful information sent by Lavalink about this node.
     """
-    def __init__(self, bot: Union[Bot, AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
-        self.bot: Union[Bot, AutoShardedBot] = bot
-        self.host: str = host
-        self.port: int = port
-        self.password: str = password
-        self.region: Optional[VoiceRegion] = region
-        self.identifier: str = identifier
-        self.session: aiohttp.ClientSession = aiohttp.ClientSession()
-        self.players: List[Player] = []
-        self.stats: Optional[Stats] = None
+    def __init__(self, client: ClientType, host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
+        self._client: ClientType = client
+        self._host: str = host
+        self._port: int = port
+        self._password: str = password
+        self._region: Optional[VoiceRegion] = region
+        self._identifier: str = identifier
+        self._players: List[Player] = []
+        self._stats: Optional[Stats] = None
+        self._session: aiohttp.ClientSession = aiohttp.ClientSession()
         self._websocket: Optional[Websocket] = None
 
     def __repr__(self) -> str:
         return f"<Lavapy Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region}) (Players={len(self.players)})>"
+
+    @property
+    def client(self) -> ClientType:
+        """Returns the :class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot` or :class:`discord.ext.commands.AutoShardedBot` which is assigned to this node."""
+        return self._client
+
+    @property
+    def host(self) -> str:
+        """Returns the IP address of the Lavalink server."""
+        return self._host
+
+    @property
+    def port(self) -> int:
+        """Returns the port of the Lavalink server."""
+        return self._port
+
+    @property
+    def password(self) -> str:
+        """Returns the password to the Lavalink server."""
+        return self._password
+
+    @property
+    def region(self) -> VoiceRegion:
+        """Returns the :class:`discord.VoiceRegion` assigned to this node."""
+        return self._region
+
+    @property
+    def identifier(self) -> str:
+        """Returns the unique identifier for this node."""
+        return self._identifier
+
+    @property
+    def players(self) -> List[Player]:
+        """Returns a list containing all Lavapy :class:`Player`s which are connected to this node."""
+        return self._players
+
+    @property
+    def stats(self) -> Optional[Stats]:
+        """Returns useful information sent by Lavalink about this node."""
+        return self._stats
+
+    @stats.setter
+    def stats(self, newStats: Stats) -> None:
+        """Sets the value of :class:`Stats`."""
+        self._stats = newStats
+
+    @property
+    def session(self) -> aiohttp.ClientSession:
+        """Returns the :class:`aiohttp.ClientSession` used for sending and getting data."""
+        return self._session
 
     async def connect(self) -> None:
         """|coro|
@@ -103,7 +132,23 @@ class Node:
         else:
             raise WebsocketAlreadyExists("Websocket already initialised.")
 
-    async def getData(self, dest: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
+    async def disconnect(self, *, force: bool = False) -> None:
+        """|coro|
+
+        Disconnects this :class:`Node` and removes it from the :class:`NodePool`.
+
+        Parameters
+        ----------
+        force: bool
+            Whether to force the disconnection. This is currently not used.
+        """
+        for player in self.players:
+            await player.disconnect(force=force)
+
+        self._websocket.listener.cancel()
+        await self._websocket.connection.close()
+
+    async def _getData(self, dest: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
         """|coro|
 
         Make a request to Lavalink with a given query and return a response.
@@ -117,8 +162,8 @@ class Node:
 
         Returns
         -------
-        Tuple[Dict[str, Any], ClientResponse]
-            A tuple containing the response from Lavalink as well as a ClientResponse object to determine the status of the request.
+        Tuple[Dict[str, Any], :class:aiohttp.ClientResponse`]
+            A tuple containing the response from Lavalink as well as a :class:aiohttp.ClientResponse` object to determine the status of the request.
         """
         logger.debug(f"Getting data with destination: {dest}")
         headers = {
@@ -144,27 +189,27 @@ class Node:
     async def buildTrack(self, id: str) -> Track:
         """|coro|
 
-        Builds a track from a base64 :class:`Track` ID.
+        Builds a :class:`Track` from a base64 ID.
 
         Parameters
         ----------
         id: str
-            The base 64 track ID.
+            The base64 ID.
 
         Raises
         ------
         BuildTrackError
-            An error occurred while building the track.
+            An error occurred while building the :class:`Track`.
 
         Returns
         -------
         Track
-            A Lavapy Track object.
+            A Lavapy :class:`Track` object.
         """
         payload = {
             "track": id
         }
-        track, response = await self.getData(f"http://{self.host}:{self.port}/decodetrack?track=", payload)
+        track, response = await self._getData(f"http://{self.host}:{self.port}/decodetrack?track=", payload)
         if response.status != 200:
-            raise BuildTrackError("A error occurred while building the track.")
+            raise BuildTrackError("A error occurred while building the track.", track)
         return Track(id, track)
