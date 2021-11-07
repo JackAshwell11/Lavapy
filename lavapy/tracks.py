@@ -246,7 +246,7 @@ class Playlist(Playable):
 
 
 class SoundcloudTrack(Track):
-    """A track created using a search to Soundcloud. Currently it is not advised to get SoundcloudTracks via an identifier."""
+    """A track created using a search to Soundcloud. Currently it is not advised to get Soundcloud tracks via an identifier."""
 
     _searchType: str = "scsearch:"
 
