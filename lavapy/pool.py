@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import string
 import random
-from typing import Dict, Optional
+from typing import Optional, Union, Dict
 
 from discord import VoiceRegion
 

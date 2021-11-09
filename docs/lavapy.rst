@@ -27,17 +27,17 @@ Player
 
 Playables
 ---------
-.. autoclass:: Playable
+
+.. autoclass:: Searchable
+    :members:
+.. autoclass:: Identifiable
     :members:
 .. autoclass:: Track
     :members:
-    :show-inheritance:
-.. autoclass:: Playlist
+.. autoclass:: MultiTrack
     :members:
-    :show-inheritance:
-.. autoclass:: SoundcloudTrack
+.. autoclass:: PartialResource
     :members:
-    :show-inheritance:
 .. autoclass:: YoutubeTrack
     :members:
     :show-inheritance:

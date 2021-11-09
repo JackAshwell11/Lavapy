@@ -24,15 +24,15 @@ SOFTWARE.
 from __future__ import annotations
 
 import logging
-from typing import Optional, List, Dict, Any, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union, Tuple, List, Dict, Type, Any
 import aiohttp
 from aiohttp import ClientResponse
 
 from discord.enums import VoiceRegion
 
-from .exceptions import WebsocketAlreadyExists, BuildTrackError
+from .exceptions import WebsocketAlreadyExists, BuildTrackError, LavalinkException, LoadTrackError
 from .websocket import Websocket
-from .tracks import Track
+from .tracks import Track, MultiTrack
 from .utils import ClientType
 
 if TYPE_CHECKING:
@@ -148,28 +148,28 @@ class Node:
         self._websocket.listener.cancel()
         await self._websocket.connection.close()
 
-    async def _getData(self, dest: str, params: Optional[Dict[str, str]]) -> Tuple[Dict[str, Any], ClientResponse]:
+    async def _getData(self, endpoint: str, params: Dict[str, str]) -> Tuple[Dict[str, Any], ClientResponse]:
         """|coro|
 
-        Make a request to Lavalink with a given query and return a response.
+        Make a request to Lavalink with a given endpoint and return a response.
 
         Parameters
         ----------
-        dest: str
-            The request to send to Lavalink and get a response for.
+        endpoint: str
+            The endpoint to query from Lavalink.
         params: Dict[str, str]
             A dict containing additional info to send to Lavalink.
 
         Returns
         -------
-        Tuple[Dict[str, Any], :class:aiohttp.ClientResponse`]
+        Tuple[Dict[str, Any], :class:`aiohttp.ClientResponse`]
             A tuple containing the response from Lavalink as well as a :class:aiohttp.ClientResponse` object to determine the status of the request.
         """
-        logger.debug(f"Getting data with destination: {dest}")
+        logger.debug(f"Getting endpoint {endpoint} with data {params}")
         headers = {
             "Authorization": self.password
         }
-        async with await self.session.get(dest, headers=headers, params=params) as req:
+        async with await self.session.get(f"http://{self.host}:{self.port}/{endpoint}", headers=headers, params=params) as req:
             data = await req.json()
         return data, req
 
@@ -206,10 +206,42 @@ class Node:
         Track
             A Lavapy :class:`Track` object.
         """
-        payload = {
-            "track": id
-        }
-        track, response = await self._getData(f"http://{self.host}:{self.port}/decodetrack?track=", payload)
+        track, response = await self._getData("decodetrack", {"track": id})
         if response.status != 200:
             raise BuildTrackError("A error occurred while building the track.", track)
         return Track(id, track)
+
+    async def getTracks(self, cls: Union[Type[Track], Type[MultiTrack]], query: str) -> Optional[Union[Track, List[Track], MultiTrack]]:
+        """|coro|
+
+        Gets data about a :class:`Track` from Lavalink.
+
+        Parameters
+        ----------
+        cls: Union[Track, MultiTrack]
+            The Lavapy resource to create an instance of.
+        query: str
+            The query to search for via Lavalink.
+
+        Returns
+        -------
+        Optional[Union[Track, List[Track]]]
+            A Lavapy resource which can be used to play music.
+        """
+        data, response = await self._getData("loadtracks", {"identifier": query})
+        if response.status != 200:
+            raise LavalinkException("Invalid response from lavalink.")
+
+        loadType = data.get("loadType")
+        if loadType == "LOAD_FAILED":
+            raise LoadTrackError(f"Track failed to load with data: {data}.")
+        elif loadType == "NO_MATCHES":
+            return None
+        elif loadType == "TRACK_LOADED":
+            trackInfo = data["tracks"][0]
+            return cls(trackInfo["track"], trackInfo["info"])
+        elif loadType == "SEARCH_RESULT":
+            return [cls(element["track"], element["info"]) for element in data["tracks"]]
+        elif loadType == "PLAYLIST_LOADED":
+            playlistInfo = data["playlistInfo"]
+            return cls(playlistInfo["name"], playlistInfo["selectedTrack"], [cls._trackCls(track["track"], track["info"]) for track in data["tracks"]])

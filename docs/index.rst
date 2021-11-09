@@ -23,7 +23,7 @@ Documentation
 -------------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: API Reference:
 
     lavapy

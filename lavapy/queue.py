@@ -23,12 +23,13 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Union, List
 
 from .exceptions import QueueEmpty
+from .tracks import MultiTrack
 
 if TYPE_CHECKING:
-    from .tracks import Track, YoutubePlaylist
+    from .tracks import Track
 
 
 __all__ = ("Queue",)
@@ -88,16 +89,18 @@ class Queue:
         """
         self._queue.append(track)
 
-    def addPlaylist(self, playlist: YoutubePlaylist) -> None:
+    def addIterable(self, iterable: Union[MultiTrack, List[Track]]) -> None:
         """
-        Adds a :class:`YoutubePlaylist` to the :class:`Queue``.
+        Adds an iterable to the :class:`Queue`.
 
         Parameters
         ----------
-        playlist: YoutubePlaylist
-            The :class:`YoutubePlaylist` to add to the :class:`Queue`.
+        iterable: Union[MultiTrack, List[Track]]
+            The iterable to add to the queue.
         """
-        for track in playlist.tracks:
+        if isinstance(iterable, MultiTrack):
+            iterable = iterable.tracks
+        for track in iterable:
             self.add(track)
 
     def clear(self) -> None:

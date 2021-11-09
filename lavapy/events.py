@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Dict, Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Dict, Any
 
 if TYPE_CHECKING:
     from .tracks import Track
@@ -50,7 +50,7 @@ class LavapyEvent:
     event: str
         The event name.
     player: Optional[Player]
-        A Lavapy :class:`Player` object.
+        A Lavapy Player object.
     """
     def __init__(self, event: str, player: Optional[Player]) -> None:
         self._event: str = event
@@ -68,7 +68,7 @@ class LavapyEvent:
 
     @property
     def payload(self) -> Dict[str, Any]:
-        """Returns a dict containing the payload sent to :meth:`discord.ext.commands.Bot.dispatch()`. This must be sent to `**kwargs`."""
+        """Returns a dict containing the payload sent to :meth:`discord.ext.commands.Bot.dispatch()`. This must be parsed to `**kwargs`."""
         return self._payload
 
 
@@ -80,14 +80,14 @@ class TrackStartEvent(LavapyEvent):
 
         @bot.listen()
         async def on_lavapy_track_start(player, track):
-            pass
+            ...
 
     Parameters
     ----------
     player: Player
-        A Lavapy :class:`Player` object.
+        A Lavapy Player object.
     track: Track
-        A Lavapy :class:`Track` object.
+        A Lavapy Track object.
     """
     def __init__(self, player: Player, track: Track) -> None:
         super().__init__("track_start", player)
@@ -105,14 +105,14 @@ class TrackEndEvent(LavapyEvent):
 
         @bot.listen()
         async def on_lavapy_track_end(player, track, reason):
-            pass
+            ...
 
     Parameters
     ----------
     player: Player
-        A Lavapy :class:`Player` object.
+        A Lavapy Player object.
     track: Track
-        A Lavapy :class:`Track` object.
+        A Lavapy Track object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -133,14 +133,14 @@ class TrackExceptionEvent(LavapyEvent):
 
         @bot.listen()
         async def on_lavapy_track_exception(player, track, exception):
-            pass
+            ...
 
     Parameters
     ----------
     player: Player
-        A Lavapy :class:`Player` object.
+        A Lavapy Player object.
     track: Track
-        A Lavapy :class:`Track` object.
+        A Lavapy Track object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -171,9 +171,9 @@ class TrackStuckEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy :class:`Player` object.
+        A Lavapy Player object.
     track: Track
-        A Lavapy :class:`Track` object.
+        A Lavapy Track object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -199,7 +199,7 @@ class WebsocketOpenEvent(LavapyEvent):
     Parameters
     ----------
     node: Node
-        A Lavapy :class:`Node` object.
+        A Lavapy Node object.
     """
     def __init__(self, node: Node) -> None:
         super().__init__("websocket_open", None)
@@ -222,7 +222,7 @@ class WebsocketClosedEvent(LavapyEvent):
     Parameters
     ----------
     node: Node
-        A Lavapy :class:`Node` object.
+        A Lavapy Node object.
     data: Dict[str, Any]
         The raw event data.
     """

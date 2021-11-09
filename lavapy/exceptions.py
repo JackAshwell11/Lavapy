@@ -21,8 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from typing import Dict, Any
-
 __all__ = ("LavapyException",
            "NoNodesConnected",
            "NodeOccupied",
@@ -42,29 +40,7 @@ class LavapyException(Exception):
 
 
 class LavalinkException(LavapyException):
-    """
-    Base exception raised when an error occurs communicating with Lavalink.
-
-    Parameters
-    ----------
-    msg: str
-        The error message.
-    data: Dict[str, Any]
-        A dict containing the response from Lavalink.
-    """
-    def __init__(self, msg: str, data: Dict[str, Any]) -> None:
-        super().__init__(msg)
-        if data.get("error"):
-            # User is running Lavalink <= 3.3
-            self._severity: str = data["error"]["severity"]
-        else:
-            # User is running Lavalink >= 3.4
-            self._severity: str = data["exception"]["severity"]
-
-    @property
-    def severity(self) -> str:
-        """Returns the severity of the error."""
-        return self._severity
+    """Base exception raised when an error occurs communicating with Lavalink."""
 
 
 class NoNodesConnected(LavapyException):

@@ -26,7 +26,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from asyncio import Task
-from typing import Dict, Any, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Tuple, Dict, Any
 from aiohttp import WSMsgType
 from aiohttp.client_ws import ClientWebSocketResponse
 

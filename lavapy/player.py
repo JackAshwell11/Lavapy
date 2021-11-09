@@ -26,7 +26,7 @@ from __future__ import annotations
 import datetime
 import logging
 from datetime import datetime, timezone
-from typing import Union, Optional, Any, Dict, Type
+from typing import Optional, Union, Dict, Type, Any
 
 from discord import VoiceProtocol, VoiceChannel, Guild
 
@@ -34,7 +34,7 @@ from .filters import LavapyFilter
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
 from .node import Node
 from .pool import NodePool
-from .tracks import Track
+from .tracks import Track, PartialResource, MultiTrack
 from .queue import Queue
 from .utils import ClientType
 
@@ -244,7 +244,7 @@ class Player(VoiceProtocol):
 
         logger.info(f"Disconnected from voice channel: {self.channel.id}")
 
-    async def play(self, track: Track, startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
+    async def play(self, track: Union[Track, PartialResource, MultiTrack], startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         """|coro|
 
         Plays a given :class:`Track`.
@@ -266,6 +266,16 @@ class Player(VoiceProtocol):
         """
         if self.isPlaying and not replace:
             return
+        if isinstance(track, PartialResource):
+            track = await self.node.getTracks(track.cls, track.query)
+            if track is None:
+                return
+        if isinstance(track, MultiTrack):
+            temp = track
+            track = temp.tracks.pop()
+            self.queue.addIterable(temp)
+        elif isinstance(track, list):
+            track = track[0]
         newTrack = {
             "op": "play",
             "guildId": str(self.guild.id),

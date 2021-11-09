@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import List, Tuple, Dict, Union, Any
+from typing import Union, Tuple, List, Dict, Any
 
 from .exceptions import InvalidFilterArgument
 
