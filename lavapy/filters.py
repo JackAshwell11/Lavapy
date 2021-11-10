@@ -57,14 +57,14 @@ class LavapyFilter:
 
 class Equalizer(LavapyFilter):
     """
-    A class representing a usable Equalizer.
+    A class representing a usable equalizer.
 
     Parameters
     ---------
     levels: List[Tuple[int, float]]
         A list of tuple pairs containing a band int and gain float.
     name: str
-        A string to name this Equalizer.
+        A string to name this equalizer.
     """
     name = "equalizer"
 
@@ -84,7 +84,7 @@ class Equalizer(LavapyFilter):
 
     @property
     def equalizerName(self) -> str:
-        """Returns the name of this :class:`Equalizer`."""
+        """Returns the name of this equalizer."""
         return self._equalizerName
 
     @staticmethod
@@ -107,14 +107,14 @@ class Equalizer(LavapyFilter):
     @classmethod
     def build(cls, levels: List[Tuple[int, float]], name: str = "CustomEqualizer") -> Equalizer:
         """
-        Build a custom :class:`Equalizer` class with the given levels.
+        Build a custom equalizer with the given levels.
 
         Parameters
         ----------
         levels: List[Tuple[int, float]]
             A custom list of tuple pairs containing a band int and gain float. You will have to construct this yourself.
         name: str
-            An optional string to name this :class:`Equalizer`. If this is not supplied, it will be set to 'CustomEqualizer'.
+            An optional string to name this equalizer. If this is not supplied, it will be set to 'CustomEqualizer'.
 
         Returns
         -------
@@ -126,7 +126,7 @@ class Equalizer(LavapyFilter):
     @classmethod
     def flat(cls) -> Equalizer:
         """
-        A Flat :class:`Equalizer`. This will not provide a cut or boost to any frequency.
+        A flat equalizer. This will not provide a cut or boost to any frequency.
 
         Returns
         -------
