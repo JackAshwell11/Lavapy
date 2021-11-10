@@ -23,8 +23,8 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union, Dict, Any
 import random
+from typing import TYPE_CHECKING, Union, Dict, Any
 
 from discord import Client, AutoShardedClient
 from discord.ext.commands import Bot, AutoShardedBot

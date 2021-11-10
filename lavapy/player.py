@@ -61,9 +61,9 @@ class Player(VoiceProtocol):
     Parameters
     ----------
     client: Union[:class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
-        A :class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`.
+        A client or bot object.
     channel: VoiceChannel
-        A :class:`discord.VoiceChannel` for the player to connect to.
+        A voice channel for the player to connect to.
     """
     def __init__(self, client: ClientType, channel: VoiceChannel) -> None:
         super().__init__(client, channel)
@@ -85,17 +85,17 @@ class Player(VoiceProtocol):
 
     @property
     def guild(self) -> Guild:
-        """Returns the :class:`discord.Guild`: this player is in."""
+        """Returns the guild this player is in."""
         return self.channel.guild
 
     @property
     def node(self) -> Optional[Node]:
-        """Returns the Lavapy :class:`Node` this player is connected to."""
+        """Returns the Lavapy node this player is connected to."""
         return self._node
 
     @property
     def track(self) -> Optional[Track]:
-        """Returns the currently playing :class:`Track` if there is one."""
+        """Returns the currently playing track if there is one."""
         return self._track
 
     @property
@@ -105,17 +105,17 @@ class Player(VoiceProtocol):
 
     @property
     def filters(self) -> Dict[str, LavapyFilter]:
-        """Returns all the currently applied :class:`LavapyFilter` objects if there are any."""
+        """Returns all the currently applied filters if there are any."""
         return self._filters
 
     @property
     def queue(self) -> Queue:
-        """Returns a :class:`Queue` object which can be used to line up and retrieve tracks."""
+        """Returns a queue object which can be used to line up and retrieve tracks."""
         return self._queue
 
     @property
     def position(self) -> float:
-        """Returns the current position of the :class:`Track` in seconds. If nothing is playing, this returns 0."""
+        """Returns the current position of the track in seconds. If nothing is playing, this returns 0."""
         if not self.isPlaying:
             return 0
 
@@ -127,17 +127,17 @@ class Player(VoiceProtocol):
 
     @property
     def isConnected(self) -> bool:
-        """Returns whether the :class:`Player` is connected to a channel or not."""
+        """Returns whether the player is connected to a channel or not."""
         return self._connected
 
     @property
     def isPlaying(self) -> bool:
-        """Returns whether the :class:`Player` is currently playing a track or not."""
+        """Returns whether the player is currently playing a track or not."""
         return self.isConnected and self.track is not None
 
     @property
     def isPaused(self) -> bool:
-        """Returns whether the :class:`Player` is currently paused or not."""
+        """Returns whether the player is currently paused or not."""
         return self._paused
 
     def _updateState(self, state: Dict[str, Any]) -> None:
@@ -207,7 +207,7 @@ class Player(VoiceProtocol):
                 "sessionId": self._voiceState["sessionId"],
                 "event": self._voiceState["event"]
             }
-            await self.node.send(voiceUpdate)
+            await self.node._send(voiceUpdate)
 
     async def connect(self, timeout: float, reconnect: bool) -> None:
         """|coro|
@@ -247,12 +247,12 @@ class Player(VoiceProtocol):
     async def play(self, track: Union[Track, PartialResource, MultiTrack], startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         """|coro|
 
-        Plays a given :class:`Track`.
+        Plays a given resource. If this resource is a :class:`Track`, it is played normally. However, if it is a :class:`PartialResource`, then it is searched for and played (if the result of the search is a list of tracks, then the first is played). If the resource is a :class:`MultiTrack` then the first track is played and the rest and sent to the :class:`Queue`.
 
         Parameters
         ----------
-        track: Track
-            The :class:`Track` to play.
+        track: Union[Track, PartialResource, MultiTrack]
+            The resource to play.
         startTime: int
             The position in milliseconds to start at. By default, this is the beginning.
         endTime: int
@@ -267,7 +267,7 @@ class Player(VoiceProtocol):
         if self.isPlaying and not replace:
             return
         if isinstance(track, PartialResource):
-            track = await self.node.getTracks(track.cls, track.query)
+            track = await self.node.getTracks(track._cls, track.query)
             if track is None:
                 return
         if isinstance(track, MultiTrack):
@@ -289,7 +289,7 @@ class Player(VoiceProtocol):
             newTrack["endTime"] = str(endTime)
         self._track = track
         self._volume = volume
-        await self.node.send(newTrack)
+        await self.node._send(newTrack)
 
         logger.debug(f"Started playing track: {self.track.title} in {self.channel.id}")
 
@@ -304,7 +304,7 @@ class Player(VoiceProtocol):
         }
         tempTrack = self.track
         self._track = None
-        await self.node.send(stop)
+        await self.node._send(stop)
 
         logger.debug(f"Stopped playing track: {tempTrack.title} in {self.channel.id}")
 
@@ -338,7 +338,7 @@ class Player(VoiceProtocol):
             "pause": pause
         }
         self._paused = pause
-        await self.node.send(pause)
+        await self.node._send(pause)
 
         logger.debug(f"Toggled pause: {pause} in {self.channel.id}")
 
@@ -364,7 +364,7 @@ class Player(VoiceProtocol):
             "guildId": str(self.guild.id),
             "position": position
         }
-        await self.node.send(seek)
+        await self.node._send(seek)
 
         logger.debug(f"Seeked to position: {position}")
 
@@ -384,19 +384,19 @@ class Player(VoiceProtocol):
             "guildId": str(self.guild.id),
             "volume": self.volume
         }
-        await self.node.send(volume)
+        await self.node._send(volume)
 
         logger.debug(f"Set volume to: {volume}")
 
     async def moveTo(self, channel: VoiceChannel) -> None:
         """|coro|
 
-        Moves the player to another :class:`discord.VoiceChannel`.
+        Moves the player to another :class:`discord.VoiceChannel`. If this is None, then the player will disconnect.
 
         Parameters
         ----------
         channel: VoiceChannel
-            The :class:`VoiceChannel` to move to.
+            The voice channel to move to.
         """
         await self.guild.change_voice_state(channel=channel)
 
@@ -411,12 +411,12 @@ class Player(VoiceProtocol):
         Parameters
         ----------
         filter: LavapyFilter
-            The :class:`LavapyFilter` to apply to the player.
+            The filter to apply to the player.
 
         Raises
         ------
         FilterAlreadyExists
-            The specific :class:`LavapyFilter` is already applied.
+            The specific filter is already applied.
         """
         name = filter.name
         if filter.name in self.filters.keys():
@@ -438,12 +438,12 @@ class Player(VoiceProtocol):
         Parameters
         ----------
         filter: Union[LavapyFilter, Type[LavapyFilter]]
-            The :class`LavapyFilter` to remove. This can either be a non-initialised class like `lavapy.Equalizer` or an initialised one like `lavapy.Equalizer.flat()`.
+            The filter to remove. This can either be a non-initialised class like `lavapy.Equalizer` or an initialised one like `lavapy.Equalizer.flat()`.
 
         Raises
         ------
         FilterNotApplied
-            The specific :class:`LavapyFilter` is not applied.
+            The specific filter is not applied.
         """
         name = filter.name
         if name not in self.filters.keys():
@@ -466,7 +466,7 @@ class Player(VoiceProtocol):
         }
         for key, value in self.filters.items():
             filterPayload[value.name] = value.payload
-        await self.node.send(filterPayload)
+        await self.node._send(filterPayload)
 
 # async def destroy(self) -> None:
 #     destroy = {

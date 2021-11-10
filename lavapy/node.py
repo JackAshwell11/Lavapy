@@ -68,7 +68,7 @@ class Node:
 
     @property
     def client(self) -> ClientType:
-        """Returns the :class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot` or :class:`discord.ext.commands.AutoShardedBot` which is assigned to this node."""
+        """Returns the client or bot object assigned to this node."""
         return self._client
 
     @property
@@ -88,7 +88,7 @@ class Node:
 
     @property
     def region(self) -> VoiceRegion:
-        """Returns the :class:`discord.VoiceRegion` assigned to this node."""
+        """Returns the voice region assigned to this node."""
         return self._region
 
     @property
@@ -98,7 +98,7 @@ class Node:
 
     @property
     def players(self) -> List[Player]:
-        """Returns a list of all Lavapy :class:`Player` objects which are connected to this node."""
+        """Returns a list of all Lavapy player objects which are connected to this node."""
         return self._players
 
     @property
@@ -106,14 +106,9 @@ class Node:
         """Returns useful information sent by Lavalink about this node."""
         return self._stats
 
-    @stats.setter
-    def stats(self, newStats: Stats) -> None:
-        """Sets the value of :class:`Stats`."""
-        self._stats = newStats
-
     @property
     def session(self) -> aiohttp.ClientSession:
-        """Returns the :class:`aiohttp.ClientSession` used for sending and getting data."""
+        """Returns the session used for sending and getting data."""
         return self._session
 
     async def connect(self) -> None:
@@ -124,7 +119,7 @@ class Node:
         Raises
         ------
         WebsocketAlreadyExists
-            The websocket for this :class:`Node` already exists.
+            The websocket for this node already exists.
         """
         logger.debug(f"Connecting to the Lavalink server at: {self.host}:{self.port}")
         if self._websocket is None:
@@ -163,7 +158,7 @@ class Node:
         Returns
         -------
         Tuple[Dict[str, Any], :class:`aiohttp.ClientResponse`]
-            A tuple containing the response from Lavalink as well as a :class:aiohttp.ClientResponse` object to determine the status of the request.
+            A tuple containing the response from Lavalink as well as the websocket response to determine the status of the request.
         """
         logger.debug(f"Getting endpoint {endpoint} with data {params}")
         headers = {
@@ -173,7 +168,7 @@ class Node:
             data = await req.json()
         return data, req
 
-    async def send(self, payload: Dict[str, Any]) -> None:
+    async def _send(self, payload: Dict[str, Any]) -> None:
         """|coro|
 
         Send a payload to Lavalink without a response.
@@ -194,17 +189,17 @@ class Node:
         Parameters
         ----------
         id: str
-            The base64 ID.
+            The base64 track ID.
 
         Raises
         ------
         BuildTrackError
-            An error occurred while building the :class:`Track`.
+            An error occurred while building the track.
 
         Returns
         -------
         Track
-            A Lavapy :class:`Track` object.
+            A Lavapy track object.
         """
         track, response = await self._getData("decodetrack", {"track": id})
         if response.status != 200:
@@ -214,7 +209,7 @@ class Node:
     async def getTracks(self, cls: Union[Type[Track], Type[MultiTrack]], query: str) -> Optional[Union[Track, List[Track], MultiTrack]]:
         """|coro|
 
-        Gets data about a :class:`Track` from Lavalink.
+        Gets data about a :class:`Track` or :class:`MultiTrack` from Lavalink.
 
         Parameters
         ----------
@@ -228,6 +223,7 @@ class Node:
         Optional[Union[Track, List[Track]]]
             A Lavapy resource which can be used to play music.
         """
+        logger.info(f"Getting data with query: {query}")
         data, response = await self._getData("loadtracks", {"identifier": query})
         if response.status != 200:
             raise LavalinkException("Invalid response from lavalink.")
@@ -244,4 +240,4 @@ class Node:
             return [cls(element["track"], element["info"]) for element in data["tracks"]]
         elif loadType == "PLAYLIST_LOADED":
             playlistInfo = data["playlistInfo"]
-            return cls(playlistInfo["name"], playlistInfo["selectedTrack"], [cls._trackCls(track["track"], track["info"]) for track in data["tracks"]])
+            return cls(playlistInfo["name"], [cls._trackCls(track["track"], track["info"]) for track in data["tracks"]])

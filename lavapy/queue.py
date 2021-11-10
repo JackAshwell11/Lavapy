@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union, List
+from typing import TYPE_CHECKING, Iterable, Union, List
 
 from .exceptions import QueueEmpty
 from .tracks import MultiTrack
@@ -47,32 +47,32 @@ class Queue:
 
     @property
     def queue(self) -> List[Track]:
-        """Returns a list of :class:`Track` objects."""
+        """Returns a list of track objects."""
         return self._queue
 
     @property
     def count(self) -> int:
-        """Returns the size of the :class:`Queue`."""
+        """Returns the size of the queue."""
         return len(self._queue)
 
     @property
     def isEmpty(self) -> bool:
-        """Returns whether the :class:`Queue` is empty or not."""
+        """Returns whether the queue is empty or not."""
         return not self._queue
 
     def get(self) -> Track:
         """
-        Gets the next :class:`Track` in the :class:`Queue`.
+        Gets the next :class:`Track` in the queue.
 
         Raises
         ------
         QueueEmpty
-            The current :class:`Queue` is empty.
+            The current queue is empty.
 
         Returns
         -------
         Track
-            The next :class:`Track` in the :class:`Queue`.
+            The next track in the queue.
         """
         if self.isEmpty:
             raise QueueEmpty("Queue is empty")
@@ -80,22 +80,22 @@ class Queue:
 
     def add(self, track: Track) -> None:
         """
-        Adds a :class:`Track` to the :class:`Queue`.
+        Adds a :class:`Track` to the queue.
 
         Parameters
         ----------
         track: Track
-            The :class:`Track` to add to the :class:`Queue`.
+            The track to add to the queue.
         """
         self._queue.append(track)
 
-    def addIterable(self, iterable: Union[MultiTrack, List[Track]]) -> None:
+    def addIterable(self, iterable: Union[MultiTrack, Iterable[Track]]) -> None:
         """
         Adds an iterable to the :class:`Queue`.
 
         Parameters
         ----------
-        iterable: Union[MultiTrack, List[Track]]
+        iterable: Union[MultiTrack, Iterable[Track]]
             The iterable to add to the queue.
         """
         if isinstance(iterable, MultiTrack):
@@ -104,5 +104,5 @@ class Queue:
             self.add(track)
 
     def clear(self) -> None:
-        """Clears all :class`Track` objects in the :class:`Queue`."""
+        """Clears all track objects in the queue."""
         self.queue.clear()

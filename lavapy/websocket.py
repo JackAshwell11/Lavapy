@@ -26,7 +26,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from asyncio import Task
-from typing import TYPE_CHECKING, Optional, Tuple, Dict, Any
+from typing import TYPE_CHECKING, Optional, Dict, Any
 from aiohttp import WSMsgType
 from aiohttp.client_ws import ClientWebSocketResponse
 
@@ -50,7 +50,7 @@ class Websocket:
     Parameters
     ----------
     node: Node
-        The Lavapy :class:`Node` object which manages this websocket.
+        The Lavapy Node object which manages this websocket.
     """
     def __init__(self, node: Node) -> None:
         self._node: Node = node
@@ -64,7 +64,7 @@ class Websocket:
 
     @property
     def node(self) -> Node:
-        """Returns the Lavapy :class:`Node` which manages this websocket."""
+        """Returns the Lavapy Node which manages this websocket."""
         return self._node
 
     @property
@@ -77,14 +77,9 @@ class Websocket:
         """Returns the websocket connection."""
         return self._connection
 
-    @connection.setter
-    def connection(self, newConnection: ClientWebSocketResponse) -> None:
-        """Sets the websocket connection."""
-        self._connection = newConnection
-
     @property
     def listener(self) -> Optional[Task]:
-        """Returns the :class:`asyncio.Task` which pings the Lavalink server for updates."""
+        """Returns the task which pings the Lavalink server for updates."""
         return self._listener
 
     def getPlayer(self, guildID: int) -> Player:
@@ -94,12 +89,12 @@ class Websocket:
         Parameters
         ----------
         guildID: int
-            The :class:`discord.Guild` ID to get a Lavapy :class:`Player` object for.
+            The guild ID to get a Lavapy Player object for.
 
         Returns
         -------
         Player
-            A Lavapy :class:`Player` object.
+            A Lavapy Player object.
         """
         return [player for player in self.node.players if player.guild.id == guildID][0]
 
@@ -114,7 +109,7 @@ class Websocket:
             "Client-Name": "Lavapy"
         }
         logger.debug(f"Attempting connection with headers: {headers}")
-        self.connection = await self.node.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers, heartbeat=60)
+        self._connection = await self.node.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers, heartbeat=60)
         self._listener = self.node.client.loop.create_task(self.createListener())
         self._connected = True
         event = WebsocketOpenEvent(self.node)
@@ -127,7 +122,7 @@ class Websocket:
         Closes the connection to the Lavalink server.
         """
         logger.debug(f"Closing connection for node: {self.node.__repr__()}")
-        await self.connection.close()
+        await self._connection.close()
         self._connected = False
 
     async def createListener(self) -> None:
@@ -146,7 +141,7 @@ class Websocket:
     async def processListener(self, data: Dict[str, Any]) -> None:
         """|coro|
 
-        Processes data received from the Lavalink server gathered in :meth:`listener()`.
+        Processes data received from the Lavalink server gathered in :meth:`createListener()`.
 
         Parameters
         ----------
@@ -161,7 +156,7 @@ class Websocket:
             event = await self.getEventPayload(data["type"], data)
             await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
         elif op == "stats":
-            self.node.stats = Stats(self.node, data)
+            self.node._stats = Stats(self.node, data)
 
     async def getEventPayload(self, name: str, data: Dict[str, Any]) -> LavapyEvent:
         """|coro|
@@ -177,8 +172,8 @@ class Websocket:
 
         Returns
         -------
-        Tuple[str, Dict[str, Any]]
-            A tuple containing the event name and the event payload.
+        LavapyEvent
+            The LavapyEvent object which corresponds to the event payload.
         """
         if name == "WebSocketClosedEvent":
             return WebsocketClosedEvent(self.node, data)

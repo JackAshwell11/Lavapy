@@ -49,7 +49,7 @@ class Searchable:
     async def search(cls, query: str, node: Node = None, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Track, PartialResource, List[Track]]]:
         """|coro|
 
-        Performs a search to Lavalink for a specific resource. This can only be a :class:`Track`.
+        Performs a search to Lavalink for a specific resource. This will only return a :class:`Track`.
 
         Parameters
         ----------
@@ -60,15 +60,16 @@ class Searchable:
         returnFirst: bool
             Whether to return only the first result or not.
         partial: bool
-            Whether to return a Lavapy PartialTrack or not.
+            Whether to return a Lavapy PartialResource or not.
 
         Returns
         -------
-        Union[Track, PartialResource, MultiTrack]
-            A Lavapy resource which can be used to play music.
+        Optional[Union[Track, PartialResource, List[Track]]]
+            A Lavapy resource or list of resources which can be used to play music.
         """
         query = f"{cls._searchType}:{query}"
         if partial:
+            # noinspection PyTypeChecker
             return PartialResource(cls, query)
         if node is None:
             # Avoid a circular dependency with node.buildTrack()
@@ -97,13 +98,14 @@ class Identifiable:
         node: Node
             The Lavapy Node to use for searching. If this is not supplied, a random one from the NodePool will be retrieved.
         partial: bool
-            Whether to return a Lavapy PartialTrack or not.
+            Whether to return a Lavapy PartialResource or not.
         Returns
         -------
         Optional[Union[Track, PartialResource, MultiTrack]]
-            A Lavapy resource which can be used to play music.
+            A Lavapy resource or list of resources which can be used to play music.
         """
         if partial:
+            # noinspection PyTypeChecker
             return PartialResource(cls, identifier)
         if node is None:
             # Avoid a circular dependency with node.buildTrack()
@@ -193,16 +195,13 @@ class MultiTrack:
     ----------
     name: str
         The name of the playlist.
-    selectedTrack: int
-        The currently selected track.
     tracks: List[Track]
         The playlist's tracks as a list of Lavapy Track objects.
     """
     _trackCls: Type[Track] = None
 
-    def __init__(self, name: str, selectedTrack: int, tracks: List[Track]):
+    def __init__(self, name: str, tracks: List[Track]) -> None:
         self._name: str = name
-        self._selectedTrack: int = selectedTrack
         self._tracks: List[Track] = tracks
 
     def __repr__(self) -> str:
@@ -212,11 +211,6 @@ class MultiTrack:
     def name(self) -> str:
         """Returns the name of the playlist."""
         return self._name
-
-    @property
-    def selectedTrack(self) -> int:
-        """Returns the currently selected track."""
-        return self._selectedTrack
 
     @property
     def tracks(self) -> List[Track]:
@@ -239,20 +233,20 @@ class PartialResource:
 
         This object will only search for the given query at playtime. Full resource information will be missing until it has been searched.
     """
-    def __init__(self, cls: Union[Type[Searchable], Type[Identifiable]], query: str) -> None:
-        self._cls = cls
-        self._query = query
+    def __init__(self, cls: Union[Type[Track], Type[MultiTrack]], query: str) -> None:
+        self._cls: Union[Type[Track], Type[MultiTrack]] = cls
+        self._query: str = query
 
     def __repr__(self) -> str:
         return f"<Lavapy PartialResource (Cls={self.cls}) (Query={self.query})>"
 
     @property
-    def cls(self):
-        """Returns the resource cls which will be created at playtime."""
+    def cls(self) -> Union[Type[Track], Type[MultiTrack]]:
+        """Returns the resource which will be created at playtime."""
         return self._cls
 
     @property
-    def query(self):
+    def query(self) -> str:
         """Returns the query which will be searched for at playtime."""
         return self._query
 
@@ -261,7 +255,7 @@ class YoutubeTrack(Track, Searchable, Identifiable):
     """A track created using a search to Youtube."""
     _searchType: str = "ytsearch"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Lavapy YoutubeTrack (Identifier={self.identifier})>"
 
 
@@ -269,7 +263,7 @@ class YoutubeMusicTrack(Track, Searchable, Identifiable):
     """A track created using a search to Youtube Music."""
     _searchType: str = "ytmsearch"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Lavapy YoutubeMusicTrack (Identifier={self.identifier})>"
 
 
@@ -277,7 +271,7 @@ class SoundcloudTrack(Track, Searchable):
     """A track created using a search to Soundcloud."""
     _searchType: str = "scsearch"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Lavapy SoundcloudTrack (Identifier={self.identifier})>"
 
 
