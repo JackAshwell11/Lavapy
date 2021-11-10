@@ -24,19 +24,20 @@ SOFTWARE.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union, Tuple, List, Dict, Type, Any
 import aiohttp
 from aiohttp import ClientResponse
+from typing import TYPE_CHECKING, Optional, Union, Tuple, List, Dict, Type, Any
 
-from discord.enums import VoiceRegion
+import discord.ext
 
 from .exceptions import WebsocketAlreadyExists, BuildTrackError, LavalinkException, LoadTrackError
+from .tracks import Track
 from .websocket import Websocket
-from .tracks import Track, MultiTrack
-from .utils import ClientType
 
 if TYPE_CHECKING:
+    from discord import VoiceRegion
     from .player import Player
+    from .tracks import MultiTrack
     from .utils import Stats
 
 __all__ = ("Node",)
@@ -51,8 +52,8 @@ class Node:
     .. warning::
         This class should not be created manually. Please use :meth:`NodePool.create_node()` instead.
     """
-    def __init__(self, client: ClientType, host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
-        self._client: ClientType = client
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
+        self._client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self._host: str = host
         self._port: int = port
         self._password: str = password
@@ -67,7 +68,7 @@ class Node:
         return f"<Lavapy Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region}) (Players={len(self.players)})>"
 
     @property
-    def client(self) -> ClientType:
+    def client(self) -> Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot]:
         """Returns the client or bot object assigned to this node."""
         return self._client
 

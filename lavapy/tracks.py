@@ -23,7 +23,6 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Optional, Union, List, Dict, Type, Any
 
 if TYPE_CHECKING:
@@ -37,8 +36,6 @@ __all__ = ("Searchable",
            "YoutubeTrack",
            "YoutubeMusicTrack",
            "YoutubePlaylist")
-
-logger = logging.getLogger(__name__)
 
 
 class Searchable:

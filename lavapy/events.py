@@ -26,9 +26,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Dict, Any
 
 if TYPE_CHECKING:
-    from .tracks import Track
-    from .player import Player
     from .node import Node
+    from .player import Player
+    from .tracks import Track
 
 __all__ = ("LavapyEvent",
            "TrackStartEvent",

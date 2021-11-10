@@ -25,16 +25,15 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from asyncio import Task
-from typing import TYPE_CHECKING, Optional, Dict, Any
 from aiohttp import WSMsgType
-from aiohttp.client_ws import ClientWebSocketResponse
+from typing import TYPE_CHECKING, Optional, Dict, Any
 
-from .utils import ExponentialBackoff
 from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketOpenEvent, WebsocketClosedEvent
-from .utils import Stats
+from .utils import ExponentialBackoff, Stats
 
 if TYPE_CHECKING:
+    from aiohttp.client_ws import ClientWebSocketResponse
+    from asyncio import Task
     from .node import Node
     from .player import Player
 
@@ -102,6 +101,11 @@ class Websocket:
         """|coro|
 
         Establishes the connection to the Lavalink server.
+
+        Raises
+        ------
+        aiohttp.client_exceptions.ClientConnectorError
+            The domain name is invalid.
         """
         headers = {
             "Authorization": self.node.password,
@@ -150,6 +154,7 @@ class Websocket:
         """
         op = data.get("op")
         if op == "playerUpdate":
+            print(data)
             player = self.getPlayer(int(data["guildId"]))
             player._updateState(data)
         elif op == "event":

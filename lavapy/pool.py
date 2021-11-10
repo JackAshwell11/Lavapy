@@ -25,13 +25,15 @@ from __future__ import annotations
 
 import string
 import random
-from typing import Optional, Union, Dict
+from typing import TYPE_CHECKING, Optional, Union, Dict
 
-from discord import VoiceRegion
+import discord.ext
 
 from .exceptions import NoNodesConnected, InvalidIdentifier, NodeOccupied
 from .node import Node
-from .utils import ClientType
+
+if TYPE_CHECKING:
+    from discord import VoiceRegion
 
 __all__ = ("NodePool",)
 
@@ -88,7 +90,7 @@ class NodePool:
         return sorted(possibleNodes, key=lambda x: len(x.players))[0]
 
     @classmethod
-    async def createNode(cls, client: ClientType, host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> Node:
+    async def createNode(cls, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
         Creates a Lavapy :class:`Node` object and stores it for later use.

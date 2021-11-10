@@ -25,25 +25,27 @@ from __future__ import annotations
 
 import datetime
 import logging
-from datetime import datetime, timezone
-from typing import Optional, Union, Dict, Type, Any
+from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
 
-from discord import VoiceProtocol, VoiceChannel, Guild
+import discord.ext
 
-from .filters import LavapyFilter
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
 from .node import Node
 from .pool import NodePool
-from .tracks import Track, PartialResource, MultiTrack
 from .queue import Queue
-from .utils import ClientType
+from .tracks import MultiTrack, PartialResource
+
+if TYPE_CHECKING:
+    from discord import VoiceChannel, Guild
+    from .filters import LavapyFilter
+    from .tracks import Track
 
 __all__ = ("Player",)
 
 logger = logging.getLogger(__name__)
 
 
-class Player(VoiceProtocol):
+class Player(discord.VoiceProtocol):
     """
     Lavapy Player object. This subclasses :class:`discord.VoiceProtocol` and such should be treated as one with additions.
 
@@ -65,9 +67,9 @@ class Player(VoiceProtocol):
     channel: VoiceChannel
         A voice channel for the player to connect to.
     """
-    def __init__(self, client: ClientType, channel: VoiceChannel) -> None:
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], channel: VoiceChannel) -> None:
         super().__init__(client, channel)
-        self.client: ClientType = client
+        self.client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self.channel: VoiceChannel = channel
         self._node: Optional[Node] = NodePool.getNode()
         self._track: Optional[Track] = None
@@ -122,7 +124,7 @@ class Player(VoiceProtocol):
         if self.isPaused:
             return min(self._lastPosition, self.track.length)
 
-        timeSinceLastUpdate = (datetime.datetime.now(timezone.utc) - self._lastUpdateTime).total_seconds()
+        timeSinceLastUpdate = (datetime.datetime.now(datetime.timezone.utc) - self._lastUpdateTime).total_seconds()
         return min(self._lastPosition + timeSinceLastUpdate, self.track.length)
 
     @property
@@ -151,7 +153,7 @@ class Player(VoiceProtocol):
         """
         # State updates are sent in milliseconds so need to be converted to seconds (/1000)
         state: Dict[str, Any] = state.get("state")
-        self._lastUpdateTime = datetime.fromtimestamp(state.get("time")/1000, timezone.utc)
+        self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, datetime.timezone.utc)
 
         self._lastPosition = state.get("position", 0)/1000
 

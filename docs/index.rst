@@ -1,7 +1,7 @@
 Welcome to Lavapy's documentation!
 ==================================
 
-A powerful and robust python library for interacting with Lavalink.
+A powerful and robust python library for interacting with `Lavalink <https://github.com/freyacodes/Lavalink>`_.
 
 .. toctree::
     :maxdepth: 1

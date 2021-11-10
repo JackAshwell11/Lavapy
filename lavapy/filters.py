@@ -146,13 +146,13 @@ class Karaoke(LavapyFilter):
     Attributes
     ----------
     level: float
-        to do.
+        The level of the karaoke filter.
     monoLevel: float
-        to do.
+        The monolevel of the karaoke filter.
     filterBand: float
-        to do.
+        The filter band of the karaoke filter.
     filterWidth: float
-        to do.
+        The filter width of the karaoke filter.
     """
     name = "karaoke"
 
@@ -174,11 +174,11 @@ class Timescale(LavapyFilter):
     Attributes
     ----------
     speed: float
-        to do.
+        The speed of the timescale filter.
     pitch: float
-        to do.
+        The pitch of the timescale filter.
     rate: float
-        to do.
+        The rate of the timescale filter.
     """
     name = "timescale"
 
@@ -201,9 +201,9 @@ class Tremolo(LavapyFilter):
     Attributes
     ----------
     frequency: float
-        to do. This must be bigger than 0.
+        The frequency of the tremolo filter. This must be bigger than 0.
     depth: float
-        to do. This must be between 0 and 1.
+        The depth of the tremolo filter. This must be between 0 and 1.
 
     Raises
     ------
@@ -232,9 +232,9 @@ class Vibrato(LavapyFilter):
     Attributes
     ----------
     frequency: float
-        to do. This must be between 0 and 14.
+        The frequency of the vibrato filter. This must be between 0 and 14.
     depth: float
-        to do. This must be between 0 and 1.
+        The depth of the tremolo filter. This must be between 0 and 1.
 
     Raises
     ------
@@ -284,21 +284,21 @@ class Distortion(LavapyFilter):
     Attributes
     ----------
     sinOffset: float
-        to do.
+        The sine offset of the distortion filter.
     sinScale: float
-        to do.
+        The sine scale of the distortion filter.
     cosOffset: float
-        to do.
+        The cosine offset of the distortion filter.
     cosScale: float
-        to do.
+        The cosine scale of the distortion filter.
     tanOffset: float
-        to do.
+        The tangent offset of the distortion filter.
     tanScale: float
-        to do.
+        The tangent scale of the distortion filter.
     offset: float
-        to do.
+        The offset of the distortion filter.
     scale: float
-        to do.
+        The scale of the distortion filter.
     """
     name = "distortion"
 
@@ -324,13 +324,13 @@ class ChannelMix(LavapyFilter):
     Attributes
     ----------
     leftToLeft: float
-        to do. This must be between 0 and 1.
+        The channel mix of left to left. This must be between 0 and 1.
     leftToRight: float
-        to do. This must be between 0 and 1.
+        The channel mix of left to right. This must be between 0 and 1.
     rightToLeft: float
-        to do. This must be between 0 and 1.
+        The channel mix of right to left. This must be between 0 and 1.
     rightToRight: float
-        to do. This must be between 0 and 1.
+        The channel mix of right to right. This must be between 0 and 1.
     """
     name = "channelMix"
 
@@ -360,7 +360,7 @@ class LowPass(LavapyFilter):
     Attributes
     ----------
     smoothing: float
-        to do.
+        The smoothing of the low pass filter.
     """
     name = "lowPass"
 

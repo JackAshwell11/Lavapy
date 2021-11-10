@@ -24,19 +24,13 @@ SOFTWARE.
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Union, Dict, Any
-
-from discord import Client, AutoShardedClient
-from discord.ext.commands import Bot, AutoShardedBot
+from typing import TYPE_CHECKING, Dict, Any
 
 if TYPE_CHECKING:
     from .node import Node
 
-__all__ = ("ClientType",
-           "ExponentialBackoff",
+__all__ = ("ExponentialBackoff",
            "Stats")
-
-ClientType = Union[Client, AutoShardedClient, Bot, AutoShardedBot]
 
 
 class ExponentialBackoff:
