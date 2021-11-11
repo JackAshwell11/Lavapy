@@ -35,11 +35,17 @@ __all__ = ("Searchable",
            "PartialResource",
            "YoutubeTrack",
            "YoutubeMusicTrack",
+           "SoundcloudTrack",
            "YoutubePlaylist")
 
 
 class Searchable:
-    """The base class for all Lavapy resources that can be searched for. Due to the nature of a search, this class will return a list of individual resources."""
+    """
+    The base class for all Lavapy resources that can be searched for. Due to the nature of a search, this class will return a list of individual resources.
+
+    .. warning::
+        This class should not be created manually. Instead use a subclass of :class:`Track`.
+    """
     _searchType: str = ""
 
     @classmethod
@@ -81,7 +87,12 @@ class Searchable:
 
 
 class Identifiable:
-    """The base class for all Lavapy resources that can be retrieved based on their identifier. Due to the nature of an identifier, this class will only return individual resources."""
+    """
+    The base class for all Lavapy resources that can be retrieved based on their identifier. Due to the nature of an identifier, this class will only return individual resources.
+
+    .. warning::
+        This class should not be created manually. Instead use a subclass of :class:`Track` or :class:`MultiTrack`.
+    """
     @classmethod
     async def get(cls, identifier: str, node: Node = None, partial: bool = False) -> Optional[Union[Track, PartialResource, MultiTrack]]:
         """|coro|
@@ -115,6 +126,9 @@ class Identifiable:
 class Track:
     """
     The base class for all Lavapy Track objects.
+
+    .. warning::
+        It is advised not to create this manually, however, it is possible to do so.
 
     Parameters
     ----------
@@ -188,6 +202,9 @@ class MultiTrack:
     """
     The base class for all Lavapy MultiTrack resources. These could be playlists or albums.
 
+    .. warning::
+        It is advised not to create this manually, however, it is possible to do so.
+
     Parameters
     ----------
     name: str
@@ -219,6 +236,9 @@ class PartialResource:
     """
     A class which searches for the given query at playtime.
 
+    .. warning::
+        It is advised not to create this manually, however, it is possible to do so.
+
     Parameters
     ----------
     cls: Type[Track]
@@ -227,8 +247,7 @@ class PartialResource:
         The query to search for at playtime.
 
     .. warning::
-
-        This object will only search for the given query at playtime. Full resource information will be missing until it has been searched.
+        This object will only search for the given query at playtime. Full resource information will be missing until it has been searched. It is advised not to create this manually, however, it is possible to do so.
     """
     def __init__(self, cls: Union[Type[Track], Type[MultiTrack]], query: str) -> None:
         self._cls: Union[Type[Track], Type[MultiTrack]] = cls

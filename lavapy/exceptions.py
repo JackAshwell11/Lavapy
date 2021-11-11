@@ -26,21 +26,17 @@ __all__ = ("LavapyException",
            "NodeOccupied",
            "InvalidIdentifier",
            "WebsocketAlreadyExists",
-           "LavalinkException",
-           "LoadTrackError",
            "QueueEmpty",
-           "BuildTrackError",
            "InvalidFilterArgument",
            "FilterAlreadyExists",
-           "FilterNotApplied")
+           "FilterNotApplied",
+           "LavalinkException",
+           "LoadTrackError",
+           "BuildTrackError")
 
 
 class LavapyException(Exception):
     """Base Lavapy exception. Every exception inherits from this."""
-
-
-class LavalinkException(LavapyException):
-    """Base exception raised when an error occurs communicating with Lavalink."""
 
 
 class NoNodesConnected(LavapyException):
@@ -59,16 +55,8 @@ class WebsocketAlreadyExists(LavapyException):
     """Exception raised when a new websocket connection is attempted but it already exists."""
 
 
-class LoadTrackError(LavalinkException):
-    """Exception raised when an error occurred when loading a track."""
-
-
 class QueueEmpty(LavapyException):
     """Exception raised when attempting to get a track from an empty queue."""
-
-
-class BuildTrackError(LavalinkException):
-    """Exception raised when an error occurred when building a track."""
 
 
 class InvalidFilterArgument(LavapyException):
@@ -81,3 +69,15 @@ class FilterAlreadyExists(LavapyException):
 
 class FilterNotApplied(LavapyException):
     """Exception raised when a filter is attempted to be removed but it is not applied."""
+
+
+class LavalinkException(LavapyException):
+    """Base exception raised when an error occurs communicating with Lavalink."""
+
+
+class LoadTrackError(LavalinkException):
+    """Exception raised when an error occurred when loading a track."""
+
+
+class BuildTrackError(LavalinkException):
+    """Exception raised when an error occurred when building a track."""

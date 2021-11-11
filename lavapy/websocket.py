@@ -25,15 +25,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from aiohttp import WSMsgType
+import aiohttp
 from typing import TYPE_CHECKING, Optional, Dict, Any
 
 from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketOpenEvent, WebsocketClosedEvent
 from .utils import ExponentialBackoff, Stats
 
 if TYPE_CHECKING:
-    from aiohttp.client_ws import ClientWebSocketResponse
-    from asyncio import Task
     from .node import Node
     from .player import Player
 
@@ -49,13 +47,13 @@ class Websocket:
     Parameters
     ----------
     node: Node
-        The Lavapy Node object which manages this websocket.
+        The Lavapy node object which manages this websocket.
     """
     def __init__(self, node: Node) -> None:
         self._node: Node = node
         self._connected: bool = False
-        self._connection: Optional[ClientWebSocketResponse] = None
-        self._listener: Optional[Task] = None
+        self._connection: Optional[aiohttp.client.ClientWebSocketResponse] = None
+        self._listener: Optional[asyncio.Task] = None
         asyncio.create_task(self.connect())
 
     def __repr__(self) -> str:
@@ -63,7 +61,7 @@ class Websocket:
 
     @property
     def node(self) -> Node:
-        """Returns the Lavapy Node which manages this websocket."""
+        """Returns the Lavapy node which manages this websocket."""
         return self._node
 
     @property
@@ -72,12 +70,12 @@ class Websocket:
         return self._connected
 
     @property
-    def connection(self) -> Optional[ClientWebSocketResponse]:
+    def connection(self) -> Optional[aiohttp.client.ClientWebSocketResponse]:
         """Returns the websocket connection."""
         return self._connection
 
     @property
-    def listener(self) -> Optional[Task]:
+    def listener(self) -> Optional[asyncio.Task]:
         """Returns the task which pings the Lavalink server for updates."""
         return self._listener
 
@@ -88,12 +86,12 @@ class Websocket:
         Parameters
         ----------
         guildID: int
-            The guild ID to get a Lavapy Player object for.
+            The guild ID to get a Lavapy player object for.
 
         Returns
         -------
         Player
-            A Lavapy Player object.
+            A Lavapy player object.
         """
         return [player for player in self.node.players if player.guild.id == guildID][0]
 
@@ -104,7 +102,7 @@ class Websocket:
 
         Raises
         ------
-        aiohttp.client_exceptions.ClientConnectorError
+        aiohttp.client.ClientConnectorError
             The domain name is invalid.
         """
         headers = {
@@ -137,9 +135,9 @@ class Websocket:
         while True:
             backoff = ExponentialBackoff()
             msg = await self.connection.receive()
-            if msg.type is WSMsgType.TEXT:
+            if msg.type is aiohttp.WSMsgType.TEXT:
                 await asyncio.create_task(self.processListener(msg.json()))
-            elif msg.type is WSMsgType.CLOSED:
+            elif msg.type is aiohttp.WSMsgType.CLOSED:
                 await asyncio.sleep(backoff.delay())
 
     async def processListener(self, data: Dict[str, Any]) -> None:
@@ -154,7 +152,6 @@ class Websocket:
         """
         op = data.get("op")
         if op == "playerUpdate":
-            print(data)
             player = self.getPlayer(int(data["guildId"]))
             player._updateState(data)
         elif op == "event":

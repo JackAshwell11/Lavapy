@@ -50,7 +50,7 @@ class LavapyEvent:
     event: str
         The event name.
     player: Optional[Player]
-        A Lavapy Player object.
+        A Lavapy player object.
     """
     def __init__(self, event: str, player: Optional[Player]) -> None:
         self._event: str = event
@@ -68,7 +68,7 @@ class LavapyEvent:
 
     @property
     def payload(self) -> Dict[str, Any]:
-        """Returns a dict containing the payload sent to :meth:`discord.ext.commands.Bot.dispatch()`. This must be parsed to `**kwargs`."""
+        """Returns a dict containing the payload sent to discord.py. This must be parsed to `**kwargs`."""
         return self._payload
 
 
@@ -85,9 +85,9 @@ class TrackStartEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy player object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy track object.
     """
     def __init__(self, player: Player, track: Track) -> None:
         super().__init__("track_start", player)
@@ -110,9 +110,9 @@ class TrackEndEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy player object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy track object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -138,9 +138,9 @@ class TrackExceptionEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy player object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy track object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -171,9 +171,9 @@ class TrackStuckEvent(LavapyEvent):
     Parameters
     ----------
     player: Player
-        A Lavapy Player object.
+        A Lavapy player object.
     track: Track
-        A Lavapy Track object.
+        A Lavapy track object.
     data: Dict[str, Any]
         The raw event data.
     """
@@ -199,7 +199,7 @@ class WebsocketOpenEvent(LavapyEvent):
     Parameters
     ----------
     node: Node
-        A Lavapy Node object.
+        A Lavapy node object.
     """
     def __init__(self, node: Node) -> None:
         super().__init__("websocket_open", None)
@@ -222,7 +222,7 @@ class WebsocketClosedEvent(LavapyEvent):
     Parameters
     ----------
     node: Node
-        A Lavapy Node object.
+        A Lavapy node object.
     data: Dict[str, Any]
         The raw event data.
     """

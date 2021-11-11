@@ -32,11 +32,10 @@ import discord.ext
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
 from .node import Node
 from .pool import NodePool
-from .queue import Queue
+from .utils import Queue
 from .tracks import MultiTrack, PartialResource
 
 if TYPE_CHECKING:
-    from discord import VoiceChannel, Guild
     from .filters import LavapyFilter
     from .tracks import Track
 
@@ -64,13 +63,13 @@ class Player(discord.VoiceProtocol):
     ----------
     client: Union[:class:`discord.Client`, :class:`discord.AutoShardedClient`, :class:`discord.ext.commands.Bot`, :class:`discord.ext.commands.AutoShardedBot`]
         A client or bot object.
-    channel: VoiceChannel
+    channel: discord.VoiceChannel
         A voice channel for the player to connect to.
     """
-    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], channel: VoiceChannel) -> None:
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], channel: discord.VoiceChannel) -> None:
         super().__init__(client, channel)
         self.client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
-        self.channel: VoiceChannel = channel
+        self.channel: discord.VoiceChannel = channel
         self._node: Optional[Node] = NodePool.getNode()
         self._track: Optional[Track] = None
         self._volume: int = 100
@@ -86,7 +85,7 @@ class Player(discord.VoiceProtocol):
         return f"<Lavapy Player (ChannelID={self.channel.id}) (GuildID={self.guild.id})>"
 
     @property
-    def guild(self) -> Guild:
+    def guild(self) -> discord.Guild:
         """Returns the guild this player is in."""
         return self.channel.guild
 
@@ -390,14 +389,14 @@ class Player(discord.VoiceProtocol):
 
         logger.debug(f"Set volume to: {volume}")
 
-    async def moveTo(self, channel: VoiceChannel) -> None:
+    async def moveTo(self, channel: discord.VoiceChannel) -> None:
         """|coro|
 
         Moves the player to another :class:`discord.VoiceChannel`. If this is None, then the player will disconnect.
 
         Parameters
         ----------
-        channel: VoiceChannel
+        channel: discord.VoiceChannel
             The voice channel to move to.
         """
         await self.guild.change_voice_state(channel=channel)

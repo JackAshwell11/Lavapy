@@ -29,7 +29,6 @@ from .filters import *
 from .node import *
 from .player import *
 from .pool import *
-from .queue import *
 from .tracks import *
 from .utils import *
 from .websocket import *

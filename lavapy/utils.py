@@ -24,12 +24,17 @@ SOFTWARE.
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Dict, Any
+from typing import TYPE_CHECKING, Iterable, Union, List, Dict, Any
+
+from .exceptions import QueueEmpty
+from .tracks import MultiTrack
 
 if TYPE_CHECKING:
     from .node import Node
+    from .tracks import Track
 
 __all__ = ("ExponentialBackoff",
+           "Queue",
            "Stats")
 
 
@@ -79,6 +84,79 @@ class ExponentialBackoff:
         return sleepTime
 
 
+class Queue:
+    """
+    A class representing a usable Queue.
+    """
+    def __init__(self) -> None:
+        self._queue: List[Track] = []
+
+    def __repr__(self) -> str:
+        return f"<Lavapy Queue (Queue={self._queue})>"
+
+    @property
+    def queue(self) -> List[Track]:
+        """Returns a list of track objects."""
+        return self._queue
+
+    @property
+    def count(self) -> int:
+        """Returns the size of the queue."""
+        return len(self._queue)
+
+    @property
+    def isEmpty(self) -> bool:
+        """Returns whether the queue is empty or not."""
+        return not self._queue
+
+    def get(self) -> Track:
+        """
+        Gets the next :class:`Track` in the queue.
+
+        Raises
+        ------
+        QueueEmpty
+            The current queue is empty.
+
+        Returns
+        -------
+        Track
+            The next track in the queue.
+        """
+        if self.isEmpty:
+            raise QueueEmpty("Queue is empty")
+        return self._queue.pop()
+
+    def add(self, track: Track) -> None:
+        """
+        Adds a :class:`Track` to the queue.
+
+        Parameters
+        ----------
+        track: Track
+            The track to add to the queue.
+        """
+        self._queue.append(track)
+
+    def addIterable(self, iterable: Union[MultiTrack, Iterable[Track]]) -> None:
+        """
+        Adds an iterable to the :class:`Queue`.
+
+        Parameters
+        ----------
+        iterable: Union[MultiTrack, Iterable[Track]]
+            The iterable to add to the queue.
+        """
+        if isinstance(iterable, MultiTrack):
+            iterable = iterable.tracks
+        for track in iterable:
+            self.add(track)
+
+    def clear(self) -> None:
+        """Clears all track objects in the queue."""
+        self.queue.clear()
+
+
 class Stats:
     """
     Stores useful information sent by Lavalink about this :class:`Node`.
@@ -86,7 +164,7 @@ class Stats:
     Attributes
     ----------
     node: Node
-        The Lavapy Node these stats are about.
+        The Lavapy node these stats are about.
     uptime: int
         How long this node has been up for.
     players: int

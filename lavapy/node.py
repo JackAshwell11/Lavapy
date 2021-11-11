@@ -35,7 +35,6 @@ from .tracks import Track
 from .websocket import Websocket
 
 if TYPE_CHECKING:
-    from discord import VoiceRegion
     from .player import Player
     from .tracks import MultiTrack
     from .utils import Stats
@@ -50,14 +49,14 @@ class Node:
     Lavapy Node object.
 
     .. warning::
-        This class should not be created manually. Please use :meth:`NodePool.create_node()` instead.
+        This class should not be created manually. Please use :meth:`NodePool.createNode()` instead.
     """
     def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
         self._client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self._host: str = host
         self._port: int = port
         self._password: str = password
-        self._region: Optional[VoiceRegion] = region
+        self._region: Optional[discord.VoiceRegion] = region
         self._identifier: str = identifier
         self._players: List[Player] = []
         self._stats: Optional[Stats] = None
@@ -88,7 +87,7 @@ class Node:
         return self._password
 
     @property
-    def region(self) -> VoiceRegion:
+    def region(self) -> discord.VoiceRegion:
         """Returns the voice region assigned to this node."""
         return self._region
 
@@ -108,14 +107,14 @@ class Node:
         return self._stats
 
     @property
-    def session(self) -> aiohttp.ClientSession:
+    def session(self) -> aiohttp.client.ClientSession:
         """Returns the session used for sending and getting data."""
         return self._session
 
     async def connect(self) -> None:
         """|coro|
 
-        Initialise the websocket to the Lavalink server.
+        Initialises the websocket connection to the Lavalink server.
 
         Raises
         ------
@@ -185,7 +184,7 @@ class Node:
     async def buildTrack(self, id: str) -> Track:
         """|coro|
 
-        Builds a :class:`Track` from a base64 ID.
+        Builds a :class:`Track` from a base64 track ID.
 
         Parameters
         ----------
@@ -221,7 +220,7 @@ class Node:
 
         Returns
         -------
-        Optional[Union[Track, List[Track]]]
+        Optional[Union[Track, List[Track], MultiTrack]]
             A Lavapy resource which can be used to play music.
         """
         logger.info(f"Getting data with query: {query}")

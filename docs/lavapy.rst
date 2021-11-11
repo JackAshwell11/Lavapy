@@ -86,6 +86,13 @@ YoutubeMusicTrack
     :members:
     :show-inheritance:
 
+SoundcloudTrack
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: SoundcloudTrack
+    :members:
+    :show-inheritance:
+
 YoutubePlaylist
 ~~~~~~~~~~~~~~~
 
@@ -220,8 +227,6 @@ Exceptions
 ----------
 
 .. autoexception:: LavapyException
-.. autoexception:: LavalinkException
-    :show-inheritance:
 .. autoexception:: NoNodesConnected
     :show-inheritance:
 .. autoexception:: NodeOccupied
@@ -230,13 +235,15 @@ Exceptions
     :show-inheritance:
 .. autoexception:: WebsocketAlreadyExists
     :show-inheritance:
-.. autoexception:: LoadTrackError
-    :show-inheritance:
 .. autoexception:: QueueEmpty
-    :show-inheritance:
-.. autoexception:: BuildTrackError
     :show-inheritance:
 .. autoexception:: FilterAlreadyExists
     :show-inheritance:
 .. autoexception:: FilterNotApplied
+    :show-inheritance:
+.. autoexception:: LavalinkException
+    :show-inheritance:
+.. autoexception:: LoadTrackError
+    :show-inheritance:
+.. autoexception:: BuildTrackError
     :show-inheritance:
