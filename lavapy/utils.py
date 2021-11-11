@@ -51,7 +51,7 @@ class ExponentialBackoff:
     maxRetries: int
         The maximum amount of retries allowed. Changing this changes how big the delay can get.
     """
-    def __init__(self, base: int = 1, maxRetries: int = 20):
+    def __init__(self, base: int = 1, maxRetries: int = 20) -> None:
         self._base: int = base
         self._maxRetries: int = maxRetries
 
@@ -61,6 +61,24 @@ class ExponentialBackoff:
         rand.seed()
 
         self._rand = rand.uniform
+
+    def __repr__(self) -> str:
+        return f"<Lavapy ExponentialBackoff (Base={self.base}) (Retries={self.retries}) (MaxRetries={self.maxRetries})>"
+
+    @property
+    def base(self) -> int:
+        """Returns the base on the equation."""
+        return self._base
+
+    @property
+    def retries(self) -> int:
+        """Returns the amount of current retries."""
+        return self._retries
+
+    @property
+    def maxRetries(self) -> int:
+        """Returns the max amount of retries."""
+        return self._maxRetries
 
     def delay(self) -> float:
         """
