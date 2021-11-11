@@ -132,8 +132,8 @@ class Websocket:
 
         Continuously pings the Lavalink server for updates and events.
         """
+        backoff = ExponentialBackoff()
         while True:
-            backoff = ExponentialBackoff()
             msg = await self.connection.receive()
             if msg.type is aiohttp.WSMsgType.TEXT:
                 await asyncio.create_task(self.processListener(msg.json()))

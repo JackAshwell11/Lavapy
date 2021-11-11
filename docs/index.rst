@@ -3,9 +3,11 @@ Welcome to Lavapy's documentation!
 
 A powerful and robust python library for interacting with `Lavalink <https://github.com/freyacodes/Lavalink>`_.
 
+Getting Started
+---------------
+
 .. toctree::
     :maxdepth: 1
-    :caption: Getting Started:
 
     installing
     quickstart

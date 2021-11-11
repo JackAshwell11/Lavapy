@@ -46,7 +46,8 @@ logger = logging.getLogger(__name__)
 
 class Player(discord.VoiceProtocol):
     """
-    Lavapy Player object. This subclasses :class:`discord.VoiceProtocol` and such should be treated as one with additions.
+    Lavapy Player object. This subclasses :class:`discord.VoiceProtocol` and such should be treated as one with
+    additions.
 
     Examples
     --------
@@ -248,7 +249,10 @@ class Player(discord.VoiceProtocol):
     async def play(self, track: Union[Track, PartialResource, MultiTrack], startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         """|coro|
 
-        Plays a given resource. If this resource is a :class:`Track`, it is played normally. However, if it is a :class:`PartialResource`, then it is searched for and played (if the result of the search is a list of tracks, then the first is played). If the resource is a :class:`MultiTrack` then the first track is played and the rest and sent to the :class:`Queue`.
+        Plays a given resource. If this resource is a :class:`Track`, it is played normally. However, if it is a
+        :class:`PartialResource`, then it is searched for and played (if the result of the search is a list of
+        tracks, then the first is played). If the resource is a :class:`MultiTrack` then the first track is played
+        and the rest and sent to the :class:`Queue`.
 
         Parameters
         ----------

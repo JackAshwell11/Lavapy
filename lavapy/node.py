@@ -51,7 +51,7 @@ class Node:
     .. warning::
         This class should not be created manually. Please use :meth:`NodePool.createNode()` instead.
     """
-    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion], identifier: str) -> None:
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], identifier: str) -> None:
         self._client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self._host: str = host
         self._port: int = port

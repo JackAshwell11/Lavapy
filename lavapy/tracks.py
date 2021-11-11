@@ -41,7 +41,8 @@ __all__ = ("Searchable",
 
 class Searchable:
     """
-    The base class for all Lavapy resources that can be searched for. Due to the nature of a search, this class will return a list of individual resources.
+    The base class for all Lavapy resources that can be searched for. Due to the nature of a search, this class will
+    return a list of individual resources.
 
     .. warning::
         This class should not be created manually. Instead use a subclass of :class:`Track`.
@@ -88,7 +89,8 @@ class Searchable:
 
 class Identifiable:
     """
-    The base class for all Lavapy resources that can be retrieved based on their identifier. Due to the nature of an identifier, this class will only return individual resources.
+    The base class for all Lavapy resources that can be retrieved based on their identifier. Due to the nature of an
+    identifier, this class will only return individual resources.
 
     .. warning::
         This class should not be created manually. Instead use a subclass of :class:`Track` or :class:`MultiTrack`.

@@ -260,7 +260,8 @@ class Rotation(LavapyFilter):
     """
     Rotates the sound around the stereo channels/user headphones aka Audio Panning.
 
-    Here is an `Example <https://en.wikipedia.org/wiki/File:Fuse_Electronics_Tremolo_MK-III_Quick_Demo.ogv>`_ (without the reverb).
+    Here is an `Example <https://en.wikipedia.org/wiki/File:Fuse_Electronics_Tremolo_MK-III_Quick_Demo.ogv>`_ (
+    without the reverb).
 
     Parameters
     ----------
@@ -319,7 +320,9 @@ class Distortion(LavapyFilter):
 
 class ChannelMix(LavapyFilter):
     """
-    Mixes both channels (left and right) with a configurable factor on how much each channel affects the other. By default, both channel are kept separate from each other. Setting all factors to 0.5 means both channels get the same audio.
+    Mixes both channels (left and right) with a configurable factor on how much each channel affects the other. By
+    default, both channel are kept separate from each other. Setting all factors to 0.5 means both channels get the
+    same audio.
 
     Attributes
     ----------

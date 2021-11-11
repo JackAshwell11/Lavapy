@@ -39,49 +39,44 @@ __all__ = ("ExponentialBackoff",
 
 
 class ExponentialBackoff:
-    """An implementation of the exponential backoff algorithm. This provides an easy
-    way to implement an exponential backoff for reconnecting or retrying connections.
-    Once instantiated, the delay method will return the next interval to wait for
-    when retying a connection. The maximum delay increases exponentially up until
-    maxTime using the algorithm base^exponential where base and retry count are
-    incremented after each calculation. Then a random value is picked between 0 and
-    that calculation. To reset the algorithm, it will need to be redefined overwriting
-    the existing variables
+    """
+    An implementation of the exponential backoff algorithm. This provides a convenient interface to implement an
+    exponential backoff for reconnecting or retrying transmissions in a distributed network. Once instantiated.,
+    the delay method will return the next interval to wait for when retrying a connection or transmission.
 
     Parameters
     ----------
     base: int
-        The base delay in seconds. The first retry will be up to this many seconds
-    maxTime: float
-        The maximum wait time that can be calculated
-    maxTries: int
-        The limit to how big the exponential can get. This will affect the sleep time
+        The base delay in seconds. Changing this changes how fast the delay increases.
+    maxRetries: int
+        The maximum amount of retries allowed. Changing this changes how big the delay can get.
     """
-    def __init__(self, base: int = 1, maxTime: float = 60.0, maxTries: int = 10) -> None:
-        self._base: int = base
-        self._retries: int = 0
-        self._maxTime: float = maxTime
-        self._maxTries: int = maxTries
 
-        rand: random.Random = random.Random()
+    def __init__(self, base: int = 1, maxRetries: int = 20):
+        self._base: int = base
+        self._maxRetries: int = maxRetries
+
+        self._retries: int = 0
+        self._exponential: int = 0
+
+        rand = random.Random()
         rand.seed()
 
-        self._random = rand.uniform
+        self._rand = rand.uniform
 
-    def __repr__(self) -> str:
-        return f"<Lavapy ExponentialBackoff (Retries={self._retries}) (Base={self._base})>"
-
-    def delay(self) -> float:
+    def delay(self):
         """
-        This implements the exponential backoff algorithm. This is a value between
-        0 and base^exp, where after each calculation, the base and retry count is
-        incremented.
+        Computes the next delay. This is a value between 0 and (base*2)^exponential where exponential starts off at
+        1. Exponential is also restricted by the amount of retries currently done. If the amount of retries currently
+        done is bigger than maxRetries, then retries resets limiting exponential.
         """
-        exponential = min(self._retries, self._maxTries)
-        sleepTime = min(self._random(0, self._base**exponential), self._maxTime)
-        self._base += 1
         self._retries += 1
-        return sleepTime
+
+        if self._retries > self._maxRetries:
+            self._retries = 1
+
+        self._exponential = min(self._exponential + 1, self._retries)
+        return self._rand(0, self._base * 2 ** self._exponential)
 
 
 class Queue:
