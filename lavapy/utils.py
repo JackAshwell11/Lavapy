@@ -41,7 +41,7 @@ __all__ = ("ExponentialBackoff",
 class ExponentialBackoff:
     """
     An implementation of the exponential backoff algorithm. This provides a convenient interface to implement an
-    exponential backoff for reconnecting or retrying transmissions in a distributed network. Once instantiated.,
+    exponential backoff for reconnecting or retrying transmissions in a distributed network. Once instantiated,
     the delay method will return the next interval to wait for when retrying a connection or transmission.
 
     Parameters
@@ -51,32 +51,28 @@ class ExponentialBackoff:
     maxRetries: int
         The maximum amount of retries allowed. Changing this changes how big the delay can get.
     """
-
     def __init__(self, base: int = 1, maxRetries: int = 20):
         self._base: int = base
         self._maxRetries: int = maxRetries
 
         self._retries: int = 0
-        self._exponential: int = 0
 
         rand = random.Random()
         rand.seed()
 
         self._rand = rand.uniform
 
-    def delay(self):
+    def delay(self) -> float:
         """
-        Computes the next delay. This is a value between 0 and (base*2)^exponential where exponential starts off at
-        1. Exponential is also restricted by the amount of retries currently done. If the amount of retries currently
-        done is bigger than maxRetries, then retries resets limiting exponential.
+        Computes the next delay. This is a value between 0 and (base*2)^(retries+1) where if the amount of retries
+        currently done is bigger than maxRetries, then retries resets.
         """
         self._retries += 1
 
         if self._retries > self._maxRetries:
             self._retries = 1
 
-        self._exponential = min(self._exponential + 1, self._retries)
-        return self._rand(0, self._base * 2 ** self._exponential)
+        return self._rand(0, self._base * 2 ** self._retries)
 
 
 class Queue:
