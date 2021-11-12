@@ -23,7 +23,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Dict
 
 import aiohttp
 from base64 import b64encode
@@ -61,11 +61,18 @@ class SpotifyClient:
         """Returns the access token used to authenticate with Spotify."""
         return self._accessToken
 
+    @property
+    def authHeaders(self) -> Dict[str, str]:
+        """Returns the headers used for authenticating Spotify requests."""
+        return {
+            "Authorization": f"Bearer {self.accessToken}",
+            "Content-Type": "application/json"
+        }
+
     async def _getBearerToken(self) -> None:
         authTokenBytes = f"{self.clientID}:{self.clientSecret}".encode()
         bearerHeaders = {
             "Authorization": f"Basic {b64encode(authTokenBytes).decode()}",
-            "grant_type": "client_credentials",
             "Content-Type": "application/x-www-form-urlencoded"
         }
         async with self.session.post("https://accounts.spotify.com/api/token?grant_type=client_credentials", headers=bearerHeaders) as response:
