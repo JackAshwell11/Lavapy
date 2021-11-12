@@ -35,6 +35,7 @@ from .tracks import Track
 from .websocket import Websocket
 
 if TYPE_CHECKING:
+    from .ext.spotify.client import SpotifyClient
     from .player import Player
     from .tracks import MultiTrack
     from .utils import Stats
@@ -51,12 +52,13 @@ class Node:
     .. warning::
         This class should not be created manually. Please use :meth:`NodePool.createNode()` instead.
     """
-    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], identifier: str) -> None:
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], spotifyClient: Optional[SpotifyClient], identifier: str) -> None:
         self._client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self._host: str = host
         self._port: int = port
         self._password: str = password
         self._region: Optional[discord.VoiceRegion] = region
+        self._spotifyClient: SpotifyClient = spotifyClient
         self._identifier: str = identifier
         self._players: List[Player] = []
         self._stats: Optional[Stats] = None
@@ -90,6 +92,11 @@ class Node:
     def region(self) -> discord.VoiceRegion:
         """Returns the voice region assigned to this node."""
         return self._region
+
+    @property
+    def spotifyClient(self) -> Optional[SpotifyClient]:
+        """Returns the Spotify client associated with this node if there is one."""
+        return self._spotifyClient
 
     @property
     def identifier(self) -> str:

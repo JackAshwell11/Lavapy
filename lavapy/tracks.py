@@ -74,7 +74,7 @@ class Searchable:
         query = f"{cls._searchType}:{query}"
         if partial:
             # noinspection PyTypeChecker
-            return PartialResource(cls, query)
+            return PartialResource(cls, query, False)
         if node is None:
             # Avoid a circular dependency with node.buildTrack()
             from .pool import NodePool
@@ -116,7 +116,7 @@ class Identifiable:
         """
         if partial:
             # noinspection PyTypeChecker
-            return PartialResource(cls, identifier)
+            return PartialResource(cls, identifier, False)
         if node is None:
             # Avoid a circular dependency with node.buildTrack()
             from .pool import NodePool
@@ -251,9 +251,10 @@ class PartialResource:
     .. warning::
         This object will only search for the given query at playtime. Full resource information will be missing until it has been searched. It is advised not to create this manually, however, it is possible to do so.
     """
-    def __init__(self, cls: Union[Type[Track], Type[MultiTrack]], query: str) -> None:
+    def __init__(self, cls: Union[Type[Track], Type[MultiTrack]], query: str, isExtension: bool) -> None:
         self._cls: Union[Type[Track], Type[MultiTrack]] = cls
         self._query: str = query
+        self._isExtension: bool = isExtension
 
     def __repr__(self) -> str:
         return f"<Lavapy PartialResource (Cls={self.cls}) (Query={self.query})>"
