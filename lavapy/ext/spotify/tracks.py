@@ -23,59 +23,141 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union, List
+import re
+from typing import TYPE_CHECKING, Optional, Callable, Union, Tuple, List, Dict, Type, Any
 
-from lavapy.tracks import PartialResource, YoutubeTrack
+from lavapy.tracks import Playable, Track, MultiTrack, YoutubeTrack
+from .exceptions import InvalidSpotifyClient
 
 if TYPE_CHECKING:
     from lavapy.node import Node
 
-__all__ = ("SpotifySearchable",
-           "SpotifyIdentifiable",
-           "SpotifyTrack")
+__all__ = ("SpotifyPlayable",
+           "SpotifyTrack",
+           "SpotifyPlaylist")
 
 
-class SpotifySearchable:
-    _searchEndpoint: str = "https://api.spotify.com/v1/search?type="
-    _searchType: str = ""
+# async def spotifyQueryProcessor(cls: Union[SpotifyTrack, SpotifyPlaylist], query: str, node: Node) -> Tuple[Union[str, List[str]], Optional[str]]:
+#     """|coro|
+#
+#     Parameters
+#     ----------
+#     cls: Union[SpotifyTrack, SpotifyPlaylist]
+#         The Spotify resource to query the web API for details about.
+#     query: str
+#         The query to send to Spotify's web API.
+#     node: Node
+#         The Lavapy node to use for querying the Spotify web API.
+#
+#     Raises
+#     ------
+#     InvalidSpotifyClient
+#         The provided Lavapy node's Spotify client is invalid
+#
+#     Returns
+#     -------
+#     Tuple[Union[str, List[str]], Optional[str]]
+#         A query or list of queries which can be used to search Lavalink for. There is also a multitrack name for use with :meth:`spotifyExtensionIterator()`.
+#     """
+#     if node.spotifyClient is None:
+#         raise InvalidSpotifyClient(f"{node.identifier}'s SpotifyClient is invalid.")
+#     regexResult = re.compile("https://open\.spotify\.com/.+/(?P<identifier>.+)\?").match(query)
+#     if cls._spotifyType == "track":
+#         if not regexResult:
+#             async with node.spotifyClient.session.get("https://api.spotify.com/v1/search?type=track", headers=node.spotifyClient.authHeaders, params={"q": query}) as response:
+#                 data = await response.json()
+#             data = data["tracks"]["items"][0]
+#         else:
+#             identifier = regexResult.group("identifier")
+#             async with node.spotifyClient.session.get(f"https://api.spotify.com/v1/tracks/{identifier}", headers=node.spotifyClient.authHeaders) as response:
+#                 data = await response.json()
+#         return f'ytsearch:{data["artists"][0]["name"]} - {data["name"]}', None
+#     elif cls._spotifyType == "playlist":
+#         identifier = regexResult.group("identifier")
+#         async with node.spotifyClient.session.get(f"https://api.spotify.com/v1/playlists/{identifier}", headers=node.spotifyClient.authHeaders) as response:
+#             data = await response.json()
+#         trackArr: List[Dict[str, Any]] = data["tracks"]["items"]
+#         nextUrl = data["tracks"]["next"]
+#         playlistName = data["name"]
+#         while nextUrl:
+#             async with node.spotifyClient.session.get(data["tracks"]["next"], headers=node.spotifyClient.authHeaders) as response:
+#                 data = await response.json()
+#             trackArr.extend(data["items"])
+#             nextUrl = data["next"]
+#         return [f'ytsearch:{track["track"]["artists"][0]["name"]} - {track["track"]["name"]}' for track in trackArr], playlistName
+#     elif cls._spotifyType == "album":
+#         pass
+#
+#
+# async def spotifyExtensionIterator(cls: Union[Type[SpotifyPlaylist]], query: List[str], node: Node, multitrackName: str) -> Union[SpotifyPlaylist]:
+#     """|coro|
+#
+#     Parameters
+#     ----------
+#     cls: Union[Type[SpotifyPlaylist]]
+#         The Spotify resource to create an instance of.
+#     query: List[str]
+#         A list of strings to query Lavalink for.
+#     node: Node
+#         The Lavapy node to use for querying Lavalink.
+#     multitrackName
+#
+#     Returns
+#     -------
+#     Union[SpotifyPlaylist]
+#         A Lavapy Spotify playlist which can be used for playing music.
+#     """
+#     trackArr = []
+#     for count, trackQuery in enumerate(query):
+#         tracks = await node.getTracks(YoutubeTrack, trackQuery)
+#         trackArr.append(tracks[0])
+#         if count == 1:
+#             break
+#     return cls(multitrackName, trackArr)
+#
+#
+# async def spotifyReturnProcessor(tracks: List[SpotifyTrack], search: bool, returnFirst: bool) -> Optional[Union[SpotifyTrack, List[SpotifyTrack]]]:
+#     """|coro|
+#
+#     Parameters
+#     ----------
+#     tracks: List[SpotifyTrack]
+#         A list of Spotify tracks to process.
+#     search: bool
+#         Whether the search was a query or identifier search.
+#     returnFirst: bool
+#         Whether to return only the first result or not.
+#
+#     Returns
+#     -------
+#     Optional[Union[SpotifyTrack, List[SpotifyTrack]]]
+#         A Lavapy Spotify track or list of tracks which can be used for playing music
+#     """
+#     if search and not returnFirst:
+#         return tracks
+#     return tracks[0]
+
+
+class SpotifyPlayable:
+    """The base class for all Lavapy Spotify resources. This supports both query searches and identifier searches."""
+    _spotifyType: str
 
     @classmethod
-    async def search(cls, query: str, node: Node = None, returnFirst: bool = True, partial: bool = False) -> Optional[Union[SpotifyTrack, PartialResource, List[SpotifyTrack]]]:
-        if partial:
-            # noinspection PyTypeChecker
-            return PartialResource(cls, query, True)
-        if node is None:
-            # Avoid a circular dependency with node.buildTrack()
-            from lavapy.pool import NodePool
-            node = NodePool.getNode()
-        searchParams = {
-            "q": query
-        }
-        async with node.spotifyClient.session.get(f"{cls._searchEndpoint}{cls._searchType}", headers=node.spotifyClient.authHeaders, params=searchParams) as response:
-            data = await response.json()
-        data = data["tracks"]["items"][0]
-        artistName = data["artists"][0]["name"]
-        trackName = data["name"]
-        tracks = await node.getTracks(YoutubeTrack, f"{artistName} - {trackName}")
-        if tracks is not None:
-            if returnFirst:
-                return SpotifyTrack(tracks[0])
-            return [SpotifyTrack(track) for track in tracks]
-
-
-class SpotifyIdentifiable:
-    _searchEndpoint: str = "https://api.spotify.com/v1/tracks/id"
-
-    @classmethod
-    async def get(cls, identifier: str, node: Node = None, partial: bool = False):
+    async def search(cls, query: str, node: Node = None, search: bool = True, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Track, List[Track], PartialResource, MultiTrack]]:
         pass
 
 
-class SpotifyTrack(SpotifySearchable, SpotifyIdentifiable):
-    _searchType: str = "track"
-
-    def __init__(self) -> None:
-        pass
+class SpotifyTrack(Track, SpotifyPlayable):
+    """A track created using a search to Spotify."""
+    _spotifyType: str = "track"
 
     def __repr__(self) -> str:
-        return f"<Lavapy SpotifyTrack>"
+        return f"<Lavapy SpotifyTrack (YoutubeIdentifier={self.identifier})>"
+
+
+class SpotifyPlaylist(MultiTrack, SpotifyPlayable):
+    """A playlist created using a search to Spotify."""
+    _spotifyType: str = "playlist"
+
+    def __repr__(self) -> str:
+        return f"<Lavapy SpotifyPlaylist>"

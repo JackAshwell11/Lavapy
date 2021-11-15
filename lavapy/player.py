@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
+from typing import TYPE_CHECKING, Optional, Union, List, Dict, Type, Any
 
 import discord.ext
 
@@ -257,7 +257,7 @@ class Player(discord.VoiceProtocol):
         Parameters
         ----------
         track: Union[Track, PartialResource, MultiTrack]
-            The resource to play.
+            The Lavapy resource to play.
         startTime: int
             The position in milliseconds to start at. By default, this is the beginning.
         endTime: int
@@ -271,16 +271,12 @@ class Player(discord.VoiceProtocol):
         """
         if self.isPlaying and not replace:
             return
-        if isinstance(track, PartialResource):
-            track = await self.node.getTracks(track._cls, track.query)
-            if track is None:
-                return
         if isinstance(track, MultiTrack):
             temp = track
             track = temp.tracks.pop()
             self.queue.addIterable(temp)
-        elif isinstance(track, list):
-            track = track[0]
+        if isinstance(track, PartialResource):
+            track = await self.node.processPartialResource(track)
         newTrack = {
             "op": "play",
             "guildId": str(self.guild.id),

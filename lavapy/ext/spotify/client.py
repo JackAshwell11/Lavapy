@@ -32,7 +32,7 @@ from .exceptions import SpotifyAuthException
 
 
 class SpotifyClient:
-    def __init__(self, clientID: str, clientSecret: str):
+    def __init__(self, clientID: str, clientSecret: str) -> None:
         self._clientID: str = clientID
         self._clientSecret: str = clientSecret
         self._session: aiohttp.ClientSession = aiohttp.ClientSession()
@@ -70,6 +70,10 @@ class SpotifyClient:
         }
 
     async def _getBearerToken(self) -> None:
+        """|coro|
+
+        Gets a Spotify bearer token for use when communicating with Spotify.
+        """
         authTokenBytes = f"{self.clientID}:{self.clientSecret}".encode()
         bearerHeaders = {
             "Authorization": f"Basic {b64encode(authTokenBytes).decode()}",
