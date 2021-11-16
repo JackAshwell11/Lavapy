@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Optional, Union, List, Dict, Type, Any
 
 if TYPE_CHECKING:
     from .node import Node
+    from .ext.spotify.tracks import SpotifyPlayable
 
 
 __all__ = ("Playable",
@@ -80,7 +81,7 @@ class Playable:
         if search:
             query = f"{cls._searchType}:{query}"
         if partial:
-            return PartialResource(cls, query, search)
+            return PartialResource(cls, query)
         tracks = await node.getTracks(cls, query)
         if tracks is not None:
             if search and returnFirst:
@@ -100,20 +101,17 @@ class PartialResource:
 
     Parameters
     ----------
-    cls: Type[Playable]
+    cls: Union[Type[Playable], Type[SpotifyPlayable]]
         The resource to create a instance of at playtime.
     query: str
         The query to search for at playtime.
-    search: bool
-        Whether the query is a query search or an identifier search.
 
     .. warning::
         This object will only search for the given query at playtime. Full resource information will be missing until it has been searched. It is advised not to create this manually, however, it is possible to do so.
     """
-    def __init__(self, cls: Type[Playable], query: str, search: bool) -> None:
+    def __init__(self, cls: Union[Type[Playable], Type[SpotifyPlayable]], query: str) -> None:
         self._cls = cls
         self._query: str = query
-        self._search: bool = search
 
     def __repr__(self) -> str:
         return f"<Lavapy PartialResource (Cls={self.cls}) (Query={self.query})>"
@@ -127,11 +125,6 @@ class PartialResource:
     def query(self) -> str:
         """Returns the query which will be searched for at playtime."""
         return self._query
-
-    @property
-    def search(self) -> bool:
-        """Returns whether the query is a query search or an identifier search."""
-        return self._search
 
 
 class Track:

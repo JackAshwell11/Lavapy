@@ -273,10 +273,12 @@ class Player(discord.VoiceProtocol):
             return
         if isinstance(track, MultiTrack):
             temp = track
-            track = temp.tracks.pop()
+            track = temp.tracks.pop(0)
             self.queue.addIterable(temp)
         if isinstance(track, PartialResource):
             track = await self.node.processPartialResource(track)
+            if track is None:
+                return
         newTrack = {
             "op": "play",
             "guildId": str(self.guild.id),

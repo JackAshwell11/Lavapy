@@ -35,10 +35,11 @@ from .tracks import Track
 from .websocket import Websocket
 
 if TYPE_CHECKING:
-    from .ext.spotify.client import SpotifyClient
     from .player import Player
     from .tracks import Playable, PartialResource, MultiTrack
     from .utils import Stats
+    from .ext.spotify.client import SpotifyClient
+    from .ext.spotify.tracks import SpotifyPlayable
 
 __all__ = ("Node",)
 
@@ -213,14 +214,14 @@ class Node:
             raise BuildTrackError("A error occurred while building the track.", track)
         return Track(id, track)
 
-    async def getTracks(self, cls: Union[Type[Playable]], query: str) -> Optional[Union[Track, List[Track], MultiTrack]]:
+    async def getTracks(self, cls: Union[Type[Playable], Type[SpotifyPlayable]], query: str) -> Optional[Union[Track, List[Track], MultiTrack]]:
         """|coro|
 
         Gets data about a :class:`Track` or :class:`MultiTrack` from Lavalink.
 
         Parameters
         ----------
-        cls: Union[Type[Playable]]
+        cls: Union[Type[Playable], Type[SpotifyPlayable]]
             The Lavapy resource to create an instance of.
         query: str
             The query to search for via Lavalink.
@@ -252,5 +253,20 @@ class Node:
             # noinspection PyTypeChecker
             return cls(playlistInfo["name"], [cls._trackCls(track["track"], track["info"]) for track in data["tracks"]])
 
-    async def processPartialResource(self, partial: PartialResource):
-        print(partial)
+    async def processPartialResource(self, partial: PartialResource) -> Track:
+        """|coro|
+
+        Processes a :class:`PartialResource` and returns the actual data.
+
+        Parameters
+        ----------
+        partial: PartialResource
+            The partial resource to get details on.
+
+        Returns
+        -------
+        Track
+            A Lavapy track object which can be used to play music.
+        """
+        temp = await self.getTracks(partial.cls, partial.query)
+        return temp[0]
