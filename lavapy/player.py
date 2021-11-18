@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-from typing import TYPE_CHECKING, Optional, Union, List, Dict, Type, Any
+from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
 
 import discord.ext
 

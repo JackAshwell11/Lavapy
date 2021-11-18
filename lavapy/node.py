@@ -33,12 +33,13 @@ import discord.ext
 from .exceptions import WebsocketAlreadyExists, BuildTrackError, LavalinkException, LoadTrackError
 from .tracks import Track
 from .websocket import Websocket
+from .ext.spotify.client import SpotifyClient
+from .ext.spotify.exceptions import InvalidSpotifyClient
 
 if TYPE_CHECKING:
     from .player import Player
-    from .tracks import Playable, PartialResource, MultiTrack
+    from .tracks import Playable, MultiTrack
     from .utils import Stats
-    from .ext.spotify.client import SpotifyClient
     from .ext.spotify.tracks import SpotifyPlayable
 
 __all__ = ("Node",)
@@ -53,18 +54,25 @@ class Node:
     .. warning::
         This class should not be created manually. Please use :meth:`NodePool.createNode()` instead.
     """
-    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], spotifyClient: Optional[SpotifyClient], identifier: str) -> None:
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], secure: bool, spotifyClient: Optional[SpotifyClient], identifier: str) -> None:
         self._client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self._host: str = host
         self._port: int = port
         self._password: str = password
         self._region: Optional[discord.VoiceRegion] = region
-        self._spotifyClient: SpotifyClient = spotifyClient
+        self._secure: bool = secure
+        if spotifyClient is not None:
+            if isinstance(spotifyClient, SpotifyClient):
+                self._spotifyClient: SpotifyClient = spotifyClient
+            else:
+                raise InvalidSpotifyClient(f"Invalid Spotify client for node {self.identifier}")
         self._identifier: str = identifier
         self._players: List[Player] = []
         self._stats: Optional[Stats] = None
         self._session: aiohttp.ClientSession = aiohttp.ClientSession()
         self._websocket: Optional[Websocket] = None
+        self._websocketUri: str = f"{'wss' if self.secure else 'ws'}://{self.host}:{self.port}"
+        self._restUri: str = f"{'https' if self._secure else 'http'}://{self.host}:{self.port}"
 
     def __repr__(self) -> str:
         return f"<Lavapy Node (Domain={self.host}:{self.port}) (Identifier={self.identifier}) (Region={self.region}) (Players={len(self.players)})>"
@@ -95,6 +103,11 @@ class Node:
         return self._region
 
     @property
+    def secure(self) -> bool:
+        """Returns whether the connection to the Lavalink server is secure or not."""
+        return self._secure
+
+    @property
     def spotifyClient(self) -> Optional[SpotifyClient]:
         """Returns the Spotify client associated with this node if there is one."""
         return self._spotifyClient
@@ -118,6 +131,23 @@ class Node:
     def session(self) -> aiohttp.client.ClientSession:
         """Returns the session used for sending and getting data."""
         return self._session
+
+    @property
+    def websocketUri(self) -> str:
+        """Returns the URI used for initialising the websocket."""
+        return self._websocketUri
+
+    @property
+    def restUri(self) -> str:
+        """Returns the URI used for communicating with the Lavalink server."""
+        return self._restUri
+
+    @property
+    def penalty(self) -> float:
+        """Returns the load balancing penalty for this node."""
+        if self.stats is None:
+            return 9e30
+        return self.stats.penalty.total
 
     async def connect(self) -> None:
         """|coro|
@@ -148,8 +178,13 @@ class Node:
         for player in self.players:
             await player.disconnect(force=force)
 
-        self._websocket.listener.cancel()
-        await self._websocket.connection.close()
+        try:
+            self._websocket.listener.cancel()
+            await self._websocket.connection.close()
+            from .pool import NodePool
+            del NodePool._nodes[self.identifier]
+        except Exception as e:
+            logger.debug(f"Failed to remove node {self.identifier} with error {e}")
 
     async def _getData(self, endpoint: str, params: Dict[str, str]) -> Tuple[Dict[str, Any], ClientResponse]:
         """|coro|
@@ -172,7 +207,7 @@ class Node:
         headers = {
             "Authorization": self.password
         }
-        async with await self.session.get(f"http://{self.host}:{self.port}/{endpoint}", headers=headers, params=params) as req:
+        async with await self.session.get(f"{self.restUri}/{endpoint}", headers=headers, params=params) as req:
             data = await req.json()
         return data, req
 

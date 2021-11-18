@@ -241,6 +241,11 @@ class YoutubeTrack(Track, Playable):
     def __repr__(self) -> str:
         return f"<Lavapy YoutubeTrack (Identifier={self.identifier})>"
 
+    @property
+    def thumbnail(self) -> str:
+        """Returns the URI to the thumbnail of this track."""
+        return f"https://img.youtube.com/vi/{self.identifier}/maxresdefault.jpg"
+
 
 class YoutubeMusicTrack(Track, Playable):
     """A track created using a search to Youtube Music."""

@@ -27,7 +27,6 @@ import re
 from typing import TYPE_CHECKING, Optional, Union, Tuple, List, Dict, Type, Any
 
 from lavapy.tracks import PartialResource, Track, MultiTrack, YoutubeTrack
-from .exceptions import InvalidSpotifyClient
 
 if TYPE_CHECKING:
     from lavapy.node import Node
@@ -52,18 +51,11 @@ async def getDetails(cls: Type[SpotifyPlayable], query: str, node: Node) -> Tupl
     node: Node
         The Lavapy node to use for querying the Spotify web API.
 
-    Raises
-    ------
-    InvalidSpotifyClient
-        The provided Lavapy node's Spotify client is invalid
-
     Returns
     -------
     Tuple[Union[str, List[str]], Optional[str]]
         A tuple containing a Youtube query or a list of Youtube query as well as the multitrack name.
     """
-    if node.spotifyClient is None:
-        raise InvalidSpotifyClient(f"{node.identifier}'s SpotifyClient is invalid.")
     regexResult = re.compile("https://open\.spotify\.com/.+/(?P<identifier>.+)\?").match(query)
     if cls._spotifyType == "track":
         if not regexResult:

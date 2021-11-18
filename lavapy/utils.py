@@ -35,7 +35,8 @@ if TYPE_CHECKING:
 
 __all__ = ("ExponentialBackoff",
            "Queue",
-           "Stats")
+           "Stats",
+           "Penalty")
 
 
 class ExponentialBackoff:
@@ -163,7 +164,7 @@ class Queue:
 
     def clear(self) -> None:
         """Clears all track objects in the queue."""
-        self.queue.clear()
+        self.tracks.clear()
 
 
 class Stats:
@@ -223,5 +224,27 @@ class Stats:
         self.framesDeficit: int = frameStats.get("deficit", -1)
         self.framesNulled: int = frameStats.get("nulled", -1)
 
+        self.penalty: Penalty = Penalty(self)
+
     def __repr__(self) -> str:
         return f"<Lavapy Stats (Node={self.node})>"
+
+
+class Penalty:
+    """Represents a load balancing penalty for use when assigning a Lavapy :class:`Node` object."""
+    def __init__(self, stats: Stats):
+        self.playerPenalty: int = stats.playingPlayers
+        self.cpuPenalty: float = 1.05 ** (100 * stats.systemLoad) * 10 - 10
+        self.nullFramePenalty: float = 0
+        self.deficitFramePenalty: float = 0
+
+        if stats.framesNulled != -1:
+            self.nullFramePenalty = (1.03 ** (500 * (stats.framesNulled / 3000))) * 300 - 300
+            self.nullFramePenalty *= 2
+
+        if stats.framesDeficit != -1:
+            self.deficitFramePenalty = (
+                1.03 ** (500 * (stats.framesDeficit / 3000))
+            ) * 600 - 600
+
+        self.total: float = (self.playerPenalty + self.cpuPenalty + self.nullFramePenalty + self.deficitFramePenalty)

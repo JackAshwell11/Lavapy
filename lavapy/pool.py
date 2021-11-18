@@ -91,7 +91,7 @@ class NodePool:
         return sorted(possibleNodes, key=lambda x: len(x.players))[0]
 
     @classmethod
-    async def createNode(cls, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
+    async def createNode(cls, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
         Creates a Lavapy :class:`Node` object and stores it for later use.
@@ -108,6 +108,8 @@ class NodePool:
             The password to the Lavalink server.
         region: Optional[:class:`discord.VoiceRegion`]
             The voice region to assign to this node.
+        secure: bool
+            Whether to connect securely to the Lavalink server or not.
         spotifyClient: Optional[SpotifyClient]
             A Lavapy Spotify client for interacting with Spotify.
         identifier: Optional[str]
@@ -129,7 +131,7 @@ class NodePool:
         if identifier in cls._nodes:
             raise NodeOccupied(f"A node with the identifier <{identifier}> already exists.")
 
-        node = Node(client, host, port, password, region, spotifyClient, identifier)
+        node = Node(client, host, port, password, region, secure, spotifyClient, identifier)
         cls._nodes[identifier] = node
         await node.connect()
         await node.spotifyClient._getBearerToken()

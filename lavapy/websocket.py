@@ -51,7 +51,6 @@ class Websocket:
     """
     def __init__(self, node: Node) -> None:
         self._node: Node = node
-        self._connected: bool = False
         self._connection: Optional[aiohttp.client.ClientWebSocketResponse] = None
         self._listener: Optional[asyncio.Task] = None
         asyncio.create_task(self.connect())
@@ -67,7 +66,7 @@ class Websocket:
     @property
     def connected(self) -> bool:
         """Returns whether the websocket is connected or not."""
-        return self._connected
+        return self._connection is not None and not self.connection.closed
 
     @property
     def connection(self) -> Optional[aiohttp.client.ClientWebSocketResponse]:
@@ -111,11 +110,17 @@ class Websocket:
             "Client-Name": "Lavapy"
         }
         logger.debug(f"Attempting connection with headers: {headers}")
-        self._connection = await self.node.session.ws_connect(f"ws://{self.node.host}:{self.node.port}", headers=headers, heartbeat=60)
+        try:
+            self._connection = await self.node.session.ws_connect(self.node.websocketUri, headers=headers, heartbeat=60)
+        except Exception as error:
+            if isinstance(error, aiohttp.WSServerHandshakeError) and error.status == 401:
+                logger.error(f"Authorisation failed for node {self.node.identifier}")
+            else:
+                logger.error(f"Connection failure for node {self.node.identifier} with error {error}")
+            return
         self._listener = self.node.client.loop.create_task(self.createListener())
-        self._connected = True
-        event = WebsocketOpenEvent(self.node)
         logger.debug(f"Connection established with node: {self.node.__repr__()}")
+        event = WebsocketOpenEvent(self.node)
         await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
 
     async def disconnect(self) -> None:
@@ -125,7 +130,6 @@ class Websocket:
         """
         logger.debug(f"Closing connection for node: {self.node.__repr__()}")
         await self._connection.close()
-        self._connected = False
 
     async def createListener(self) -> None:
         """|coro|
@@ -135,10 +139,16 @@ class Websocket:
         backoff = ExponentialBackoff()
         while True:
             msg = await self.connection.receive()
-            if msg.type is aiohttp.WSMsgType.TEXT:
-                await asyncio.create_task(self.processListener(msg.json()))
-            elif msg.type is aiohttp.WSMsgType.CLOSED:
-                await asyncio.sleep(backoff.delay())
+            if msg.type is aiohttp.WSMsgType.CLOSED:
+                logger.debug(f"Websocket Closed: {msg.extra}")
+                retry = backoff.delay()
+                logger.debug(f"Retrying connection in <{retry}> seconds")
+                await asyncio.sleep(retry)
+            else:
+                if msg.data == 1011:
+                    logger.error(f"Internal Lavalink error encountered with node {self.node.identifier}. Terminating without retries. Consider updating your Lavalink server.")
+                    self.listener.cancel()
+                asyncio.create_task(self.processListener(msg.json()))
 
     async def processListener(self, data: Dict[str, Any]) -> None:
         """|coro|
