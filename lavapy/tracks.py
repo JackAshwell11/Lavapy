@@ -23,6 +23,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Optional, Union, List, Dict, Type, Any
 
 if TYPE_CHECKING:
@@ -51,7 +52,7 @@ class Playable:
     _trackCls: Optional[Type[Track]]
 
     @classmethod
-    async def search(cls, query: str, node: Node = None, search: bool = True, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Track, List[Track], PartialResource, MultiTrack]]:
+    async def search(cls, query: str, node: Node = None, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Track, List[Track], PartialResource, MultiTrack]]:
         """|coro|
 
         Performs a search to Lavalink for a specific resource.
@@ -62,8 +63,6 @@ class Playable:
             The query to search for.
         node: Node
             The Lavapy Node to use for searching. If this is not supplied, a random one from the node pool will be retrieved.
-        search: bool
-            Whether to use a query search or an identifier search.
         returnFirst: bool
             Whether to return only the first result or not.
         partial: bool
@@ -74,17 +73,18 @@ class Playable:
         Optional[Union[Track, List[Track], PartialResource, MultiTrack]]
             A Lavapy resource or a list of resources which can be used to play music.
         """
+        regexResult = re.compile("https://.+/").match(query)
         if node is None:
             # Avoid a circular dependency with node.buildTrack()
             from .pool import NodePool
             node = NodePool.getNode()
-        if search:
+        if not regexResult:
             query = f"{cls._searchType}:{query}"
         if partial:
             return PartialResource(cls, query)
         tracks = await node.getTracks(cls, query)
         if tracks is not None:
-            if search and returnFirst:
+            if isinstance(tracks, list) and returnFirst:
                 return tracks[0]
             return tracks
 
