@@ -2,10 +2,6 @@
     :align: center
     :width: 1000px
 
-
-Lavapy
-======
-
 .. image:: https://img.shields.io/pypi/pyversions/Lavapy
     :target: https://pypi.org/project/Lavapy/
     :align: center
