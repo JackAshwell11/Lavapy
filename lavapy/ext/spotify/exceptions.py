@@ -24,8 +24,13 @@ SOFTWARE.
 from lavapy.exceptions import LavapyException
 
 
-__all__ = ("SpotifyAuthException",)
+__all__ = ("SpotifyAuthException",
+           "InvalidSpotifyClient")
 
 
 class SpotifyAuthException(LavapyException):
     """Exception raised when an error occurred while authorising with Spotify."""
+
+
+class InvalidSpotifyClient(LavapyException):
+    """Exception raised when a node's SpotifyClient is invalid."""

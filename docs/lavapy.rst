@@ -42,16 +42,16 @@ Queue
 Playables
 ---------
 
-Searchable
+Playable
 ~~~~~~~~~~
 
-.. autoclass:: Searchable
+.. autoclass:: Playable
     :members:
 
-Identifiable
-~~~~~~~~~~~~
+PartialResource
+~~~~~~~~~~~~~~~
 
-.. autoclass:: Identifiable
+.. autoclass:: PartialResource
     :members:
 
 Track
@@ -64,12 +64,6 @@ MultiTrack
 ~~~~~~~~~~
 
 .. autoclass:: MultiTrack
-    :members:
-
-PartialResource
-~~~~~~~~~~~~~~~
-
-.. autoclass:: PartialResource
     :members:
 
 YoutubeTrack

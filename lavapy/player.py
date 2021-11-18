@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
+from typing import TYPE_CHECKING, Optional, Union, List, Dict, Type, Any
 
 import discord.ext
 
@@ -157,6 +157,21 @@ class Player(discord.VoiceProtocol):
 
         self._lastPosition = state.get("position", 0)/1000
 
+    def _multitrackCheck(self, track: Union[Track, MultiTrack]) -> Track:
+        """
+        Checks if a resource is a multitrack and if it is then it grabs the first track and pushes the rest to the queue.
+
+        Parameters
+        ----------
+        track: Union[Track, MultiTrack]
+            A Lavapy multitrack resource to check.
+        """
+        if isinstance(track, MultiTrack):
+            temp = track
+            track = temp.tracks.pop(0)
+            self.queue.addIterable(temp)
+        return track
+
     async def on_voice_server_update(self, data: Dict[str, str]) -> None:
         """|coro|
 
@@ -257,7 +272,7 @@ class Player(discord.VoiceProtocol):
         Parameters
         ----------
         track: Union[Track, PartialResource, MultiTrack]
-            The resource to play.
+            The Lavapy resource to play.
         startTime: int
             The position in milliseconds to start at. By default, this is the beginning.
         endTime: int
@@ -271,16 +286,14 @@ class Player(discord.VoiceProtocol):
         """
         if self.isPlaying and not replace:
             return
+        track = self._multitrackCheck(track)
         if isinstance(track, PartialResource):
-            track = await self.node.getTracks(track._cls, track.query)
+            track = await self.node.getTracks(track.cls, track.query)
             if track is None:
                 return
-        if isinstance(track, MultiTrack):
-            temp = track
-            track = temp.tracks.pop()
-            self.queue.addIterable(temp)
-        elif isinstance(track, list):
-            track = track[0]
+            if isinstance(track, list):
+                track = track[0]
+            track = self._multitrackCheck(track)
         newTrack = {
             "op": "play",
             "guildId": str(self.guild.id),

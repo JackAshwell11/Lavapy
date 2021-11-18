@@ -30,9 +30,22 @@ from base64 import b64encode
 
 from .exceptions import SpotifyAuthException
 
+__all__ = ("SpotifyClient",)
+
 
 class SpotifyClient:
-    def __init__(self, clientID: str, clientSecret: str):
+    """
+
+    Provides an interface for easily initialising and communicating with Spotify.
+
+    Parameters
+    ----------
+    clientID: str
+        The Spotify client ID of the application you want to connect to.
+    clientSecret: str
+        The Spotify client secret of the application you want to connect to.
+    """
+    def __init__(self, clientID: str, clientSecret: str) -> None:
         self._clientID: str = clientID
         self._clientSecret: str = clientSecret
         self._session: aiohttp.ClientSession = aiohttp.ClientSession()
@@ -70,6 +83,10 @@ class SpotifyClient:
         }
 
     async def _getBearerToken(self) -> None:
+        """|coro|
+
+        Gets a Spotify bearer token for use when communicating with Spotify.
+        """
         authTokenBytes = f"{self.clientID}:{self.clientSecret}".encode()
         bearerHeaders = {
             "Authorization": f"Basic {b64encode(authTokenBytes).decode()}",

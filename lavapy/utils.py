@@ -98,25 +98,25 @@ class Queue:
     A class representing a usable Queue.
     """
     def __init__(self) -> None:
-        self._queue: List[Track] = []
+        self._tracks: List[Track] = []
 
     def __repr__(self) -> str:
-        return f"<Lavapy Queue (Queue={self._queue})>"
+        return f"<Lavapy Queue (Queue={self._tracks})>"
 
     @property
-    def queue(self) -> List[Track]:
+    def tracks(self) -> List[Track]:
         """Returns a list of track objects."""
-        return self._queue
+        return self._tracks
 
     @property
     def count(self) -> int:
         """Returns the size of the queue."""
-        return len(self._queue)
+        return len(self._tracks)
 
     @property
     def isEmpty(self) -> bool:
         """Returns whether the queue is empty or not."""
-        return not self._queue
+        return not self._tracks
 
     def get(self) -> Track:
         """
@@ -134,7 +134,7 @@ class Queue:
         """
         if self.isEmpty:
             raise QueueEmpty("Queue is empty")
-        return self._queue.pop()
+        return self._tracks.pop()
 
     def add(self, track: Track) -> None:
         """
@@ -145,7 +145,7 @@ class Queue:
         track: Track
             The track to add to the queue.
         """
-        self._queue.append(track)
+        self._tracks.append(track)
 
     def addIterable(self, iterable: Union[MultiTrack, Iterable[Track]]) -> None:
         """

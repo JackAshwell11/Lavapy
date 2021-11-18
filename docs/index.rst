@@ -26,5 +26,12 @@ Documentation
 
 .. toctree::
     :maxdepth: 3
+    :caption: API Reference
 
     lavapy
+
+.. toctree::
+    :maxdepth: 3
+    :caption: Extensions API Reference
+
+    exts/spotify
