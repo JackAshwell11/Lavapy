@@ -252,21 +252,3 @@ class Node:
             playlistInfo = data["playlistInfo"]
             # noinspection PyTypeChecker
             return cls(playlistInfo["name"], [cls._trackCls(track["track"], track["info"]) for track in data["tracks"]])
-
-    async def processPartialResource(self, partial: PartialResource) -> Track:
-        """|coro|
-
-        Processes a :class:`PartialResource` and returns the actual data.
-
-        Parameters
-        ----------
-        partial: PartialResource
-            The partial resource to get details on.
-
-        Returns
-        -------
-        Track
-            A Lavapy track object which can be used to play music.
-        """
-        temp = await self.getTracks(partial.cls, partial.query)
-        return temp[0]

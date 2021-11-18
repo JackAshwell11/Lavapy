@@ -30,8 +30,21 @@ from base64 import b64encode
 
 from .exceptions import SpotifyAuthException
 
+__all__ = ("SpotifyClient",)
+
 
 class SpotifyClient:
+    """
+
+    Provides an interface for easily initialising and communicating with Spotify.
+
+    Parameters
+    ----------
+    clientID: str
+        The Spotify client ID of the application you want to connect to.
+    clientSecret: str
+        The Spotify client secret of the application you want to connect to.
+    """
     def __init__(self, clientID: str, clientSecret: str) -> None:
         self._clientID: str = clientID
         self._clientSecret: str = clientSecret

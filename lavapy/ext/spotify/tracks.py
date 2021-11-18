@@ -90,13 +90,13 @@ async def getDetails(cls: Type[SpotifyPlayable], query: str, node: Node) -> Tupl
             data = await response.json()
         trackArr: List[Dict[str, Any]] = data["tracks"]["items"]
         nextUrl = data["tracks"]["next"]
-        playlistName = data["name"]
+        albumName = data["name"]
         while nextUrl:
             async with node.spotifyClient.session.get(nextUrl, headers=node.spotifyClient.authHeaders) as response:
                 data = await response.json()
             trackArr.extend(data["items"])
             nextUrl = data["next"]
-        return [f'ytsearch:{track["artists"][0]["name"]} - {track["name"]}' for track in trackArr], playlistName
+        return [f'ytsearch:{track["artists"][0]["name"]} - {track["name"]}' for track in trackArr], albumName
 
 
 class SpotifyPlayable:
@@ -113,6 +113,9 @@ class SpotifyPlayable:
         """|coro|
 
         Performs a search to Lavalink for a specific Spotify resource.
+
+        .. warning::
+            If the query leads to a multitrack, getting the full playlist can take a long time. Therefore, it is advised to use partial resources for multitracks.
 
         Parameters
         ----------
@@ -145,12 +148,13 @@ class SpotifyPlayable:
         else:
             temp = []
             for qry in query:
-                result = await node.getTracks(cls, qry)
+                result = await node.getTracks(SpotifyTrack, qry)
                 temp.append(result[0])
             tracks = cls(multitrackName, temp)
         if tracks is not None:
             if isinstance(tracks, list) and returnFirst:
                 return tracks[0]
+            # noinspection PyTypeChecker
             return tracks
 
     def __init__(self, *data: Any) -> None:
@@ -176,6 +180,7 @@ class SpotifyPlaylist(MultiTrack, SpotifyPlayable):
 class SpotifyAlbum(MultiTrack, SpotifyPlayable):
     """An album created using a search to Spotify."""
     _spotifyType: str = "album"
+    _trackCls: Track = YoutubeTrack
 
     def __repr__(self) -> str:
         return f"<Lavapy SpotifyAlbum (Track count={len(self.tracks)})>"
