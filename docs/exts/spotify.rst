@@ -16,24 +16,28 @@ SpotifyBase
 ~~~~~~~~~~~~~~~
 
 .. autoclass:: SpotifyBase
+    :show-inheritance:
     :members:
 
 SpotifyTrack
 ~~~~~~~~~~~~
 
 .. autoclass:: SpotifyTrack
+    :show-inheritance:
     :members:
 
 SpotifyPlaylist
 ~~~~~~~~~~~~~~~
 
 .. autoclass:: SpotifyPlaylist
+    :show-inheritance:
     :members:
 
 SpotifyAlbum
 ~~~~~~~~~~~~
 
 .. autoclass:: SpotifyAlbum
+    :show-inheritance:
     :members:
 
 Exceptions
