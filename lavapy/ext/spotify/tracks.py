@@ -31,7 +31,8 @@ from lavapy.tracks import Playable, Track, MultiTrack, YoutubeTrack
 if TYPE_CHECKING:
     from lavapy.node import Node
 
-__all__ = ("SpotifyTrack",
+__all__ = ("SpotifyBase",
+           "SpotifyTrack",
            "SpotifyPlaylist",
            "SpotifyAlbum")
 
