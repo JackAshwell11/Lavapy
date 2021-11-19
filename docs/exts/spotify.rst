@@ -12,10 +12,10 @@ SpotifyClient
 Playables
 ---------
 
-SpotifyPlayable
+SpotifyBase
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: SpotifyPlayable
+.. autoclass:: SpotifyBase
     :members:
 
 SpotifyTrack
