@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     from .player import Player
     from .tracks import Playable, MultiTrack
     from .utils import Stats
-    from .ext.spotify.tracks import SpotifyPlayable
 
 __all__ = ("Node",)
 
@@ -249,14 +248,14 @@ class Node:
             raise BuildTrackError("A error occurred while building the track.", track)
         return Track(id, track)
 
-    async def getTracks(self, cls: Union[Type[Playable], Type[SpotifyPlayable]], query: str) -> Optional[Union[Track, List[Track], MultiTrack]]:
+    async def getTracks(self, cls: Type[Playable], query: str) -> Optional[Union[Track, List[Track], MultiTrack]]:
         """|coro|
 
         Gets data about a :class:`Track` or :class:`MultiTrack` from Lavalink.
 
         Parameters
         ----------
-        cls: Union[Type[Playable], Type[SpotifyPlayable]]
+        cls: Type[Playable]
             The Lavapy resource to create an instance of.
         query: str
             The query to search for via Lavalink.

@@ -24,11 +24,10 @@ SOFTWARE.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Optional, Union, List, Dict, Type, Any
+from typing import TYPE_CHECKING, Optional, Callable, Union, List, Dict, Type, Any
 
 if TYPE_CHECKING:
     from .node import Node
-    from .ext.spotify.tracks import SpotifyPlayable
 
 
 __all__ = ("Playable",
@@ -41,6 +40,28 @@ __all__ = ("Playable",
            "YoutubePlaylist")
 
 
+async def defaultQueryGetter(cls: Type[Playable], query: str, _) -> str:
+    """|coro|
+
+    Forms the query for a specific :class:`Playable`.
+
+    Parameters
+    ----------
+    cls: Type[Playable]
+        The cls to get the search type for.
+    query: str
+        The query to modify with a search type.
+
+    Returns
+    -------
+    str
+        The modified query.
+    """
+    if not re.compile("https://.+/").match(query):
+        return f"{cls._searchType}:{query}"
+    return query
+
+
 class Playable:
     """
     The base class for all Lavapy resources. This supports both query searches and identifier searches.
@@ -50,9 +71,11 @@ class Playable:
     """
     _searchType: str
     _trackCls: Optional[Type[Track]]
+    _queryGetter: Callable = defaultQueryGetter
+    _getMultitrackName: Callable = None
 
     @classmethod
-    async def search(cls, query: str, node: Node = None, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Track, List[Track], PartialResource, MultiTrack]]:
+    async def search(cls, query: str, node: Node = None, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Track, List[Track], PartialResource, List[PartialResource], MultiTrack]]:
         """|coro|
 
         Performs a search to Lavalink for a specific resource.
@@ -73,19 +96,29 @@ class Playable:
         Optional[Union[Track, List[Track], PartialResource, MultiTrack]]
             A Lavapy resource or a list of resources which can be used to play music.
         """
-        regexResult = re.compile("https://.+/").match(query)
         if node is None:
             # Avoid a circular dependency with node.buildTrack()
             from .pool import NodePool
             node = NodePool.getNode()
-        if not regexResult:
-            query = f"{cls._searchType}:{query}"
+        newQuery = await cls._queryGetter(cls, query, node)
         if partial:
-            return PartialResource(cls, query)
-        tracks = await node.getTracks(cls, query)
+            if isinstance(query, list):
+                # This will only run with extensions
+                # noinspection PyTypeChecker
+                return cls(cls._getMultitrackName(cls, query, node), [PartialResource(YoutubeTrack, temp) for temp in newQuery])
+            return PartialResource(cls, newQuery)
+        if isinstance(newQuery, str):
+            tracks = await node.getTracks(cls, newQuery)
+        else:
+            temp = []
+            for i in newQuery:
+                result = await node.getTracks(YoutubeTrack, i)
+                temp.append(result[0])
+            tracks = cls(cls._getMultitrackName(cls, query, node), temp)
         if tracks is not None:
             if isinstance(tracks, list) and returnFirst:
                 return tracks[0]
+            # noinspection PyTypeChecker
             return tracks
 
     def __init__(self, *data: Any) -> None:
@@ -101,7 +134,7 @@ class PartialResource:
 
     Parameters
     ----------
-    cls: Union[Type[Playable], Type[SpotifyPlayable]]
+    cls: Type[Playable]
         The resource to create a instance of at playtime.
     query: str
         The query to search for at playtime.
@@ -109,7 +142,7 @@ class PartialResource:
     .. warning::
         This object will only search for the given query at playtime. Full resource information will be missing until it has been searched. It is advised not to create this manually, however, it is possible to do so.
     """
-    def __init__(self, cls: Union[Type[Playable], Type[SpotifyPlayable]], query: str) -> None:
+    def __init__(self, cls: Type[Playable], query: str) -> None:
         self._cls = cls
         self._query: str = query
 
