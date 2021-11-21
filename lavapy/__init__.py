@@ -26,7 +26,6 @@ import logging
 from .events import *
 from .exceptions import *
 from .filters import *
-from .node import *
 from .player import *
 from .pool import *
 from .tracks import *

@@ -27,8 +27,7 @@ import re
 from typing import TYPE_CHECKING, Optional, Callable, Union, List, Dict, Type, Any
 
 if TYPE_CHECKING:
-    from .node import Node
-
+    from .pool import Node
 
 __all__ = ("Playable",
            "PartialResource",

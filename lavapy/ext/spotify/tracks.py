@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Optional, Callable, Union, Tuple, List, Dict, 
 from lavapy.tracks import Playable, Track, MultiTrack, YoutubeTrack
 
 if TYPE_CHECKING:
-    from lavapy.node import Node
+    from lavapy.pool import Node
 
 __all__ = ("SpotifyBase",
            "SpotifyTrack",

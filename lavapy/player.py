@@ -30,8 +30,7 @@ from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
 import discord.ext
 
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
-from .node import Node
-from .pool import NodePool
+from .pool import NodePool, Node
 from .utils import Queue
 from .tracks import MultiTrack, PartialResource
 
@@ -141,6 +140,11 @@ class Player(discord.VoiceProtocol):
     def isPaused(self) -> bool:
         """Returns whether the player is currently paused or not."""
         return self._paused
+
+    @property
+    def isDead(self) -> bool:
+        """Returns whether the player is dead or not. A player is considered dead if it has been destroyed and removed from stored players."""
+        return self not in self.node.players
 
     def _updateState(self, state: Dict[str, Any]) -> None:
         """

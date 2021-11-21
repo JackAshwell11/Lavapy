@@ -32,7 +32,7 @@ from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionE
 from .utils import ExponentialBackoff, Stats
 
 if TYPE_CHECKING:
-    from .node import Node
+    from .pool import Node
     from .player import Player
 
 logger = logging.getLogger(__name__)

@@ -26,7 +26,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Dict, Any
 
 if TYPE_CHECKING:
-    from .node import Node
+    from .pool import Node
     from .player import Player
     from .tracks import Track
 
@@ -198,7 +198,7 @@ class WebsocketOpenEvent(LavapyEvent):
 
     Parameters
     ----------
-    node: Node
+    node: lavapy.pool.Node
         A Lavapy node object.
     """
     def __init__(self, node: Node) -> None:
@@ -221,7 +221,7 @@ class WebsocketClosedEvent(LavapyEvent):
 
     Parameters
     ----------
-    node: Node
+    node: lavapy.pool.Node
         A Lavapy node object.
     data: Dict[str, Any]
         The raw event data.

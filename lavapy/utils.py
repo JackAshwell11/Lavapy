@@ -30,7 +30,7 @@ from .exceptions import QueueEmpty
 from .tracks import MultiTrack
 
 if TYPE_CHECKING:
-    from .node import Node
+    from .pool import Node
     from .tracks import Track
 
 __all__ = ("ExponentialBackoff",
@@ -248,3 +248,7 @@ class Penalty:
             ) * 600 - 600
 
         self.total: float = (self.playerPenalty + self.cpuPenalty + self.nullFramePenalty + self.deficitFramePenalty)
+
+
+class NodeAlgorithms:
+    pass
