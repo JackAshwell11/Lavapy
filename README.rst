@@ -18,7 +18,7 @@
     :target: LICENSE
     :align: center
 
-A powerful and robust python library for interacting with Lavalink.
+A powerful and robust Python library built from the ground up for interacting with Lavalink.
 
 Installation
 ------------

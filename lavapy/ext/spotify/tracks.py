@@ -107,7 +107,9 @@ async def spotifyGetMultitrackName(cls: Type[SpotifyBase], query: str, node: Nod
         The multitrack's name.
     """
     regexResult = re.compile("https://open\.spotify\.com/.+/(?P<identifier>.+)\?").match(query)
-    if cls._spotifyType == "playlist":
+    if cls._spotifyType == "track":
+        return ""
+    elif cls._spotifyType == "playlist":
         async with node.spotifyClient.session.get(f"https://api.spotify.com/v1/playlists/{regexResult.group('identifier')}", headers=node.spotifyClient.authHeaders) as response:
             data = await response.json()
     elif cls._spotifyType == "album":
@@ -136,7 +138,7 @@ class SpotifyPlaylist(MultiTrack, SpotifyBase):
     _spotifyType: str = "playlist"
 
     def __repr__(self) -> str:
-        return f"<Lavapy SpotifyPlaylist (Track count={len(self.tracks)})>"
+        return f"<Lavapy SpotifyPlaylist (Name={self.name}) (Track count={len(self.tracks)})>"
 
 
 class SpotifyAlbum(MultiTrack, SpotifyBase):
@@ -145,4 +147,4 @@ class SpotifyAlbum(MultiTrack, SpotifyBase):
     _trackCls: Track = YoutubeTrack
 
     def __repr__(self) -> str:
-        return f"<Lavapy SpotifyAlbum (Track count={len(self.tracks)})>"
+        return f"<Lavapy SpotifyAlbum (Name={self.name}) (Track count={len(self.tracks)})>"

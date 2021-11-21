@@ -14,7 +14,7 @@ setup(
     author_email="jack.ashwell1@gmail.com",
     license="MIT",
     url="https://github.com/Aspect1103/Lavapy",
-    description="A powerful and robust python library for interacting with Lavalink.",
+    description="A powerful and robust Python library built from the ground up for interacting with Lavalink.",
     long_description=readme,
     packages=["lavapy"],
     python_requires=">=3.8",

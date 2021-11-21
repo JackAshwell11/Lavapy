@@ -101,11 +101,14 @@ class Playable:
             from .pool import NodePool
             node = NodePool.getNode()
         newQuery = await cls._queryGetter(cls, query, node)
+        if cls._getMultitrackName is not None:
+            multitrackName = await cls._getMultitrackName(cls, query, node)
         if partial:
-            if isinstance(query, list):
+            if isinstance(newQuery, list):
                 # This will only run with extensions
                 # noinspection PyTypeChecker
-                return cls(cls._getMultitrackName(cls, query, node), [PartialResource(YoutubeTrack, temp) for temp in newQuery])
+                # noinspection PyUnboundLocalVariable
+                return cls(multitrackName, [PartialResource(YoutubeTrack, temp) for temp in newQuery])
             return PartialResource(cls, newQuery)
         if isinstance(newQuery, str):
             tracks = await node.getTracks(cls, newQuery)
@@ -114,7 +117,8 @@ class Playable:
             for i in newQuery:
                 result = await node.getTracks(YoutubeTrack, i)
                 temp.append(result[0])
-            tracks = cls(cls._getMultitrackName(cls, query, node), temp)
+            # noinspection PyUnboundLocalVariable
+            tracks = cls(multitrackName, temp)
         if tracks is not None:
             if isinstance(tracks, list) and returnFirst:
                 return tracks[0]
