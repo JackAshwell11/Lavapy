@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
 import discord.ext
 
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
-from .pool import NodePool, Node, NodeAlgorithmsType
+from .pool import NodePool, Node
 from .utils import Queue
 from .tracks import MultiTrack, PartialResource
 
@@ -70,7 +70,7 @@ class Player(discord.VoiceProtocol):
         super().__init__(client, channel)
         self.client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self.channel: discord.VoiceChannel = channel
-        self._node: Optional[Node] = NodePool.getNode(NodeAlgorithmsType.balanced)
+        self._node: Optional[Node] = NodePool.balanced()
         self._track: Optional[Track] = None
         self._volume: int = 100
         self._filters: Dict[str, LavapyFilter] = {}

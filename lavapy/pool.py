@@ -26,7 +26,6 @@ from __future__ import annotations
 import string
 import logging
 import random
-from enum import Enum
 from typing import TYPE_CHECKING, Optional,  Union, Dict, List, Tuple, Any, Type
 
 import aiohttp
@@ -35,9 +34,10 @@ from aiohttp import ClientResponse
 
 from .tracks import Track
 from .websocket import Websocket
-from .exceptions import WebsocketAlreadyExists, NoNodesConnected, InvalidIdentifier, NodeOccupied, BuildTrackError, LavalinkException, LoadTrackError
+from .exceptions import WebsocketAlreadyExists, NoNodesConnected, NodeOccupied, BuildTrackError, LavalinkException, LoadTrackError, InvalidNodeSearch
 from .ext.spotify.client import SpotifyClient
 from .ext.spotify.exceptions import InvalidSpotifyClient
+from .ext.spotify.tracks import SpotifyBase
 
 if TYPE_CHECKING:
     from discord import VoiceRegion
@@ -45,19 +45,10 @@ if TYPE_CHECKING:
     from .utils import Stats
     from .tracks import Playable, MultiTrack
 
-__all__ = ("NodeAlgorithmsType",
-           "NodePool",
+__all__ = ("NodePool",
            "Node")
 
 logger = logging.getLogger(__name__)
-
-
-class NodeAlgorithmsType(Enum):
-    minPlayers = 0
-    balanced = 1
-    identifier = 2
-    closestNode = 3
-    extension = 4
 
 
 class NodePool:
@@ -65,38 +56,6 @@ class NodePool:
     Lavapy NodePool class. This holds all the :class:`Node` objects created with :meth:`createNode()`.
     """
     _nodes: Dict[str, Node] = {}
-
-    @classmethod
-    def getNode(cls, algorithm: NodeAlgorithmsType, identifier: Optional[str] = None, region: Optional[VoiceRegion] = None, extension: Type[Playable] = None) -> Node:
-        """
-        Retrieves a :class:`Node` object based on identifier, :class:`discord.VoiceRegion` or neither (randomly).
-
-        Parameters
-        ----------
-        algorithm: NodeAlgorithmsType
-            The desired algorithm to use.
-        identifier: Optional[str]
-            The unique identifier for the desired node.
-        region: Optional[:class:`discord.VoiceRegion`]
-            The voice region a specific node is assigned to.
-        extension: Type[Playable]
-            The extension to find a node which supports it.
-
-        Returns
-        -------
-        Node
-            A Lavapy node object.
-        """
-        if algorithm is NodeAlgorithmsType.minPlayers:
-            return cls._minPlayers()
-        if algorithm is NodeAlgorithmsType.balanced:
-            return cls._balanced()
-        elif algorithm is NodeAlgorithmsType.identifier:
-            return cls._identifier(identifier)
-        elif algorithm is NodeAlgorithmsType.closestNode:
-            return cls._closestNode(region)
-        elif algorithm is NodeAlgorithmsType.extension:
-            return cls._extension(extension)
 
     @classmethod
     async def createNode(cls, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
@@ -146,7 +105,7 @@ class NodePool:
         return node
 
     @classmethod
-    def _minPlayers(cls) -> Node:
+    def minPlayers(cls) -> Node:
         """
         An algorithm which selects the best Lavapy :class:`Node` based on the amount of players.
 
@@ -154,6 +113,8 @@ class NodePool:
         ------
         NoNodesConnected
             There are currently no nodes connected with the provided options.
+        InvalidNodeSearch
+            No nodes could be found with the current algorithm.
 
         Returns
         -------
@@ -162,10 +123,14 @@ class NodePool:
         """
         if not cls._nodes:
             raise NoNodesConnected("There are currently no nodes connected.")
-        return sorted(cls._nodes.values(), key=lambda x: len(x.players))[0]
+        result = sorted(cls._nodes.values(), key=lambda x: len(x.players))
+        try:
+            return result[0]
+        except KeyError:
+            raise InvalidNodeSearch("No nodes could be found using the minPlayers algorithm.")
 
     @classmethod
-    def _balanced(cls) -> Node:
+    def balanced(cls) -> Node:
         """
         An algorithm which selects the best Lavapy :class:`Node` based on each node's penalty.
 
@@ -173,6 +138,8 @@ class NodePool:
         ------
         NoNodesConnected
             There are currently no nodes connected with the provided options.
+        InvalidNodeSearch
+            No nodes could be found with the current algorithm.
 
         Returns
         -------
@@ -181,10 +148,14 @@ class NodePool:
         """
         if not cls._nodes:
             raise NoNodesConnected("There are currently no nodes connected.")
-        return sorted(cls._nodes.values(), key=lambda x: x.penalty)[0]
+        result = sorted(cls._nodes.values(), key=lambda x: x.penalty)
+        try:
+            return result[0]
+        except KeyError:
+            raise InvalidNodeSearch("No nodes could be found using the balanced algorithm.")
 
     @classmethod
-    def _identifier(cls, identifier: str):
+    def identifier(cls, identifier: str):
         """
         An algorithm which selects the best Lavapy :class:`Node` based on its identifier.
 
@@ -192,18 +163,18 @@ class NodePool:
         ------
         NoNodesConnected
             There are currently no nodes connected with the provided options.
-        InvalidIdentifier
-            A node does not exist with that identifier.
+        InvalidNodeSearch
+            No nodes could be found with the current algorithm.
         """
         if not cls._nodes:
             raise NoNodesConnected("There are currently no nodes connected.")
         try:
             return cls._nodes[identifier]
         except KeyError:
-            raise InvalidIdentifier(f"No nodes exist with the identifier {identifier}")
+            raise InvalidNodeSearch(f"No nodes could be found with identifier {identifier}.")
 
     @classmethod
-    def _closestNode(cls, region: VoiceRegion):
+    def closestNode(cls, region: VoiceRegion):
         """
         An algorithm which selects the best Lavapy :class:`Node` based on how close it is to the desired target.
 
@@ -211,12 +182,19 @@ class NodePool:
         ------
         NoNodesConnected
             There are currently no nodes connected with the provided options.
+        InvalidNodeSearch
+            No nodes could be found with the current algorithm.
         """
         if not cls._nodes:
             raise NoNodesConnected("There are currently no nodes connected.")
+        result = [node for node in cls._nodes.values() if node.region == region]
+        try:
+            return result[0]
+        except KeyError:
+            raise InvalidNodeSearch(f"No nodes could be found with region {region}.")
 
     @classmethod
-    def _extension(cls, extension: Type[Playable]):
+    def extension(cls, extension: Type[Playable]):
         """
         An algorithm which selects the best Lavapy :class:`Node` based on the amount of players.
 
@@ -224,9 +202,19 @@ class NodePool:
         ------
         NoNodesConnected
             There are currently no nodes connected with the provided options.
+        InvalidNodeSearch
+            No nodes could be found with the current algorithm.
         """
         if not cls._nodes:
             raise NoNodesConnected("There are currently no nodes connected.")
+        if issubclass(extension, SpotifyBase):
+            result = [node for node in cls._nodes.values() if node.spotifyClient is not None]
+        else:
+            result = list(cls._nodes.values())
+        try:
+            return result[0]
+        except KeyError:
+            raise InvalidNodeSearch(f"No nodes could be found with extension {extension}.")
 
 
 class Node:
@@ -243,6 +231,7 @@ class Node:
         self._password: str = password
         self._region: Optional[discord.VoiceRegion] = region
         self._secure: bool = secure
+        self._spotifyClient: Optional[SpotifyClient] = None
         if spotifyClient is not None:
             if isinstance(spotifyClient, SpotifyClient):
                 self._spotifyClient: SpotifyClient = spotifyClient
@@ -336,7 +325,8 @@ class Node:
 
         Initialises all the extensions linked to this :class:`Node`.
         """
-        await self.spotifyClient._getBearerToken()
+        if self.spotifyClient is not None:
+            await self.spotifyClient._getBearerToken()
 
     async def connect(self) -> None:
         """|coro|

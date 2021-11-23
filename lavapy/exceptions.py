@@ -32,7 +32,8 @@ __all__ = ("LavapyException",
            "FilterNotApplied",
            "LavalinkException",
            "LoadTrackError",
-           "BuildTrackError")
+           "BuildTrackError",
+           "InvalidNodeSearch")
 
 
 class LavapyException(Exception):
@@ -69,6 +70,10 @@ class FilterAlreadyExists(LavapyException):
 
 class FilterNotApplied(LavapyException):
     """Exception raised when a filter is attempted to be removed but it is not applied."""
+
+
+class InvalidNodeSearch(LavapyException):
+    """Exception raised when an search for a node is invalid."""
 
 
 class LavalinkException(LavapyException):

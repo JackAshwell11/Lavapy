@@ -97,8 +97,8 @@ class Playable:
         """
         if node is None:
             # Avoid a circular dependency
-            from .pool import NodePool, NodeAlgorithmsType
-            node = NodePool.getNode(NodeAlgorithmsType.extension)
+            from .pool import NodePool
+            node = NodePool.extension(cls)
         newQuery = await cls._queryGetter(cls, query, node)
         if cls._getMultitrackName is not None:
             multitrackName = await cls._getMultitrackName(cls, query, node)
