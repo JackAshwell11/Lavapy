@@ -66,11 +66,6 @@ class NodePool:
     """
     _nodes: Dict[str, Node] = {}
 
-    @property
-    def nodes(self) -> Dict[str, Node]:
-        """Returns a mapping of identifiers to node objects."""
-        return self._nodes
-
     @classmethod
     def getNode(cls, algorithm: NodeAlgorithmsType, identifier: Optional[str] = None, region: Optional[VoiceRegion] = None, extension: Type[Playable] = None) -> Node:
         """
