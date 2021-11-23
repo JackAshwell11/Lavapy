@@ -66,27 +66,20 @@ async def spotifyGetDetails(cls: Type[SpotifyBase], query: str, node: Node) -> U
                 data = await response.json()
             return f'ytsearch:{data["artists"][0]["name"]} - {data["name"]}'
     elif cls._spotifyType == "playlist":
-        async with node.spotifyClient.session.get(f"https://api.spotify.com/v1/playlists/{regexResult.group('identifier')}/tracks", headers=node.spotifyClient.authHeaders) as response:
-            data = await response.json()
-        trackArr: List[Dict[str, Any]] = data["items"]
-        nextUrl = data["next"]
-        while nextUrl:
-            async with node.spotifyClient.session.get(nextUrl, headers=node.spotifyClient.authHeaders) as response:
-                data = await response.json()
-            trackArr.extend(data["items"])
-            nextUrl = data["next"]
-        return [f'ytsearch:{track["track"]["artists"][0]["name"]} - {track["track"]["name"]}' for track in trackArr]
+        url = f"https://api.spotify.com/v1/playlists/{regexResult.group('identifier')}/tracks"
     elif cls._spotifyType == "album":
-        async with node.spotifyClient.session.get(f"https://api.spotify.com/v1/albums/{regexResult.group('identifier')}/tracks", headers=node.spotifyClient.authHeaders) as response:
+        url = f"https://api.spotify.com/v1/albums/{regexResult.group('identifier')}/tracks"
+    # noinspection PyUnboundLocalVariable
+    async with node.spotifyClient.session.get(url, headers=node.spotifyClient.authHeaders) as response:
+        data = await response.json()
+    trackArr: List[Dict[str, Any]] = data["items"]
+    nextUrl = data["next"]
+    while nextUrl:
+        async with node.spotifyClient.session.get(nextUrl, headers=node.spotifyClient.authHeaders) as response:
             data = await response.json()
-        trackArr: List[Dict[str, Any]] = data["items"]
+        trackArr.extend(data["items"])
         nextUrl = data["next"]
-        while nextUrl:
-            async with node.spotifyClient.session.get(nextUrl, headers=node.spotifyClient.authHeaders) as response:
-                data = await response.json()
-            trackArr.extend(data["items"])
-            nextUrl = data["next"]
-        return [f'ytsearch:{track["artists"][0]["name"]} - {track["name"]}' for track in trackArr]
+    return [f'ytsearch:{track["track"]["artists"][0]["name"]} - {track["track"]["name"]}' for track in trackArr]
 
 
 async def spotifyGetMultitrackName(cls: Type[SpotifyBase], query: str, node: Node) -> str:

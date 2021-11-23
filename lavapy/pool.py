@@ -26,7 +26,8 @@ from __future__ import annotations
 import string
 import logging
 import random
-from typing import TYPE_CHECKING, Optional, Union, Dict, List, Tuple, Any, Type
+from enum import Enum
+from typing import TYPE_CHECKING, Optional,  Union, Dict, List, Tuple, Any, Type
 
 import aiohttp
 import discord.ext
@@ -44,10 +45,19 @@ if TYPE_CHECKING:
     from .utils import Stats
     from .tracks import Playable, MultiTrack
 
-__all__ = ("NodePool",
+__all__ = ("NodeAlgorithmsType",
+           "NodePool",
            "Node")
 
 logger = logging.getLogger(__name__)
+
+
+class NodeAlgorithmsType(Enum):
+    minPlayers = 0
+    balanced = 1
+    identifier = 2
+    closestNode = 3
+    extension = 4
 
 
 class NodePool:
@@ -62,44 +72,36 @@ class NodePool:
         return self._nodes
 
     @classmethod
-    def getNode(cls, identifier: Optional[str] = None, region: Optional[VoiceRegion] = None) -> Node:
+    def getNode(cls, algorithm: NodeAlgorithmsType, identifier: Optional[str] = None, region: Optional[VoiceRegion] = None, extension: Type[Playable] = None) -> Node:
         """
         Retrieves a :class:`Node` object based on identifier, :class:`discord.VoiceRegion` or neither (randomly).
 
         Parameters
         ----------
+        algorithm: NodeAlgorithmsType
+            The desired algorithm to use.
         identifier: Optional[str]
             The unique identifier for the desired node.
         region: Optional[:class:`discord.VoiceRegion`]
             The voice region a specific node is assigned to.
-
-        Raises
-        ------
-        InvalidIdentifier
-            No nodes exists with the given identifier.
-        NoNodesConnected
-            There are currently no nodes connected with the provided options.
+        extension: Type[Playable]
+            The extension to find a node which supports it.
 
         Returns
         -------
         Node
             A Lavapy node object.
         """
-        if not cls._nodes:
-            raise NoNodesConnected("There are currently no nodes connected.")
-        if identifier is not None:
-            try:
-                node = cls._nodes[identifier]
-                return node
-            except KeyError:
-                raise InvalidIdentifier(f"No nodes with the identifier <{identifier}>.")
-        elif region is not None:
-            possibleNodes = [node for node in cls._nodes.values() if node.region is region]
-            if not possibleNodes:
-                raise NoNodesConnected(f"No nodes exist for region <{region}>.")
-        else:
-            possibleNodes = cls._nodes.values()
-        return sorted(possibleNodes, key=lambda x: len(x.players))[0]
+        if algorithm is NodeAlgorithmsType.minPlayers:
+            return cls._minPlayers()
+        if algorithm is NodeAlgorithmsType.balanced:
+            return cls._balanced()
+        elif algorithm is NodeAlgorithmsType.identifier:
+            return cls._identifier(identifier)
+        elif algorithm is NodeAlgorithmsType.closestNode:
+            return cls._closestNode(region)
+        elif algorithm is NodeAlgorithmsType.extension:
+            return cls._extension(extension)
 
     @classmethod
     async def createNode(cls, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
@@ -147,6 +149,89 @@ class NodePool:
         await node.connect()
         await node._initialiseExtensions()
         return node
+
+    @classmethod
+    def _minPlayers(cls) -> Node:
+        """
+        An algorithm which selects the best Lavapy :class:`Node` based on the amount of players.
+
+        Raises
+        ------
+        NoNodesConnected
+            There are currently no nodes connected with the provided options.
+
+        Returns
+        -------
+        Node
+            A Lavapy node object.
+        """
+        if not cls._nodes:
+            raise NoNodesConnected("There are currently no nodes connected.")
+        return sorted(cls._nodes.values(), key=lambda x: len(x.players))[0]
+
+    @classmethod
+    def _balanced(cls) -> Node:
+        """
+        An algorithm which selects the best Lavapy :class:`Node` based on each node's penalty.
+
+        Raises
+        ------
+        NoNodesConnected
+            There are currently no nodes connected with the provided options.
+
+        Returns
+        -------
+        Node
+            A Lavapy node object.
+        """
+        if not cls._nodes:
+            raise NoNodesConnected("There are currently no nodes connected.")
+        return sorted(cls._nodes.values(), key=lambda x: x.penalty)[0]
+
+    @classmethod
+    def _identifier(cls, identifier: str):
+        """
+        An algorithm which selects the best Lavapy :class:`Node` based on its identifier.
+
+        Raises
+        ------
+        NoNodesConnected
+            There are currently no nodes connected with the provided options.
+        InvalidIdentifier
+            A node does not exist with that identifier.
+        """
+        if not cls._nodes:
+            raise NoNodesConnected("There are currently no nodes connected.")
+        try:
+            return cls._nodes[identifier]
+        except KeyError:
+            raise InvalidIdentifier(f"No nodes exist with the identifier {identifier}")
+
+    @classmethod
+    def _closestNode(cls, region: VoiceRegion):
+        """
+        An algorithm which selects the best Lavapy :class:`Node` based on how close it is to the desired target.
+
+        Raises
+        ------
+        NoNodesConnected
+            There are currently no nodes connected with the provided options.
+        """
+        if not cls._nodes:
+            raise NoNodesConnected("There are currently no nodes connected.")
+
+    @classmethod
+    def _extension(cls, extension: Type[Playable]):
+        """
+        An algorithm which selects the best Lavapy :class:`Node` based on the amount of players.
+
+        Raises
+        ------
+        NoNodesConnected
+            There are currently no nodes connected with the provided options.
+        """
+        if not cls._nodes:
+            raise NoNodesConnected("There are currently no nodes connected.")
 
 
 class Node:
@@ -248,7 +333,7 @@ class Node:
     def penalty(self) -> float:
         """Returns the load balancing penalty for this node."""
         if self.stats is None:
-            return 9e30
+            return 0.0
         return self.stats.penalty.total
 
     async def _initialiseExtensions(self) -> None:

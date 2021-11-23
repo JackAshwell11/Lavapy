@@ -47,7 +47,7 @@ async def defaultQueryGetter(cls: Type[Playable], query: str, _) -> str:
     Parameters
     ----------
     cls: Type[Playable]
-        The cls to get the search type for.
+        The self to get the search type for.
     query: str
         The query to modify with a search type.
 
@@ -96,9 +96,9 @@ class Playable:
             A Lavapy resource or a list of resources which can be used to play music.
         """
         if node is None:
-            # Avoid a circular dependency with node.buildTrack()
-            from .pool import NodePool
-            node = NodePool.getNode()
+            # Avoid a circular dependency
+            from .pool import NodePool, NodeAlgorithmsType
+            node = NodePool.getNode(NodeAlgorithmsType.extension)
         newQuery = await cls._queryGetter(cls, query, node)
         if cls._getMultitrackName is not None:
             multitrackName = await cls._getMultitrackName(cls, query, node)
