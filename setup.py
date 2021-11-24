@@ -12,7 +12,7 @@ with open("requirements.txt") as rqmnts:
     requirements = rqmnts.read().splitlines()
 
 if os.getenv("READTHEDOCS") == "True":
-    with open("docs/requirements_rtd.txt") as rqmnts:
+    with open("docs/requirementsRTD.txt") as rqmnts:
         requirements.extend(rqmnts.read().splitlines())
 
 setup(
