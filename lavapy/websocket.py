@@ -24,16 +24,18 @@ SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-import logging
 import aiohttp
+import logging
 from typing import TYPE_CHECKING, Optional, Dict, Any
 
+from .backoff import ExponentialBackoff
 from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketOpenEvent, WebsocketClosedEvent
-from .utils import ExponentialBackoff, Stats
+from .stats import Stats
+from .tracks import Track
 
 if TYPE_CHECKING:
-    from .pool import Node
     from .player import Player
+    from .pool import Node
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +113,7 @@ class Websocket:
         }
         logger.debug(f"Attempting connection with headers: {headers}")
         try:
-            self._connection = await self.node.session.ws_connect(self.node.websocketUri, headers=headers, heartbeat=60)
+            self._connection = await self.node.session.ws_connect(self.node.websocketUri, headers=headers, heartbeat=self.node.heartbeat)
         except Exception as error:
             if isinstance(error, aiohttp.WSServerHandshakeError) and error.status == 401:
                 logger.error(f"Authorisation failed for node {self.node.identifier}")
@@ -191,7 +193,7 @@ class Websocket:
             return WebsocketClosedEvent(self.node, data)
 
         player = self.getPlayer(int(data["guildId"]))
-        track = await self.node.buildTrack(data["track"])
+        track = await self.node.buildTrack(Track, data["track"])
         if name == "TrackStartEvent":
             return TrackStartEvent(player, track)
         elif name == "TrackEndEvent":

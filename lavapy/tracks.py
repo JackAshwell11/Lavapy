@@ -26,6 +26,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Optional, Callable, Union, List, Dict, Type, Any
 
+import lavapy
+
 if TYPE_CHECKING:
     from .pool import Node
 
@@ -96,9 +98,7 @@ class Playable:
             A Lavapy resource or a list of resources which can be used to play music.
         """
         if node is None:
-            # Avoid a circular dependency
-            from .pool import NodePool
-            node = NodePool.extension(cls)
+            node = lavapy.NodePool.extension(cls)
         newQuery = await cls._queryGetter(cls, query, node)
         if cls._getMultitrackName is not None:
             multitrackName = await cls._getMultitrackName(cls, query, node)

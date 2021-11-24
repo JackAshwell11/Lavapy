@@ -30,12 +30,13 @@ from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
 import discord.ext
 
 from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
-from .pool import NodePool, Node
-from .utils import Queue
+from .pool import NodePool
+from .queue import Queue
 from .tracks import MultiTrack, PartialResource
 
 if TYPE_CHECKING:
     from .filters import LavapyFilter
+    from .pool import Node
     from .tracks import Track
 
 __all__ = ("Player",)

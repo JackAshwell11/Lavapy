@@ -23,13 +23,15 @@ SOFTWARE.
 """
 import logging
 
+from .backoff import *
 from .events import *
 from .exceptions import *
 from .filters import *
 from .player import *
 from .pool import *
+from .queue import *
+from .stats import *
 from .tracks import *
-from .utils import *
 from .websocket import *
 
 __title__ = "Lavapy"

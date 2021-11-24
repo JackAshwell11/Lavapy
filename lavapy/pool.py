@@ -23,30 +23,28 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-import string
 import logging
 import random
-from typing import TYPE_CHECKING, Optional,  Union, Dict, List, Tuple, Any, Type
+import string
+from typing import TYPE_CHECKING, Optional, Union, Dict, List, Tuple, Any, Type
 
 import aiohttp
-import discord.ext
-from aiohttp import ClientResponse
 
-from .tracks import Track
-from .websocket import Websocket
-from .exceptions import WebsocketAlreadyExists, NoNodesConnected, NodeOccupied, BuildTrackError, LavalinkException, LoadTrackError, InvalidNodeSearch
-from .ext.spotify.client import SpotifyClient
-from .ext.spotify.exceptions import InvalidSpotifyClient
 from .ext.spotify.tracks import SpotifyBase
+from .exceptions import WebsocketAlreadyExists, NoNodesConnected, NodeOccupied, BuildTrackError, LavalinkException, LoadTrackError, InvalidNodeSearch
+from .stats import Stats
+from .websocket import Websocket
 
 if TYPE_CHECKING:
+    import discord.ext
+    from aiohttp import ClientResponse
     from discord import VoiceRegion
+    from .ext.spotify.client import SpotifyClient
     from .player import Player
-    from .utils import Stats
-    from .tracks import Playable, MultiTrack
+    from .tracks import Playable, Track, MultiTrack
 
 __all__ = ("NodePool",
-           "Node")
+           "Node",)
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +56,7 @@ class NodePool:
     _nodes: Dict[str, Node] = {}
 
     @classmethod
-    async def createNode(cls, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
+    async def createNode(cls, *, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, heartbeat: int = 60, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
         Creates a Lavapy :class:`Node` object and stores it for later use.
@@ -77,6 +75,8 @@ class NodePool:
             The voice region to assign to this node.
         secure: bool
             Whether to connect securely to the Lavalink server or not.
+        heartbeat: int
+            How many seconds to wait before sending a ping message and waiting for a response from the Lavalink server.
         spotifyClient: Optional[SpotifyClient]
             A Lavapy Spotify client for interacting with Spotify.
         identifier: Optional[str]
@@ -98,7 +98,7 @@ class NodePool:
         if identifier in cls._nodes:
             raise NodeOccupied(f"A node with the identifier <{identifier}> already exists.")
 
-        node = Node(client, host, port, password, region, secure, spotifyClient, identifier)
+        node = Node(client, host, port, password, region, secure, heartbeat, spotifyClient, identifier)
         cls._nodes[identifier] = node
         await node.connect()
         await node._initialiseExtensions()
@@ -224,19 +224,15 @@ class Node:
     .. warning::
         This class should not be created manually. Please use :meth:`NodePool.createNode()` instead.
     """
-    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], secure: bool, spotifyClient: Optional[SpotifyClient], identifier: str) -> None:
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], secure: bool, heartbeat: int, spotifyClient: Optional[SpotifyClient], identifier: str) -> None:
         self._client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self._host: str = host
         self._port: int = port
         self._password: str = password
         self._region: Optional[discord.VoiceRegion] = region
         self._secure: bool = secure
-        self._spotifyClient: Optional[SpotifyClient] = None
-        if spotifyClient is not None:
-            if isinstance(spotifyClient, SpotifyClient):
-                self._spotifyClient: SpotifyClient = spotifyClient
-            else:
-                raise InvalidSpotifyClient(f"Invalid Spotify client for node {self.identifier}")
+        self._heartbeat: int = heartbeat
+        self._spotifyClient: Optional[SpotifyClient] = spotifyClient
         self._identifier: str = identifier
         self._players: List[Player] = []
         self._stats: Optional[Stats] = None
@@ -269,7 +265,7 @@ class Node:
         return self._password
 
     @property
-    def region(self) -> discord.VoiceRegion:
+    def region(self) -> Optional[discord.VoiceRegion]:
         """Returns the voice region assigned to this node."""
         return self._region
 
@@ -277,6 +273,11 @@ class Node:
     def secure(self) -> bool:
         """Returns whether the connection to the Lavalink server is secure or not."""
         return self._secure
+
+    @property
+    def heartbeat(self) -> int:
+        """Returns the amount of seconds between ping requests."""
+        return self._heartbeat
 
     @property
     def spotifyClient(self) -> Optional[SpotifyClient]:
@@ -402,13 +403,15 @@ class Node:
         logger.debug(f"Sending payload: {payload}")
         await self._websocket.connection.send_json(payload)
 
-    async def buildTrack(self, id: str) -> Track:
+    async def buildTrack(self, cls: Type[Track], id: str) -> Track:
         """|coro|
 
         Builds a :class:`Track` from a base64 track ID.
 
         Parameters
         ----------
+        cls: Type[Track]
+            The Lavapy resource to return an instance of
         id: str
             The base64 track ID.
 
@@ -425,7 +428,7 @@ class Node:
         track, response = await self._getData("decodetrack", {"track": id})
         if response.status != 200:
             raise BuildTrackError("A error occurred while building the track.", track)
-        return Track(id, track)
+        return cls(id, track)
 
     async def getTracks(self, cls: Type[Playable], query: str) -> Optional[Union[Track, List[Track], MultiTrack]]:
         """|coro|
