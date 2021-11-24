@@ -13,7 +13,7 @@ Playables
 ---------
 
 SpotifyBase
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. autoclass:: SpotifyBase
     :show-inheritance:
@@ -44,6 +44,4 @@ Exceptions
 ----------
 
 .. autoexception:: SpotifyAuthException
-    :show-inheritance:
-.. autoexception:: InvalidSpotifyClient
     :show-inheritance:

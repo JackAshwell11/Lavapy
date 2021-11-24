@@ -24,7 +24,7 @@ SOFTWARE.
 __all__ = ("LavapyException",
            "NoNodesConnected",
            "NodeOccupied",
-           "InvalidIdentifier",
+           "InvalidSeekPosition",
            "WebsocketAlreadyExists",
            "QueueEmpty",
            "InvalidFilterArgument",
@@ -48,8 +48,8 @@ class NodeOccupied(LavapyException):
     """Exception raised when node identifiers conflict."""
 
 
-class InvalidIdentifier(LavapyException):
-    """Exception raised when an invalid ID is passed somewhere in Lavapy."""
+class InvalidSeekPosition(LavapyException):
+    """Exception raised when an invalid seek position is passed."""
 
 
 class WebsocketAlreadyExists(LavapyException):

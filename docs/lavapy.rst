@@ -43,7 +43,7 @@ Playables
 ---------
 
 Playable
-~~~~~~~~~~
+~~~~~~~~
 
 .. autoclass:: Playable
     :members:
@@ -225,7 +225,7 @@ Exceptions
     :show-inheritance:
 .. autoexception:: NodeOccupied
     :show-inheritance:
-.. autoexception:: InvalidIdentifier
+.. autoexception:: InvalidSeekPosition
     :show-inheritance:
 .. autoexception:: WebsocketAlreadyExists
     :show-inheritance:
@@ -240,4 +240,6 @@ Exceptions
 .. autoexception:: LoadTrackError
     :show-inheritance:
 .. autoexception:: BuildTrackError
+    :show-inheritance:
+.. autoexception:: InvalidNodeSearch
     :show-inheritance:

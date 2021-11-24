@@ -89,7 +89,7 @@ class NodePool:
 
         Returns
         -------
-        Node:
+        Node
             A Lavapy node object.
         """
         if identifier is None:
@@ -359,8 +359,7 @@ class Node:
             await player.disconnect(force=force)
 
         try:
-            self._websocket.listener.cancel()
-            await self._websocket.connection.close()
+            await self._websocket.disconnect()
             del NodePool._nodes[self.identifier]
         except Exception as e:
             logger.debug(f"Failed to remove node {self.identifier} with error {e}")

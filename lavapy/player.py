@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
 
 import discord.ext
 
-from .exceptions import InvalidIdentifier, FilterAlreadyExists, FilterNotApplied
+from .exceptions import InvalidSeekPosition, FilterAlreadyExists, FilterNotApplied
 from .pool import NodePool
 from .queue import Queue
 from .tracks import MultiTrack, PartialResource
@@ -381,7 +381,7 @@ class Player(discord.VoiceProtocol):
             Seek position is bigger than the track length.
         """
         if position > self.track.length:
-            raise InvalidIdentifier("Seek position is bigger than track length.")
+            raise InvalidSeekPosition("Seek position is bigger than track length.")
         seek = {
             "op": "seek",
             "guildId": str(self.guild.id),

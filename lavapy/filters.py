@@ -169,7 +169,7 @@ class Karaoke(LavapyFilter):
 
 class Timescale(LavapyFilter):
     """
-    Changes the speed, pitch and rate of a track.
+    Changes the speed, pitch and rate of a track. You can make some very cool sound effects with this such as a vaporwave-esque filter which slows the track down a certain amount to produce said effect.
 
     Attributes
     ----------
@@ -184,6 +184,12 @@ class Timescale(LavapyFilter):
 
     def __init__(self, speed: float = 1.0, pitch: float = 1.0, rate: float = 1.0) -> None:
         super().__init__()
+        if speed < 0.0:
+            raise InvalidFilterArgument("Speed must be more than 0.")
+        if pitch < 0.0:
+            raise InvalidFilterArgument("Pitch must be more than 0.")
+        if rate < 0.0:
+            raise InvalidFilterArgument("Rate must be more than 0.")
         self.speed = self._payload["speed"] = speed
         self.pitch = self._payload["pitch"] = pitch
         self.rate = self._payload["rate"] = rate

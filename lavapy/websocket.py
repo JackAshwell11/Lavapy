@@ -131,6 +131,7 @@ class Websocket:
         Closes the connection to the Lavalink server.
         """
         logger.debug(f"Closing connection for node: {self.node.__repr__()}")
+        self.listener.cancel()
         await self._connection.close()
 
     async def createListener(self) -> None:
