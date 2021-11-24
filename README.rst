@@ -4,21 +4,17 @@
 
 .. image:: https://img.shields.io/pypi/pyversions/Lavapy
     :target: https://pypi.org/project/Lavapy/
-    :align: center
 
 .. image:: https://img.shields.io/pypi/v/Lavapy
     :target: https://pypi.org/project/Lavapy/
-    :align: center
 
 .. image:: https://readthedocs.org/projects/lavapy/badge/?version=latest
     :target: https://lavapy.readthedocs.io/en/latest/?badge=latest
-    :align: center
 
 .. image:: https://img.shields.io/github/license/Aspect1103/Lavapy
     :target: LICENSE
-    :align: center
 
-A powerful and robust Python library built from the ground up for interacting with Lavalink.
+A powerful and robust Python library built from the ground up for interacting with `Lavalink <https://github.com/freyacodes/Lavalink>`_.
 
 Installation
 ------------
