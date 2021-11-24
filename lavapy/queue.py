@@ -23,12 +23,12 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Union, List
+from typing import TYPE_CHECKING, Iterable, List, Union
 
 from .exceptions import QueueEmpty
 
 if TYPE_CHECKING:
-    from .tracks import Track, MultiTrack
+    from .tracks import MultiTrack, Track
 
 __all__ = ("Queue",)
 

@@ -24,7 +24,7 @@ SOFTWARE.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Optional, Callable, Union, List, Dict, Type, Any
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
 
 import lavapy
 

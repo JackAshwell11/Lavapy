@@ -23,7 +23,6 @@ SOFTWARE.
 """
 from lavapy.exceptions import LavapyException
 
-
 __all__ = ("SpotifyAuthException",)
 
 

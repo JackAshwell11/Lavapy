@@ -24,12 +24,13 @@ SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-import aiohttp
 import logging
-from typing import TYPE_CHECKING, Optional, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict, Optional
+
+import aiohttp
 
 from .backoff import ExponentialBackoff
-from .events import LavapyEvent, TrackStartEvent, TrackEndEvent, TrackExceptionEvent, TrackStuckEvent, WebsocketOpenEvent, WebsocketClosedEvent
+from .events import LavapyEvent, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebsocketClosedEvent, WebsocketOpenEvent
 from .stats import Stats
 from .tracks import Track
 

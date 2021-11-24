@@ -23,7 +23,10 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import TYPE_CHECKING, Any, Dict
+
+if TYPE_CHECKING:
+    from .pool import Node
 
 __all__ = ("Stats",
            "Penalty")

@@ -24,9 +24,9 @@ SOFTWARE.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Optional, Callable, Union, Tuple, List, Dict, Type, Any
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
 
-from lavapy.tracks import Playable, Track, MultiTrack, YoutubeTrack
+from lavapy.tracks import MultiTrack, Playable, Track, YoutubeTrack
 
 if TYPE_CHECKING:
     from lavapy.pool import Node
@@ -53,8 +53,8 @@ async def spotifyGetDetails(cls: Type[SpotifyBase], query: str, node: Node) -> U
 
     Returns
     -------
-    Tuple[Union[str, List[str]], Optional[str]]
-        A tuple containing a Youtube query or a list of Youtube queries.
+    Union[str, List[str]]
+        A query string or list of query strings.
     """
     regexResult = re.compile("https://open\.spotify\.com/.+/(?P<identifier>.+)\?").match(query)
     if cls._spotifyType == "track":

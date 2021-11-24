@@ -25,11 +25,11 @@ from __future__ import annotations
 
 import datetime
 import logging
-from typing import TYPE_CHECKING, Optional, Union, Dict, Type, Any
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 import discord.ext
 
-from .exceptions import InvalidSeekPosition, FilterAlreadyExists, FilterNotApplied
+from .exceptions import FilterAlreadyExists, FilterNotApplied, InvalidSeekPosition
 from .pool import NodePool
 from .queue import Queue
 from .tracks import MultiTrack, PartialResource
@@ -231,7 +231,7 @@ class Player(discord.VoiceProtocol):
             }
             await self.node._send(voiceUpdate)
 
-    async def connect(self, timeout: float, reconnect: bool) -> None:
+    async def connect(self, *, timeout: float, reconnect: bool) -> None:
         """|coro|
 
         Connects the player to a :class:`discord.VoiceChannel`.

@@ -26,22 +26,22 @@ from __future__ import annotations
 import logging
 import random
 import string
-from typing import TYPE_CHECKING, Optional, Union, Dict, List, Tuple, Any, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import aiohttp
 
+from .exceptions import BuildTrackError, InvalidNodeSearch, LavalinkException, LoadTrackError, NodeOccupied, NoNodesConnected, WebsocketAlreadyExists
 from .ext.spotify.tracks import SpotifyBase
-from .exceptions import WebsocketAlreadyExists, NoNodesConnected, NodeOccupied, BuildTrackError, LavalinkException, LoadTrackError, InvalidNodeSearch
 from .stats import Stats
 from .websocket import Websocket
 
 if TYPE_CHECKING:
     import discord.ext
-    from aiohttp import ClientResponse
     from discord import VoiceRegion
+
     from .ext.spotify.client import SpotifyClient
     from .player import Player
-    from .tracks import Playable, Track, MultiTrack
+    from .tracks import MultiTrack, Playable, Track
 
 __all__ = ("NodePool",
            "Node",)
@@ -364,7 +364,7 @@ class Node:
         except Exception as e:
             logger.debug(f"Failed to remove node {self.identifier} with error {e}")
 
-    async def _getData(self, endpoint: str, params: Dict[str, str]) -> Tuple[Dict[str, Any], ClientResponse]:
+    async def _getData(self, endpoint: str, params: Dict[str, str]) -> Tuple[Dict[str, Any], aiohttp.ClientResponse]:
         """|coro|
 
         Make a request to Lavalink with a given endpoint and return a response.

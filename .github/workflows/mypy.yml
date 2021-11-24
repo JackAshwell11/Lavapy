@@ -19,4 +19,4 @@ jobs:
 
     - name: Run mypy
       run: |
-        mypy lavapy/
+        mypy --ignore-missing-imports lavapy/

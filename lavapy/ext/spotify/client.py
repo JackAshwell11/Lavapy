@@ -23,10 +23,10 @@ SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import Optional, Dict
+from base64 import b64encode
+from typing import Dict, Optional
 
 import aiohttp
-from base64 import b64encode
 
 from .exceptions import SpotifyAuthException
 
