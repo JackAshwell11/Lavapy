@@ -30,10 +30,6 @@ To install Lavapy, use one of the commands below:
     # Linux/macOS
     python3.8 -m pip install -U lavapy
 
-Features
---------
-TO DO
-
 Usage
 -----
 A simple and easy example to connect to a voice channel and play a Youtube song based on a given search query.

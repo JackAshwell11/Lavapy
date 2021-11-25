@@ -12,3 +12,5 @@ To install Lavapy, use one of the commands below:
 
     # Linux/macOS
     python3.8 -m pip install -U lavapy
+
+Lavapy also requires `Lavalink <https://github.com/freyacodes/Lavalink>`_ 3.3 or above (preferably 3.4).
