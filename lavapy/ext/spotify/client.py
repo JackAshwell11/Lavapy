@@ -35,7 +35,6 @@ __all__ = ("SpotifyClient",)
 
 class SpotifyClient:
     """
-
     Provides an interface for easily initialising and communicating with Spotify.
 
     Parameters

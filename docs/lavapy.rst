@@ -231,15 +231,17 @@ Exceptions
     :show-inheritance:
 .. autoexception:: QueueEmpty
     :show-inheritance:
+.. autoexception:: InvalidFilterArgument
+    :show-inheritance:
 .. autoexception:: FilterAlreadyExists
     :show-inheritance:
 .. autoexception:: FilterNotApplied
+    :show-inheritance:
+.. autoexception:: InvalidNodeSearch
     :show-inheritance:
 .. autoexception:: LavalinkException
     :show-inheritance:
 .. autoexception:: LoadTrackError
     :show-inheritance:
 .. autoexception:: BuildTrackError
-    :show-inheritance:
-.. autoexception:: InvalidNodeSearch
     :show-inheritance:

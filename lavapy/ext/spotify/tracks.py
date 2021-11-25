@@ -26,7 +26,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
 
-from lavapy.tracks import MultiTrack, Playable, Track, YoutubeTrack
+from lavapy.tracks import MultiTrack, Playable, Track
 
 if TYPE_CHECKING:
     from lavapy.pool import Node
