@@ -30,10 +30,10 @@ __all__ = ("LavapyException",
            "InvalidFilterArgument",
            "FilterAlreadyExists",
            "FilterNotApplied",
+           "InvalidNodeSearch",
            "LavalinkException",
            "LoadTrackError",
-           "BuildTrackError",
-           "InvalidNodeSearch")
+           "BuildTrackError")
 
 
 class LavapyException(Exception):

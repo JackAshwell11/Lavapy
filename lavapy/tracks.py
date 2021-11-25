@@ -73,10 +73,10 @@ class Playable:
     _searchType: str
     _trackCls: Optional[Type[Track]]
     _queryGetter: Callable = defaultQueryGetter
-    _getMultitrackName: Callable = None
+    _getMultitrackName: Optional[Callable] = None
 
     @classmethod
-    async def search(cls, query: str, node: Node = None, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Track, List[Track], PartialResource, List[PartialResource], MultiTrack]]:
+    async def search(cls, query: str, node: Node = None, returnFirst: bool = True, partial: bool = False) -> Optional[Union[Playable, Track, List[Track], PartialResource, List[PartialResource], MultiTrack]]:
         """|coro|
 
         Performs a search to Lavalink for a specific resource.
@@ -94,19 +94,16 @@ class Playable:
 
         Returns
         -------
-        Optional[Union[Track, List[Track], PartialResource, MultiTrack]]
+        Optional[Union[Playable, Track, List[Track], PartialResource, List[PartialResource], MultiTrack]]
             A Lavapy resource or a list of resources which can be used to play music.
         """
         if node is None:
             node = lavapy.NodePool.extension(cls)
         newQuery = await cls._queryGetter(cls, query, node)
-        if cls._getMultitrackName is not None:
-            multitrackName = await cls._getMultitrackName(cls, query, node)
         if partial:
             if isinstance(newQuery, list):
                 # This will only run with extensions
-                # noinspection PyTypeChecker
-                # noinspection PyUnboundLocalVariable
+                multitrackName = await cls._getMultitrackName(cls, query, node)
                 return cls(multitrackName, [PartialResource(YoutubeTrack, temp) for temp in newQuery])
             return PartialResource(cls, newQuery)
         if isinstance(newQuery, str):
@@ -116,12 +113,11 @@ class Playable:
             for i in newQuery:
                 result = await node.getTracks(YoutubeTrack, i)
                 temp.append(result[0])
-            # noinspection PyUnboundLocalVariable
+            multitrackName = await cls._getMultitrackName(cls, query, node)
             tracks = cls(multitrackName, temp)
         if tracks is not None:
             if isinstance(tracks, list) and returnFirst:
                 return tracks[0]
-            # noinspection PyTypeChecker
             return tracks
 
     def __init__(self, *data: Any) -> None:
@@ -301,7 +297,7 @@ class SoundcloudTrack(Track, Playable):
 
 class YoutubePlaylist(MultiTrack, Playable):
     """A playlist created using a search to Youtube."""
-    _trackCls: Track = YoutubeTrack
+    _trackCls: Type[Track] = YoutubeTrack
 
     def __repr__(self) -> str:
         return f"<Lavapy YoutubePlaylist (Name={self.name}) (Track count={len(self.tracks)})>"

@@ -26,9 +26,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, List, Union
 
 from .exceptions import QueueEmpty
+from .tracks import MultiTrack
 
 if TYPE_CHECKING:
-    from .tracks import MultiTrack, Track
+    from .tracks import Track
 
 __all__ = ("Queue",)
 
@@ -96,10 +97,8 @@ class Queue:
         iterable: Union[MultiTrack, Iterable[Track]]
             The iterable to add to the queue.
         """
-        try:
+        if isinstance(iterable, MultiTrack):
             iterable = iterable.tracks
-        except AttributeError:
-            pass
         for track in iterable:
             self.add(track)
 

@@ -137,7 +137,7 @@ class SpotifyPlaylist(MultiTrack, SpotifyBase):
 class SpotifyAlbum(MultiTrack, SpotifyBase):
     """An album created using a search to Spotify."""
     _spotifyType: str = "album"
-    _trackCls: Track = YoutubeTrack
+    _trackCls: Type[Track] = SpotifyTrack
 
     def __repr__(self) -> str:
         return f"<Lavapy SpotifyAlbum (Name={self.name}) (Track count={len(self.tracks)})>"

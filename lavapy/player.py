@@ -157,18 +157,18 @@ class Player(discord.VoiceProtocol):
             The raw info sent by Lavalink.
         """
         # State updates are sent in milliseconds so need to be converted to seconds (/1000)
-        state: Dict[str, Any] = state.get("state")
+        state = state.get("state")
         self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, datetime.timezone.utc)
 
         self._lastPosition = state.get("position", 0)/1000
 
-    def _multitrackCheck(self, track: Union[Track, MultiTrack]) -> Track:
+    def _multitrackCheck(self, track: Union[Track, PartialResource, MultiTrack]) -> Track:
         """
         Checks if a resource is a multitrack and if it is then it grabs the first track and pushes the rest to the queue.
 
         Parameters
         ----------
-        track: Union[Track, MultiTrack]
+        track: Union[Track, PartialResource, MultiTrack]
             A Lavapy multitrack resource to check.
         """
         if isinstance(track, MultiTrack):
@@ -358,7 +358,7 @@ class Player(discord.VoiceProtocol):
         pause = {
             "op": "pause",
             "guildId": str(self.guild.id),
-            "pause": pause
+            "pause": str(pause)
         }
         self._paused = pause
         await self.node._send(pause)
@@ -405,7 +405,7 @@ class Player(discord.VoiceProtocol):
         volume = {
             "op": "volume",
             "guildId": str(self.guild.id),
-            "volume": self.volume
+            "volume": str(self.volume)
         }
         await self.node._send(volume)
 

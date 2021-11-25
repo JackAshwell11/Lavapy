@@ -133,7 +133,7 @@ class Websocket:
         """
         logger.debug(f"Closing connection for node: {self.node.__repr__()}")
         self.listener.cancel()
-        await self._connection.close()
+        await self.connection.close()
 
     async def createListener(self) -> None:
         """|coro|

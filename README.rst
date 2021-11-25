@@ -1,4 +1,4 @@
-.. image:: logo.png
+.. image:: https://raw.githubusercontent.com/Aspect1103/Lavapy/master/logo.png
     :align: center
     :width: 1000px
 
