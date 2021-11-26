@@ -11,7 +11,6 @@ Getting Started
 
     installing
     quickstart
-    examples
     faq
 
 Help and Support

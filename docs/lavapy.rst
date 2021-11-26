@@ -42,8 +42,7 @@ Queue
 Playables
 ---------
 
-.. note:
-
+.. note::
     Remember to check if the specific source is enabled in your Lavalink application.yml.
 
 Playable

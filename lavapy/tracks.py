@@ -297,7 +297,7 @@ class SoundcloudTrack(Track, Playable):
 
 
 class LocalTrack(Track, Playable):
-    """A track created using a Discord mp3 file."""
+    """A track created using a search to a Discord mp3 file."""
 
     def __repr__(self) -> str:
         return f"<Lavapy LocalTrack (Identifier={self.identifier})>"
