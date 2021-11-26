@@ -42,6 +42,10 @@ Queue
 Playables
 ---------
 
+.. note:
+
+    Remember to check if the specific source is enabled in your Lavalink application.yml.
+
 Playable
 ~~~~~~~~
 
@@ -84,6 +88,14 @@ SoundcloudTrack
 ~~~~~~~~~~~~~~~~~
 
 .. autoclass:: SoundcloudTrack
+    :members:
+    :show-inheritance:
+
+
+LocalTrack
+~~~~~~~~~~
+
+.. autoclass:: LocalTrack
     :members:
     :show-inheritance:
 

@@ -38,6 +38,7 @@ __all__ = ("Playable",
            "YoutubeTrack",
            "YoutubeMusicTrack",
            "SoundcloudTrack",
+           "LocalTrack",
            "YoutubePlaylist")
 
 
@@ -293,6 +294,13 @@ class SoundcloudTrack(Track, Playable):
 
     def __repr__(self) -> str:
         return f"<Lavapy SoundcloudTrack (Identifier={self.identifier})>"
+
+
+class LocalTrack(Track, Playable):
+    """A track created using a Discord mp3 file."""
+
+    def __repr__(self) -> str:
+        return f"<Lavapy LocalTrack (Identifier={self.identifier})>"
 
 
 class YoutubePlaylist(MultiTrack, Playable):

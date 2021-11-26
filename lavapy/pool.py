@@ -56,6 +56,11 @@ class NodePool:
     _nodes: Dict[str, Node] = {}
 
     @classmethod
+    def nodes(cls) -> Dict[str, Node]:
+        """Returns a mapping of identifier to node objects."""
+        return cls._nodes
+
+    @classmethod
     async def createNode(cls, *, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, heartbeat: int = 60, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
