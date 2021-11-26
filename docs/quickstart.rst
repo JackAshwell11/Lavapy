@@ -1,12 +1,12 @@
 Quickstart
 ==========
 
-To use Lavapy, you need to have Lavalink 3.3 or higher (preferably 3.4 since you won't be able to access some features without it). You can download it from `Here <https://github.com/freyacodes/Lavalink>`_. To start the server, create an application.yml file (`Example <https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example>`_) and then run the server with `java -jar Lavalink.jar`.
+To use Lavapy, you need to have Lavalink 3.3 or higher (preferably 3.4 since you won't be able to access some features without it). For details on how to install and start it, see :ref:`setupLavalink`.
 
 Basic Bot Example
 -----------------
 
-Lavapy is designed to work with discord.py 1.7.3 and up. Previous version may work, however, problems will not be fixed due to those versions being deprecated.
+Lavapy is designed to work with discord.py 1.7.3 and up. Previous versions may work, however, problems will not be fixed due to those versions being deprecated.
 
 Here is an example for a starting bot which will play a Youtube track using a search query in a discord voice channel:
 
@@ -24,7 +24,10 @@ Here is an example for a starting bot which will play a Youtube track using a se
         """
         await bot.wait_until_ready()
 
-        await lavapy.NodePool.createNode(client=bot, host="0.0.0.0", port=2333, password="LAVALINK_PASSWORD")
+        await lavapy.NodePool.createNode(client=bot,
+                                         host="0.0.0.0",
+                                         port=2333,
+                                         password="LAVALINK_PASSWORD")
 
 
     @bot.command()
