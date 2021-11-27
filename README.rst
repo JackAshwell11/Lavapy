@@ -14,6 +14,9 @@
 .. image:: https://img.shields.io/github/license/Aspect1103/Lavapy
     :target: LICENSE
 
+.. image:: https://img.shields.io/lgtm/grade/python/g/Aspect1103/Lavapy.svg?logo=lgtm&logoWidth=18
+    :target: https://lgtm.com/projects/g/Aspect1103/Lavapy/context:python
+
 A powerful and robust Python library built from the ground up for interacting with `Lavalink <https://github.com/freyacodes/Lavalink>`_.
 
 Installation
@@ -29,6 +32,10 @@ To install Lavapy, use one of the commands below:
 
     # Linux/macOS
     python3.8 -m pip install -U lavapy
+
+Then you need to setup the Lavalink server, for details visit `Here <https://lavapy.readthedocs.io/en/latest/faq.html#how-do-i-run-lavalink-jar>`_.
+
+Now all of that is done, you can start using Lavapy.
 
 Usage
 -----

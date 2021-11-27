@@ -157,6 +157,7 @@ class Player(discord.VoiceProtocol):
             The raw info sent by Lavalink.
         """
         # State updates are sent in milliseconds so need to be converted to seconds (/1000)
+        logger.debug(f"Received state update for player with guild id {self.guild.id} with data {state}")
         state = state.get("state")
         self._lastUpdateTime = datetime.datetime.fromtimestamp(state.get("time")/1000, datetime.timezone.utc)
 
@@ -201,18 +202,15 @@ class Player(discord.VoiceProtocol):
             The raw info sent by Discord about the client's voice state.
         """
         self._voiceState.update({"sessionId": data["session_id"]})
-
         channelID = data["channel_id"]
         if channelID is None:
             # Disconnecting
             self._voiceState.clear()
             return
-
         channel = self.client.get_channel(channelID)
         if channel != self.channel:
-            logger.debug(f"Moved player to channel: {channel.id}")
+            logger.debug(f"Moved player to channel {channel.id}")
             self.channel = channel
-
         await self._sendVoiceUpdate()
 
     async def _sendVoiceUpdate(self) -> None:
@@ -221,8 +219,7 @@ class Player(discord.VoiceProtocol):
         Sends data collected from on_voice_server_update and on_voice_state_update to Lavalink.
         """
         if {"sessionId", "event"} == self._voiceState.keys():
-            logger.debug(f"Dispatching voice update: {self.channel.id}")
-
+            logger.debug(f"Dispatching voice update for guild {self.guild.id}")
             voiceUpdate = {
                 "op": "voiceUpdate",
                 "guildId": str(self.guild.id),
@@ -246,8 +243,7 @@ class Player(discord.VoiceProtocol):
         await self.guild.change_voice_state(channel=self.channel)
         self.node.players.append(self)
         self._connected = True
-
-        logger.info(f"Connected to voice channel: {self.channel.id}")
+        logger.info(f"Connected to voice channel {self.channel.id}")
 
     async def disconnect(self, *, force: bool = False) -> None:
         """|coro|
@@ -263,8 +259,7 @@ class Player(discord.VoiceProtocol):
         self.node.players.remove(self)
         self._connected = False
         self.cleanup()
-
-        logger.info(f"Disconnected from voice channel: {self.channel.id}")
+        logger.info(f"Disconnected from voice channel {self.channel.id}")
 
     async def play(self, track: Union[Track, PartialResource, MultiTrack], startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
         """|coro|
@@ -313,8 +308,7 @@ class Player(discord.VoiceProtocol):
         self._track = track
         self._volume = volume
         await self.node._send(newTrack)
-
-        logger.debug(f"Started playing track: {self.track.title} in {self.channel.id}")
+        logger.debug(f"Started playing track {self.track.title} in {self.channel.id}")
 
     async def stop(self) -> None:
         """|coro|
@@ -328,8 +322,7 @@ class Player(discord.VoiceProtocol):
         tempTrack = self.track
         self._track = None
         await self.node._send(stop)
-
-        logger.debug(f"Stopped playing track: {tempTrack.title} in {self.channel.id}")
+        logger.debug(f"Stopped playing track {tempTrack.title} in {self.channel.id}")
 
     async def pause(self) -> None:
         """|coro|
@@ -337,6 +330,7 @@ class Player(discord.VoiceProtocol):
         Pauses the :class:`Player` if it was playing.
         """
         await self._togglePause(True)
+        logger.debug(f"Paused track in {self.channel.id}")
 
     async def resume(self) -> None:
         """|coro|
@@ -344,6 +338,7 @@ class Player(discord.VoiceProtocol):
         Resumes the :class:`Player` if it was paused.
         """
         await self._togglePause(False)
+        logger.debug(f"Resumed track in {self.channel.id}")
 
     async def _togglePause(self, pause: bool) -> None:
         """|coro|
@@ -362,8 +357,6 @@ class Player(discord.VoiceProtocol):
         }
         self._paused = pause
         await self.node._send(pause)
-
-        logger.debug(f"Toggled pause: {pause} in {self.channel.id}")
 
     async def seek(self, position: int) -> None:
         """|coro|
@@ -388,8 +381,7 @@ class Player(discord.VoiceProtocol):
             "position": position
         }
         await self.node._send(seek)
-
-        logger.debug(f"Seeked to position: {position}")
+        logger.debug(f"Seeked to position {position} for guild {self.guild.id}")
 
     async def setVolume(self, volume: int) -> None:
         """|coro|
@@ -408,8 +400,7 @@ class Player(discord.VoiceProtocol):
             "volume": str(self.volume)
         }
         await self.node._send(volume)
-
-        logger.debug(f"Set volume to: {volume}")
+        logger.debug(f"Set volume to {volume} for guild {self.guild.id}")
 
     async def moveTo(self, channel: discord.VoiceChannel) -> None:
         """|coro|
@@ -444,11 +435,9 @@ class Player(discord.VoiceProtocol):
         name = filter.name
         if filter.name in self.filters.keys():
             raise FilterAlreadyExists(f"Filter <{name}> is already applied. Please remove it first.")
-
         self.filters[name] = filter
         await self._updateFilters()
-
-        logger.debug(f"Added filter: {name} with payload {filter.payload}")
+        logger.debug(f"Added filter {name} with payload {filter.payload} for guild {self.guild.id}")
 
     async def removeFilter(self, filter: Union[LavapyFilter, Type[LavapyFilter]]) -> None:
         """|coro|
@@ -471,11 +460,9 @@ class Player(discord.VoiceProtocol):
         name = filter.name
         if name not in self.filters.keys():
             raise FilterNotApplied(f"{name} is not applied.")
-
         del self.filters[name]
         await self._updateFilters()
-
-        logger.debug(f"Removed filter: {name}")
+        logger.debug(f"Removed filter {name} for guild {self.guild.id}")
 
     async def _updateFilters(self) -> None:
         """|coro|
@@ -490,10 +477,3 @@ class Player(discord.VoiceProtocol):
         for key, value in self.filters.items():
             filterPayload[value.name] = value.payload
         await self.node._send(filterPayload)
-
-# async def destroy(self) -> None:
-#     destroy = {
-#         "op": "destroy",
-#         "guildId": str(self.guild.id)
-#     }
-#     await self.node.send(destroy)

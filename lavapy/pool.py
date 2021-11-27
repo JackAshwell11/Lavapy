@@ -332,6 +332,7 @@ class Node:
         Initialises all the extensions linked to this :class:`Node`.
         """
         if self.spotifyClient is not None:
+            logger.debug(f"Initialising spotify extension for node {self.identifier}")
             await self.spotifyClient._getBearerToken()
 
     async def connect(self) -> None:
@@ -344,7 +345,7 @@ class Node:
         WebsocketAlreadyExists
             The websocket for this node already exists.
         """
-        logger.debug(f"Connecting to the Lavalink server at: {self.host}:{self.port}")
+        logger.debug(f"Connecting to the Lavalink server at {self.host}:{self.port}")
         if self._websocket is None:
             self._websocket = Websocket(self)
         else:
@@ -360,6 +361,7 @@ class Node:
         force: bool
             Whether to force the disconnection. This is currently not used.
         """
+        logger.debug(f"Disconnecting node {self.identifier}")
         for player in self.players:
             await player.disconnect(force=force)
 
@@ -404,7 +406,7 @@ class Node:
         payload: Dict[str, Any]
             The payload to send to Lavalink.
         """
-        logger.debug(f"Sending payload: {payload}")
+        logger.debug(f"Sending payload {payload}")
         await self._websocket.connection.send_json(payload)
 
     async def buildTrack(self, cls: Type[Track], id: str) -> Track:
@@ -429,6 +431,7 @@ class Node:
         Track
             A Lavapy track object.
         """
+        logger.debug(f"Building track with cls {cls} and id {id}")
         track, response = await self._getData("decodetrack", {"track": id})
         if response.status != 200:
             raise BuildTrackError("A error occurred while building the track.", track)
@@ -451,7 +454,7 @@ class Node:
         Optional[Union[Track, List[Track], MultiTrack]]
             A Lavapy resource which can be used to play music.
         """
-        logger.info(f"Getting data with query: {query}")
+        logger.info(f"Getting data with cls {cls} and query: {query}")
         data, response = await self._getData("loadtracks", {"identifier": query})
         if response.status != 200:
             raise LavalinkException("Invalid response from lavalink.")

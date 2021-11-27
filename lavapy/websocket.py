@@ -112,7 +112,7 @@ class Websocket:
             "User-Id": str(self.node.client.user.id),
             "Client-Name": "Lavapy"
         }
-        logger.debug(f"Attempting connection with headers: {headers}")
+        logger.debug(f"Attempting connection with for node {self.node.identifier}")
         try:
             self._connection = await self.node.session.ws_connect(self.node.websocketUri, headers=headers, heartbeat=self.node.heartbeat)
         except Exception as error:
@@ -122,7 +122,7 @@ class Websocket:
                 logger.error(f"Connection failure for node {self.node.identifier} with error {error}")
             return
         self._listener = self.node.client.loop.create_task(self.createListener())
-        logger.debug(f"Connection established with node: {self.node.__repr__()}")
+        logger.debug(f"Connection established for node {self.node.identifier}")
         event = WebsocketOpenEvent(self.node)
         await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
 
@@ -131,7 +131,7 @@ class Websocket:
 
         Closes the connection to the Lavalink server.
         """
-        logger.debug(f"Closing connection for node: {self.node.__repr__()}")
+        logger.debug(f"Closing connection for node {self.node.identifier}")
         self.listener.cancel()
         await self.connection.close()
 
@@ -144,9 +144,9 @@ class Websocket:
         while True:
             msg = await self.connection.receive()
             if msg.type is aiohttp.WSMsgType.CLOSED:
-                logger.debug(f"Websocket Closed: {msg.extra}")
+                logger.debug(f"Websocket closed for node {self.node.identifier} with info {msg.extra}")
                 retry = backoff.delay()
-                logger.debug(f"Retrying connection in <{retry}> seconds")
+                logger.debug(f"Retrying connection in {retry} seconds")
                 await asyncio.sleep(retry)
             else:
                 if msg.data == 1011:
@@ -191,6 +191,7 @@ class Websocket:
         LavapyEvent
             The LavapyEvent object which corresponds to the event payload.
         """
+        logger.debug(f"Received event payload {data}")
         if name == "WebSocketClosedEvent":
             return WebsocketClosedEvent(self.node, data)
 
@@ -217,4 +218,5 @@ class Websocket:
         payload: Dict[str, Any]
             The payload to dispatch with the event. This is sent to `**kwargs`.
         """
+        logger.debug(f"Dispatching event {event} with payload {payload}")
         self.node.client.dispatch(event, **payload)
