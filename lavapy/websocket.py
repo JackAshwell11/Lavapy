@@ -166,8 +166,12 @@ class Websocket:
         """
         op = data.get("op")
         if op == "playerUpdate":
-            player = self.getPlayer(int(data["guildId"]))
-            player._updateState(data)
+            try:
+                player = self.getPlayer(int(data["guildId"]))
+                player._updateState(data)
+            except IndexError:
+                # Player has recently sent a destroy op so don't update state
+                pass
         elif op == "event":
             event = await self.getEventPayload(data["type"], data)
             await self.dispatchEvent(f"lavapy_{event.event}", event.payload)

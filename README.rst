@@ -33,7 +33,7 @@ To install Lavapy, use one of the commands below:
     # Linux/macOS
     python3.8 -m pip install -U lavapy
 
-Then you need to setup the Lavalink server, for details visit `Here <https://lavapy.readthedocs.io/en/latest/faq.html#how-do-i-run-lavalink-jar>`_.
+Then you need to `setup <https://github.com/freyacodes/Lavalink#server-configuration>`_ the Lavalink server. For more details visit the faq.
 
 Now all of that is done, you can start using Lavapy.
 

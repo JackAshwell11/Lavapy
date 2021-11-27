@@ -256,7 +256,6 @@ class Player(discord.VoiceProtocol):
             Whether to force the disconnection. This is currently not used.
         """
         await self.guild.change_voice_state(channel=None)
-        self.node.players.remove(self)
         self._connected = False
         self.cleanup()
         logger.info(f"Disconnected from voice channel {self.channel.id}")
@@ -477,3 +476,17 @@ class Player(discord.VoiceProtocol):
         for key, value in self.filters.items():
             filterPayload[value.name] = value.payload
         await self.node._send(filterPayload)
+
+    async def destroy(self) -> None:
+        """|coro|
+
+        Disconnects and destroys the player.
+        """
+        logger.debug(f"Destroying player with guild id {self.guild.id}")
+        await self.disconnect()
+        self.node.players.remove(self)
+        destroyPayload = {
+            "op": "destroy",
+            "guildId": str(self.guild.id)
+        }
+        await self.node._send(destroyPayload)

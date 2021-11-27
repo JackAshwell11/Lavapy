@@ -5,9 +5,7 @@ bot = commands.Bot(command_prefix="!")
 
 
 async def initialiseNodes():
-    """
-    Wait until the bot is ready then create a Lavapy node
-    """
+    """Wait until the bot is ready then create a Lavapy node."""
     await bot.wait_until_ready()
 
     await lavapy.NodePool.createNode(client=bot,
@@ -22,7 +20,7 @@ async def play(ctx: commands.Context, *query) -> None:
     Play a Youtube song from a given search query.
 
     If the bot is not connected, connect it to the user's voice channel. For this
-    to work, the user must be connected to a voice channel
+    to work, the user must be connected to a voice channel.
     """
     if not ctx.voice_client:
         # Bot is not connected to a voice channel
