@@ -38,7 +38,6 @@ from .websocket import Websocket
 if TYPE_CHECKING:
     import discord.ext
     from discord import VoiceRegion
-
     from .ext.spotify.client import SpotifyClient
     from .player import Player
     from .tracks import MultiTrack, Playable, Track
