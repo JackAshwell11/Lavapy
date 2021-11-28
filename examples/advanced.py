@@ -47,8 +47,8 @@ class Music(commands.Cog):
                                          port=2333,
                                          password="",
                                          region=VoiceRegion.london,
-                                         spotifyClient=spotify.SpotifyClient(clientID="b88bfb64c5d5498fa4d229f1680f651e",
-                                                                             clientSecret="a2a8a1d52a0842ee81d39174381d005e"),
+                                         spotifyClient=spotify.SpotifyClient(clientID="client ID",
+                                                                             clientSecret="client secret"),
                                          identifier="Main Node")
         print("Node ready")
 
@@ -187,4 +187,4 @@ class Music(commands.Cog):
 # Add the music cog
 bot.add_cog(Music(bot))
 # Start the bot
-bot.run("ODQ1NjAyMzk1OTMyODUyMjI0.YKjWmQ.WOBGVkZFFq5BGqwEeaowWmSZCZI")
+bot.run("token")
