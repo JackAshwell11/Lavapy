@@ -12,6 +12,11 @@ SpotifyClient
 Playables
 ---------
 
+DecodeQuery
+~~~~~~~~~~~
+
+.. autofunction:: decodeSpotifyQuery
+
 SpotifyBase
 ~~~~~~~~~~~
 

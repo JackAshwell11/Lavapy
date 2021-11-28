@@ -176,7 +176,7 @@ Yes, Lavapy supports mp3 files uploaded to Discord as well. Here is an example:
     track = await lavapy.LocalTrack.search("https://cdn.discordapp.com/attachments/881224361015672863/888010232016564254/m_SURF_-_Take_Care.mp3")
 
 What is a PartialResource and how do I use it?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Instead of searching for and retrieving a track immediately, a PartialResource allows you to queue a song and search at playtime. This allows large amounts of track data to be stored, and processed without querying the REST API continuously. Here is an example with a Youtube track:
 
@@ -189,7 +189,7 @@ Instead of searching for and retrieving a track immediately, a PartialResource a
 Filters
 -------
 
-.. node::
+.. note::
 
     Only Lavalink 3.4 and above supports filters.
 
