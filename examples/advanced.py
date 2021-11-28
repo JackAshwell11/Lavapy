@@ -113,6 +113,7 @@ class Music(commands.Cog):
         # Make sure result is not none
         if result is None:
             await ctx.send("No results were found for that search")
+            return
         # If the player is already playing, push result to the queue
         if player.isPlaying:
             if isinstance(result, lavapy.MultiTrack):

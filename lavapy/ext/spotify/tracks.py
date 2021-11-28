@@ -38,28 +38,28 @@ __all__ = ("decodeSpotifyQuery",
            "SpotifyAlbum")
 
 
-def decodeSpotifyQuery(query: Union[str, Tuple[str, ...]]) -> Tuple[str, Type[Playable]]:
+def decodeSpotifyQuery(query: str) -> Type[Playable]:
     """
     Decodes a query into a :class:`Playable` type which can be searched.
 
     Parameters
     ----------
-    query: Union[str, Tuple[str, ...]]
+    query: str
         The query to decode.
 
     Returns
     -------
-    Tuple[str, Type[Playable]]
-        A tuple containing the modified query (if its not a link) and the playable type.
+    Type[Playable]
+        The playable type which can be searched.
     """
     if re.compile("https://open\.spotify\.com/track").match(query):
-        return query, SpotifyTrack
+        return SpotifyTrack
     elif re.compile("https://open\.spotify\.com/playlist").match(query):
-        return query, SpotifyPlaylist
+        return SpotifyPlaylist
     elif re.compile("https://open\.spotify\.com/track/album").match(query):
-        return query, SpotifyAlbum
+        return SpotifyAlbum
     else:
-        return query, SpotifyTrack
+        return SpotifyTrack
 
 
 async def spotifyGetDetails(cls: Type[SpotifyBase], query: str, node: Node) -> Union[str, List[str]]:

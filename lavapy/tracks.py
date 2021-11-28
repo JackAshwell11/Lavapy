@@ -43,7 +43,7 @@ __all__ = ("decodeQuery",
            "YoutubePlaylist")
 
 
-def decodeQuery(query: str) -> Tuple[str, Type[Playable]]:
+def decodeQuery(query: str) -> Type[Playable]:
     """
     Decodes a query into a :class:`Playable` type which can be searched.
 
@@ -54,21 +54,21 @@ def decodeQuery(query: str) -> Tuple[str, Type[Playable]]:
 
     Returns
     -------
-    Tuple[str, Type[Playable]]
-        A tuple containing the modified query (if its not a link) and the playable type.
+    Type[Playable]
+        The playable type which can be searched.
     """
     if re.compile("https://www.youtube.com/watch\?v=.+").match(query):
-        return query, YoutubeTrack
+        return YoutubeTrack
     elif re.compile("https://music.youtube.com/watch\?v=.+").match(query):
-        return query, YoutubeMusicTrack
+        return YoutubeMusicTrack
     elif re.compile("https://soundcloud.com/(?!discover).+").match(query) and "sets" not in query:
-        return query, SoundcloudTrack
+        return SoundcloudTrack
     elif re.compile("https://cdn.discordapp.com/.+.mp3").match(query):
-        return query, LocalTrack
+        return LocalTrack
     elif re.compile("https://www.youtube.com/playlist\?list=.+").match(query):
-        return query, YoutubePlaylist
+        return YoutubePlaylist
     else:
-        return query, YoutubeTrack
+        return YoutubeTrack
 
 
 async def defaultQueryGetter(cls: Type[Playable], query: str, _) -> str:
