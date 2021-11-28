@@ -24,14 +24,15 @@ SOFTWARE.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import lavapy
 
 if TYPE_CHECKING:
     from .pool import Node
 
-__all__ = ("Playable",
+__all__ = ("decodeQuery",
+           "Playable",
            "PartialResource",
            "Track",
            "MultiTrack",
@@ -40,6 +41,34 @@ __all__ = ("Playable",
            "SoundcloudTrack",
            "LocalTrack",
            "YoutubePlaylist")
+
+
+def decodeQuery(query: str) -> Tuple[str, Type[Playable]]:
+    """
+    Decodes a query into a :class:`Playable` type which can be searched.
+
+    Parameters
+    ----------
+    query: str
+        The query to decode.
+
+    Returns
+    -------
+    Tuple[str, Type[Playable]]
+        A tuple containing the modified query (if its not a link) and the playable type.
+    """
+    if re.compile("https://www.youtube.com/watch\?v=.+").match(query):
+        return query, YoutubeTrack
+    elif re.compile("https://music.youtube.com/watch\?v=.+").match(query):
+        return query, YoutubeMusicTrack
+    elif re.compile("https://soundcloud.com/(?!discover).+").match(query) and "sets" not in query:
+        return query, SoundcloudTrack
+    elif re.compile("https://cdn.discordapp.com/.+.mp3").match(query):
+        return query, LocalTrack
+    elif re.compile("https://www.youtube.com/playlist\?list=.+").match(query):
+        return query, YoutubePlaylist
+    else:
+        return query, YoutubeTrack
 
 
 async def defaultQueryGetter(cls: Type[Playable], query: str, _) -> str:

@@ -40,6 +40,7 @@ class Queue:
     """
     def __init__(self) -> None:
         self._tracks: List[Track] = []
+        self._currentTrack: int = -1
 
     def __repr__(self) -> str:
         return f"<Lavapy Queue (Queue={self._tracks})>"
@@ -50,6 +51,11 @@ class Queue:
         return self._tracks
 
     @property
+    def currentTrack(self) -> int:
+        """Returns the current position in the queue."""
+        return self._currentTrack
+
+    @property
     def count(self) -> int:
         """Returns the size of the queue."""
         return len(self._tracks)
@@ -57,9 +63,9 @@ class Queue:
     @property
     def isEmpty(self) -> bool:
         """Returns whether the queue is empty or not."""
-        return not self._tracks
+        return self.currentTrack == self.count-1
 
-    def get(self) -> Track:
+    def next(self) -> Track:
         """
         Gets the next :class:`Track` in the queue.
 
@@ -75,7 +81,28 @@ class Queue:
         """
         if self.isEmpty:
             raise QueueEmpty("Queue is empty")
-        return self._tracks.pop()
+        self._currentTrack += 1
+        return self.tracks[self.currentTrack]
+
+    def previous(self) -> Track:
+        """
+        Gets the previous :class:`Track` in the queue.
+
+        Raises
+        ------
+        QueueEmpty
+            The current queue is empty.
+
+        Returns
+        -------
+        Track
+            The previous track in the queue.
+        """
+        if self.currentTrack == 0:
+            raise QueueEmpty("Queue is empty")
+        self._currentTrack -= 1
+        return self.tracks[self.currentTrack]
+
 
     def add(self, track: Track) -> None:
         """
@@ -102,6 +129,7 @@ class Queue:
         for track in iterable:
             self.add(track)
 
-    def clear(self) -> None:
-        """Clears all track objects in the queue."""
+    def reset(self) -> None:
+        """Resets the queue."""
         self.tracks.clear()
+        self._currentTrack = 0

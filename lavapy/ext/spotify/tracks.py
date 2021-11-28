@@ -24,17 +24,42 @@ SOFTWARE.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Type, Union
 
 from lavapy.tracks import MultiTrack, Playable, Track
 
 if TYPE_CHECKING:
     from lavapy.pool import Node
 
-__all__ = ("SpotifyBase",
+__all__ = ("decodeSpotifyQuery",
+           "SpotifyBase",
            "SpotifyTrack",
            "SpotifyPlaylist",
            "SpotifyAlbum")
+
+
+def decodeSpotifyQuery(query: Union[str, Tuple[str, ...]]) -> Tuple[str, Type[Playable]]:
+    """
+    Decodes a query into a :class:`Playable` type which can be searched.
+
+    Parameters
+    ----------
+    query: Union[str, Tuple[str, ...]]
+        The query to decode.
+
+    Returns
+    -------
+    Tuple[str, Type[Playable]]
+        A tuple containing the modified query (if its not a link) and the playable type.
+    """
+    if re.compile("https://open\.spotify\.com/track").match(query):
+        return query, SpotifyTrack
+    elif re.compile("https://open\.spotify\.com/playlist").match(query):
+        return query, SpotifyPlaylist
+    elif re.compile("https://open\.spotify\.com/track/album").match(query):
+        return query, SpotifyAlbum
+    else:
+        return query, SpotifyTrack
 
 
 async def spotifyGetDetails(cls: Type[SpotifyBase], query: str, node: Node) -> Union[str, List[str]]:
