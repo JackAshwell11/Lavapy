@@ -204,6 +204,8 @@ class Websocket:
         if name == "TrackStartEvent":
             return TrackStartEvent(player, track)
         elif name == "TrackEndEvent":
+            if data["reason"] == "FINISHED":
+                player._track = None
             return TrackEndEvent(player, track, data)
         elif name == "TrackExceptionEvent":
             return TrackExceptionEvent(player, track, data)

@@ -242,7 +242,7 @@ class Node:
         self._stats: Optional[Stats] = None
         self._session: aiohttp.ClientSession = aiohttp.ClientSession()
         self._websocket: Optional[Websocket] = None
-        self._websocketUri: str = f"{'wss' if self.secure else 'ws'}://{self.host}:{self.port}"
+        self._websocketUri: str = f"{'wss' if self._secure else 'ws'}://{self.host}:{self.port}"
         self._restUri: str = f"{'https' if self._secure else 'http'}://{self.host}:{self.port}"
 
     def __repr__(self) -> str:
