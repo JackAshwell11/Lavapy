@@ -234,6 +234,15 @@ Getting currently applied filters for a player is easy. Here is an example:
 
 This is returned as dictionary with the key being the filter name and the value being the actual filter.
 
+How can I reset a filter?
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Resetting a currently applied filter can be achieved by passing a filter type into player.resetFilter(). Here is an example:
+
+.. code.. py
+
+    await player1.resetFilter(lavapy.Karaoke)
+
 Common operations
 -----------------
 
@@ -265,6 +274,12 @@ Here are some other operations that can be done with Lavapy which haven't been d
     # Seek the currently playing song (position is an integer of seconds)
     await player.seek(position)
 
+    # Enable repeating for the player
+    player.repeat()
+
+    # Disable repeating for the player
+    player.stopRepeating()
+
     # Check if the player is playing
     player.isPlaying
 
@@ -276,6 +291,9 @@ Here are some other operations that can be done with Lavapy which haven't been d
 
     # Check if the player is dead (a player is considered dead if it has been destroyed and removed from stored players)
     player.isDead
+
+    # Check if a player is repeating
+    player.isRepeating
 
     # Build a track from the unique track base64 identifier
     await node.build_track(lavapy.YouTubeTrack, "UniqueBase64TrackIdentifier")

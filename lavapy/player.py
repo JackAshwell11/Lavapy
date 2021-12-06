@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 import discord.ext
 
-from .exceptions import FilterAlreadyExists, FilterNotApplied, InvalidSeekPosition
+from .exceptions import FilterAlreadyExists, FilterNotApplied, InvalidSeekPosition, RepeatException
 from .pool import NodePool
 from .queue import Queue
 from .tracks import MultiTrack, PartialResource
@@ -46,8 +46,7 @@ logger = logging.getLogger(__name__)
 
 class Player(discord.VoiceProtocol):
     """
-    Lavapy Player object. This subclasses :class:`discord.VoiceProtocol` and such should be treated as one with
-    additions.
+    Lavapy Player object. This subclasses :class:`discord.VoiceProtocol` and such should be treated as one with additions.
 
     Examples
     --------
@@ -81,6 +80,7 @@ class Player(discord.VoiceProtocol):
         self._paused: bool = False
         self._lastUpdateTime: Optional[datetime.datetime] = None
         self._lastPosition: Optional[float] = None
+        self._repeat: bool = False
 
     def __repr__(self) -> str:
         return f"<Lavapy Player (ChannelID={self.channel.id}) (GuildID={self.guild.id})>"
@@ -147,6 +147,11 @@ class Player(discord.VoiceProtocol):
         """Returns whether the player is dead or not. A player is considered dead if it has been destroyed and removed from stored players."""
         return self not in self.node.players
 
+    @property
+    def isRepeating(self) -> bool:
+        """Returns whether the player is repeating the current track or not."""
+        return self._repeat
+
     def _updateState(self, state: Dict[str, Any]) -> None:
         """
         Stores the last update time and the last position.
@@ -177,6 +182,32 @@ class Player(discord.VoiceProtocol):
             track = temp.tracks.pop(0)
             self.queue.addIterable(temp)
         return track
+
+    def repeat(self) -> None:
+        """
+        Repeats the currently playing track.
+
+        Raises
+        ------
+        RepeatException
+            The player is already repeating.
+        """
+        if self.isRepeat:
+            raise RepeatException("The player is already repeating.")
+        self._repeat = True
+
+    def stopRepeat(self) -> None:
+        """
+        Stops repeating the currently playing track.
+
+        Raises
+        ------
+        RepeatException
+            The player is not repeating.
+        """
+        if self.isRepeat:
+            raise RepeatException("The player is not repeating..")
+        self._repeat = False
 
     async def on_voice_server_update(self, data: Dict[str, str]) -> None:
         """|coro|
@@ -476,6 +507,34 @@ class Player(discord.VoiceProtocol):
         for key, value in self.filters.items():
             filterPayload[value.name] = value.payload
         await self.node._send(filterPayload)
+
+    async def resetFilter(self, filter: Type[LavapyFilter]) -> None:
+        """|coro|
+
+        Resets a :class:`LavapyFilter`.
+
+        .. warning::
+            This requires Lavalink 3.4 or greater.
+
+        Parameters
+        ----------
+        filter: Type[LavapyFilter]
+            The filter to reset. This should be a non-initialised class like `lavapy.Equalizer` or `lavapy.Karaoke`.
+
+        Raises
+        ------
+        FilterNotApplied
+            The specific filter is not applied.
+        """
+        name = filter.name
+        if name not in self.filters.keys():
+            raise FilterNotApplied(f"{name} is not applied.")
+        if name == "equalizer":
+            # noinspection PyUnresolvedReferences
+            self.filters[name] = filter.flat()
+        else:
+            self.filters[name] = filter()
+        await self._updateFilters()
 
     async def destroy(self) -> None:
         """|coro|

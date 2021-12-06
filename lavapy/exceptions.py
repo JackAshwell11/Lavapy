@@ -31,6 +31,7 @@ __all__ = ("LavapyException",
            "FilterAlreadyExists",
            "FilterNotApplied",
            "InvalidNodeSearch",
+           "RepeatException",
            "LavalinkException",
            "LoadTrackError",
            "BuildTrackError")
@@ -65,15 +66,19 @@ class InvalidFilterArgument(LavapyException):
 
 
 class FilterAlreadyExists(LavapyException):
-    """Exception raised when a new filter is attempted to be applied but it already exists."""
+    """Exception raised when a new filter is attempted to be applied, but it already exists."""
 
 
 class FilterNotApplied(LavapyException):
-    """Exception raised when a filter is attempted to be removed but it is not applied."""
+    """Exception raised when a filter is attempted to be removed, but it is not applied."""
 
 
 class InvalidNodeSearch(LavapyException):
-    """Exception raised when an search for a node is invalid."""
+    """Exception raised when a search for a node is invalid."""
+
+
+class RepeatException(LavapyException):
+    """Exception raised when an error occurred when enabling or disabling repeat."""
 
 
 class LavalinkException(LavapyException):

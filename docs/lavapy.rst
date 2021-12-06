@@ -255,6 +255,8 @@ Exceptions
     :show-inheritance:
 .. autoexception:: InvalidNodeSearch
     :show-inheritance:
+.. autoexception:: RepeatException
+    :show-inheritance:
 .. autoexception:: LavalinkException
     :show-inheritance:
 .. autoexception:: LoadTrackError
