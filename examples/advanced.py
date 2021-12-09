@@ -35,14 +35,13 @@ class Music(commands.Cog):
         self.bot: commands.Bot = bot
         self.bot.loop.create_task(self.initialiseNodes())
 
-    @staticmethod
-    async def initialiseNodes() -> None:
+    async def initialiseNodes(self) -> None:
         """Wait until the bot is ready then create a Lavapy node."""
         # Wait until the bot is ready
-        await bot.wait_until_ready()
+        await self.bot.wait_until_ready()
 
         # Create the lavapy node
-        await lavapy.NodePool.createNode(client=bot,
+        await lavapy.NodePool.createNode(client=self.bot,
                                          host="192.168.1.227",
                                          port=2333,
                                          password="",
