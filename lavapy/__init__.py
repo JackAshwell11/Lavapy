@@ -38,6 +38,6 @@ __title__ = "Lavapy"
 __author__ = "Aspect1103"
 __license__ = "MIT"
 __copyright__ = "Copyright 2021-present (c) Aspect1103"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
