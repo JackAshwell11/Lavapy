@@ -291,7 +291,7 @@ class Player(discord.VoiceProtocol):
         self.cleanup()
         logger.info(f"Disconnected from voice channel {self.channel.id}")
 
-    async def play(self, track: Union[Track, PartialResource, MultiTrack], startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> None:
+    async def play(self, track: Union[Track, PartialResource, MultiTrack], startTime: int = 0, endTime: int = 0, volume: int = 100, replace: bool = True, pause: bool = False) -> Optional[Track]:
         """|coro|
 
         Plays a given resource. If this resource is a :class:`Track`, it is played normally. However, if it is a
@@ -313,6 +313,11 @@ class Player(discord.VoiceProtocol):
             A bool stating if the current track should be replaced or not.
         pause: bool
             A bool stating if the track should start paused.
+
+        Returns
+        -------
+        Optional[Track]
+            The currently playing Lavapy track.
         """
         if self.isPlaying and not replace:
             return
@@ -339,6 +344,7 @@ class Player(discord.VoiceProtocol):
         self._volume = volume
         await self.node._send(newTrack)
         logger.debug(f"Started playing track {self.track.title} in {self.channel.id}")
+        return track
 
     async def stop(self) -> None:
         """|coro|
