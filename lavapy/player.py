@@ -74,7 +74,7 @@ class Player(discord.VoiceProtocol):
         self._track: Optional[Track] = None
         self._volume: int = 100
         self._filters: Dict[str, LavapyFilter] = {}
-        self._queue: Queue = Queue()
+        self._queue: Queue = Queue(self)
         self._voiceState: Dict[str, Any] = {}
         self._connected: bool = False
         self._paused: bool = False
@@ -192,7 +192,7 @@ class Player(discord.VoiceProtocol):
         RepeatException
             The player is already repeating.
         """
-        if self.isRepeat:
+        if self.isRepeating:
             raise RepeatException("The player is already repeating.")
         self._repeat = True
 
@@ -205,7 +205,7 @@ class Player(discord.VoiceProtocol):
         RepeatException
             The player is not repeating.
         """
-        if self.isRepeat:
+        if self.isRepeating:
             raise RepeatException("The player is not repeating..")
         self._repeat = False
 
@@ -343,8 +343,10 @@ class Player(discord.VoiceProtocol):
         self._track = track
         self._volume = volume
         await self.node._send(newTrack)
-        self.queue.tracks.insert(0, track)
-        self.queue._currentTrack += 1
+        if self.queue.currentTrack == -1:
+            # First time a new song is playing
+            self.queue.tracks.insert(0, track)
+            self.queue._currentTrack += 1
         logger.debug(f"Started playing track {self.track.title} in {self.channel.id}")
         return track
 

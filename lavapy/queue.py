@@ -26,10 +26,11 @@ from __future__ import annotations
 import random
 from typing import TYPE_CHECKING, Iterable, List, Union
 
-from .exceptions import QueueEmpty
+from .exceptions import QueueEmpty, RepeatException
 from .tracks import MultiTrack
 
 if TYPE_CHECKING:
+    from .player import Player
     from .tracks import Track
 
 __all__ = ("Queue",)
@@ -39,7 +40,8 @@ class Queue:
     """
     A class representing a usable Queue.
     """
-    def __init__(self) -> None:
+    def __init__(self, player: Player) -> None:
+        self._player: Player = player
         self._tracks: List[Track] = []
         self._currentTrack: int = -1
 
@@ -74,6 +76,8 @@ class Queue:
         ------
         QueueEmpty
             The current queue is empty.
+        RepeatException
+            Cannot get next track if player is repeating
 
         Returns
         -------
@@ -82,6 +86,8 @@ class Queue:
         """
         if self.isEmpty:
             raise QueueEmpty("Queue is empty")
+        if self._player.isRepeating:
+            raise RepeatException("Cannot get next track if player is repeating")
         self._currentTrack += 1
         return self.tracks[self.currentTrack]
 
@@ -93,6 +99,8 @@ class Queue:
         ------
         QueueEmpty
             The current queue is empty.
+        RepeatException
+            Cannot get previous track if player is repeating
 
         Returns
         -------
@@ -101,6 +109,8 @@ class Queue:
         """
         if self.currentTrack == 0:
             raise QueueEmpty("Queue is empty")
+        if self._player.isRepeating:
+            raise RepeatException("Cannot get previous track if player is repeating")
         self._currentTrack -= 1
         return self.tracks[self.currentTrack]
 
