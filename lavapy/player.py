@@ -205,7 +205,7 @@ class Player(discord.VoiceProtocol):
         RepeatException
             The player is not repeating.
         """
-        if self.isRepeating:
+        if not self.isRepeating:
             raise RepeatException("The player is not repeating..")
         self._repeat = False
 
