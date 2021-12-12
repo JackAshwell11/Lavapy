@@ -343,6 +343,7 @@ class Player(discord.VoiceProtocol):
         self._track = track
         self._volume = volume
         await self.node._send(newTrack)
+        self.queue.tracks.insert(0, track)
         logger.debug(f"Started playing track {self.track.title} in {self.channel.id}")
         return track
 

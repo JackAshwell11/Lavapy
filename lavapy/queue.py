@@ -23,6 +23,7 @@ SOFTWARE.
 """
 from __future__ import annotations
 
+import random
 from typing import TYPE_CHECKING, Iterable, List, Union
 
 from .exceptions import QueueEmpty
@@ -133,3 +134,9 @@ class Queue:
         """Resets the queue."""
         self.tracks.clear()
         self._currentTrack = 0
+
+    def shuffle(self) -> None:
+        """Shuffles the queue but keeps the currently playing track in the same place."""
+        tempTrack = self.tracks.pop(self.currentTrack)
+        random.shuffle(self.tracks)
+        self.tracks.insert(self.currentTrack, tempTrack)
