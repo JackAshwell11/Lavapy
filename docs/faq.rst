@@ -275,7 +275,7 @@ Here are some other operations that can be done with Lavapy which haven't been d
     await player.seek(position)
 
     # Enable repeating for the player
-    player.repeat()
+    player.startRepeat()
 
     # Disable repeating for the player
     player.stopRepeating()

@@ -183,7 +183,7 @@ class Player(discord.VoiceProtocol):
             self.queue.addIterable(temp)
         return track
 
-    def repeat(self) -> None:
+    def startRepeat(self) -> None:
         """
         Repeats the currently playing track.
 
