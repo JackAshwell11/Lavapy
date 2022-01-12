@@ -112,7 +112,7 @@ class Equalizer(LavapyFilter):
         Parameters
         ----------
         levels: List[Tuple[int, float]]
-            A custom list of tuple pairs containing a band int and gain float. You will have to construct this yourself.
+            A custom list of tuple pairs containing a band int and gain float. You will have to construct this yourself. There should be between 0 and 14 bands with each gain being between -0.25 and 1
         name: str
             An optional string to name this equalizer. If this is not supplied, it will be set to 'CustomEqualizer'.
 
@@ -121,6 +121,10 @@ class Equalizer(LavapyFilter):
         Equalizer
             A custom equalizer object.
         """
+        if not (0 <= len(levels) <= 14):
+            raise ValueError("There should be between 0 and 14 bands.")
+        if not all([-0.25 <= val[1] <= 1 for val in levels]):
+            raise ValueError("Each gain should be between -0.25 and 1 bands.")
         return cls(levels, name)
 
     @classmethod
@@ -174,22 +178,22 @@ class Timescale(LavapyFilter):
     Attributes
     ----------
     speed: float
-        The speed of the timescale filter.
+        The speed of the timescale filter. This should be more than or equal to 0.
     pitch: float
-        The pitch of the timescale filter.
+        The pitch of the timescale filter. This should be more than or equal to 0.
     rate: float
-        The rate of the timescale filter.
+        The rate of the timescale filter. This should be more than or equal to 0.
     """
     name = "timescale"
 
     def __init__(self, speed: float = 1.0, pitch: float = 1.0, rate: float = 1.0) -> None:
         super().__init__()
-        if speed < 0.0:
-            raise InvalidFilterArgument("Speed must be more than 0.")
-        if pitch < 0.0:
-            raise InvalidFilterArgument("Pitch must be more than 0.")
-        if rate < 0.0:
-            raise InvalidFilterArgument("Rate must be more than 0.")
+        if speed <= 0.0:
+            raise InvalidFilterArgument("Speed must be more or equal to than 0.")
+        if pitch <= 0.0:
+            raise InvalidFilterArgument("Pitch must be more or equal to than 0.")
+        if rate <= 0.0:
+            raise InvalidFilterArgument("Rate must be more or equal to than 0.")
         self.speed = self._payload["speed"] = speed
         self.pitch = self._payload["pitch"] = pitch
         self.rate = self._payload["rate"] = rate
