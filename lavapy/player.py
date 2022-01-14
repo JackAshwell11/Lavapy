@@ -101,7 +101,7 @@ class Player(discord.VoiceProtocol):
         return self._track
 
     @property
-    def volume(self) -> int:
+    def volume(self) -> float:
         """Returns the current volume."""
         return self._volume
 
