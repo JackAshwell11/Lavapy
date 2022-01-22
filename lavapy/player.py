@@ -237,6 +237,7 @@ class Player(discord.VoiceProtocol):
         if channelID is None:
             # Disconnecting
             self._voiceState.clear()
+            await self.disconnect()
             return
         channel = self.client.get_channel(channelID)
         if channel != self.channel:
