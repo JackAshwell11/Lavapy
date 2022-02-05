@@ -25,7 +25,6 @@ __all__ = ("LavapyException",
            "NoNodesConnected",
            "NodeOccupied",
            "InvalidSeekPosition",
-           "WebsocketAlreadyExists",
            "QueueEmpty",
            "InvalidFilterArgument",
            "FilterAlreadyExists",
@@ -51,10 +50,6 @@ class NodeOccupied(LavapyException):
 
 class InvalidSeekPosition(LavapyException):
     """Exception raised when an invalid seek position is passed."""
-
-
-class WebsocketAlreadyExists(LavapyException):
-    """Exception raised when a new websocket connection is attempted but it already exists."""
 
 
 class QueueEmpty(LavapyException):

@@ -290,6 +290,7 @@ class Player(discord.VoiceProtocol):
         await self.guild.change_voice_state(channel=None)
         self._connected = False
         self.cleanup()
+        self.node.players.remove(self)
         logger.info(f"Disconnected from voice channel {self.channel.id}")
 
     async def play(self, track: Union[Track, PartialResource, MultiTrack], startTime: int = 0, endTime: int = 0, volume: float = 1, replace: bool = True, pause: bool = False) -> Optional[Track]:
@@ -558,7 +559,6 @@ class Player(discord.VoiceProtocol):
         """
         logger.debug(f"Destroying player with guild id {self.guild.id}")
         await self.disconnect()
-        self.node.players.remove(self)
         destroyPayload = {
             "op": "destroy",
             "guildId": str(self.guild.id)

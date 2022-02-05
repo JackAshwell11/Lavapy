@@ -48,6 +48,18 @@ __all__ = ("NodePool",
 logger = logging.getLogger(__name__)
 
 
+def getRandomID() -> str:
+    """
+    Gets a random 8 character long ID.
+
+    Returns
+    -------
+    str
+        The 8 character long ID
+    """
+    return "".join(random.choices(string.ascii_letters + string.digits, k=8))
+
+
 class NodePool:
     """
     Lavapy NodePool class. This holds all the :class:`Node` objects created with :meth:`createNode()`.
@@ -60,7 +72,7 @@ class NodePool:
         return cls._nodes
 
     @classmethod
-    async def createNode(cls, *, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, heartbeat: int = 60, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
+    async def createNode(cls, *, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, heartbeat: int = 60, resumeKey: Optional[str] = None, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
         Creates a Lavapy :class:`Node` object and stores it for later use.
@@ -81,6 +93,8 @@ class NodePool:
             Whether to connect securely to the Lavalink server or not.
         heartbeat: int
             How many seconds to wait before sending a ping message and waiting for a response from the Lavalink server.
+        resumeKey: Optional[str]
+            The resume key assigned to this node which allows a player to resume playing if it gets disconnected.
         spotifyClient: Optional[SpotifyClient]
             A Lavapy Spotify client for interacting with Spotify.
         identifier: Optional[str]
@@ -97,12 +111,15 @@ class NodePool:
             A Lavapy node object.
         """
         if identifier is None:
-            identifier = "".join(random.choices(string.ascii_letters + string.digits, k=8))
+            identifier = getRandomID()
 
         if identifier in cls._nodes:
             raise NodeOccupied(f"A node with the identifier <{identifier}> already exists.")
 
-        node = Node(client, host, port, password, region, secure, heartbeat, spotifyClient, identifier)
+        if not resumeKey:
+            resumeKey = getRandomID()
+
+        node = Node(client, host, port, password, region, secure, heartbeat, resumeKey, spotifyClient, identifier)
         cls._nodes[identifier] = node
         await node.connect()
         await node._initialiseExtensions()
@@ -228,7 +245,7 @@ class Node:
     .. warning::
         This class should not be created manually. Please use :meth:`NodePool.createNode()` instead.
     """
-    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], secure: bool, heartbeat: int, spotifyClient: Optional[SpotifyClient], identifier: str) -> None:
+    def __init__(self, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[discord.VoiceRegion], secure: bool, heartbeat: int, resumeKey: str, spotifyClient: Optional[SpotifyClient], identifier: str) -> None:
         self._client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot] = client
         self._host: str = host
         self._port: int = port
@@ -236,6 +253,7 @@ class Node:
         self._region: Optional[discord.VoiceRegion] = region
         self._secure: bool = secure
         self._heartbeat: int = heartbeat
+        self._resumeKey: str = resumeKey
         self._spotifyClient: Optional[SpotifyClient] = spotifyClient
         self._identifier: str = identifier
         self._players: List[Player] = []
@@ -282,6 +300,11 @@ class Node:
     def heartbeat(self) -> int:
         """Returns the amount of seconds between ping requests."""
         return self._heartbeat
+
+    @property
+    def resumeKey(self) -> str:
+        """Returns the resume key assigned to this node."""
+        return self._resumeKey
 
     @property
     def spotifyClient(self) -> Optional[SpotifyClient]:
@@ -348,7 +371,7 @@ class Node:
         if self._websocket is None:
             self._websocket = Websocket(self)
         else:
-            raise WebsocketAlreadyExists("Websocket already initialised.")
+            await self._websocket.resumeConnection()
 
     async def disconnect(self, *, force: bool = False) -> None:
         """|coro|
@@ -405,8 +428,8 @@ class Node:
         payload: Dict[str, Any]
             The payload to send to Lavalink.
         """
-        logger.debug(f"Sending payload {payload}")
-        await self._websocket.connection.send_json(payload)
+        if self._websocket.connected:
+            await self._websocket.send(payload)
 
     async def buildTrack(self, cls: Type[Track], id: str) -> Track:
         """|coro|

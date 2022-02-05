@@ -243,8 +243,6 @@ Exceptions
     :show-inheritance:
 .. autoexception:: InvalidSeekPosition
     :show-inheritance:
-.. autoexception:: WebsocketAlreadyExists
-    :show-inheritance:
 .. autoexception:: QueueEmpty
     :show-inheritance:
 .. autoexception:: InvalidFilterArgument

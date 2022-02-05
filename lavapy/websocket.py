@@ -97,6 +97,19 @@ class Websocket:
         """
         return [player for player in self.node.players if player.guild.id == guildID][0]
 
+    async def send(self, payload: Dict[str, Any]) -> None:
+        """|coro|
+
+        Actual function which sends a payload to Lavalink without a response.
+
+        Parameters
+        ----------
+        payload: Dict[str, Any]
+            The payload to send to Lavalink.
+        """
+        logger.debug(f"Sending payload {payload}")
+        await self.connection.send_json(payload)
+
     async def connect(self) -> None:
         """|coro|
 
@@ -110,7 +123,8 @@ class Websocket:
         headers = {
             "Authorization": self.node.password,
             "User-Id": str(self.node.client.user.id),
-            "Client-Name": "Lavapy"
+            "Client-Name": "Lavapy",
+            "Resume-Key": self.node.resumeKey
         }
         logger.debug(f"Attempting connection with for node {self.node.identifier}")
         try:
@@ -122,6 +136,20 @@ class Websocket:
                 logger.error(f"Connection failure for node {self.node.identifier} with error {error}")
             return
         self._listener = self.node.client.loop.create_task(self.createListener())
+        logger.debug(f"Connection established for node {self.node.identifier}")
+        event = WebsocketOpenEvent(self.node)
+        await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
+
+    async def resumeConnection(self) -> None:
+        """|coro|
+
+        Resumes the websocket connection to the Lavalink server."""
+        resume = {
+            "op": "configureResuming",
+            "key": self.node.resumeKey,
+            "timeout": 60
+        }
+        await self.send(resume)
         logger.debug(f"Connection established for node {self.node.identifier}")
         event = WebsocketOpenEvent(self.node)
         await self.dispatchEvent(f"lavapy_{event.event}", event.payload)
