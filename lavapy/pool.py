@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import aiohttp
 
-from .exceptions import BuildTrackError, InvalidNodeSearch, LavalinkException, LoadTrackError, NodeOccupied, NoNodesConnected, WebsocketAlreadyExists
+from .exceptions import BuildTrackError, InvalidNodeSearch, LavalinkException, LoadTrackError, NodeOccupied, NoNodesConnected
 from .ext.spotify.tracks import SpotifyBase
 from .stats import Stats
 from .websocket import Websocket
