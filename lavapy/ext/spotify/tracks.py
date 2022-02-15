@@ -24,7 +24,7 @@ SOFTWARE.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
 
 from lavapy.tracks import MultiTrack, Playable, Track
 
@@ -84,12 +84,12 @@ async def spotifyGetDetails(cls: Type[SpotifyBase], query: str, node: Node) -> U
     regexResult = re.compile("https://open\.spotify\.com/.+/(?P<identifier>.+)\?").match(query)
     if cls._spotifyType == "track":
         if not regexResult:
-            return f"ytsearch:{query}"
+            return f"ytmsearch:{query}"
         else:
             identifier = regexResult.group("identifier")
             async with node.spotifyClient.session.get(f"https://api.spotify.com/v1/tracks/{identifier}", headers=node.spotifyClient.authHeaders) as response:
                 data = await response.json()
-            return f'ytsearch:{data["artists"][0]["name"]} - {data["name"]}'
+            return f'ytmsearch:{data["artists"][0]["name"]} - {data["name"]}'
     elif cls._spotifyType == "playlist":
         url = f"https://api.spotify.com/v1/playlists/{regexResult.group('identifier')}/tracks"
     elif cls._spotifyType == "album":
@@ -104,7 +104,7 @@ async def spotifyGetDetails(cls: Type[SpotifyBase], query: str, node: Node) -> U
             data = await response.json()
         trackArr.extend(data["items"])
         nextUrl = data["next"]
-    return [f'ytsearch:{track["track"]["artists"][0]["name"]} - {track["track"]["name"]}' for track in trackArr]
+    return [f'ytmsearch:{track["track"]["artists"][0]["name"]} - {track["track"]["name"]}' for track in trackArr]
 
 
 async def spotifyGetMultitrackName(cls: Type[SpotifyBase], query: str, node: Node) -> str:
@@ -154,6 +154,7 @@ class SpotifyTrack(Track, SpotifyBase):
 class SpotifyPlaylist(MultiTrack, SpotifyBase):
     """A playlist created using a search to Spotify."""
     _spotifyType: str = "playlist"
+    _trackCls: Type[Track] = SpotifyTrack
 
     def __repr__(self) -> str:
         return f"<Lavapy SpotifyPlaylist (Name={self.name}) (Track count={len(self.tracks)})>"

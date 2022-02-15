@@ -101,7 +101,7 @@ class Playable:
         This class should not be created manually. Instead use a subclass of :class:`Track` or :class:`MultiTrack`.
     """
     _searchType: str
-    _trackCls: Optional[Type[Track]]
+    _trackCls: Optional[Type[YoutubeMusicTrack]]
     _queryGetter: Callable = defaultQueryGetter
     _getMultitrackName: Optional[Callable] = None
 
@@ -134,14 +134,14 @@ class Playable:
             if isinstance(newQuery, list):
                 # This will only run with extensions
                 multitrackName = await cls._getMultitrackName(cls, query, node)
-                return cls(multitrackName, [PartialResource(YoutubeTrack, temp) for temp in newQuery])
+                return cls(multitrackName, [PartialResource(YoutubeMusicTrack, temp) for temp in newQuery])
             return PartialResource(cls, newQuery)
         if isinstance(newQuery, str):
             tracks = await node.getTracks(cls, newQuery)
         else:
             temp = []
             for i in newQuery:
-                result = await node.getTracks(YoutubeTrack, i)
+                result = await node.getTracks(YoutubeMusicTrack, i)
                 temp.append(result[0])
             multitrackName = await cls._getMultitrackName(cls, query, node)
             tracks = cls(multitrackName, temp)
