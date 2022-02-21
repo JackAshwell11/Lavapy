@@ -72,6 +72,14 @@ class NodePool:
         return cls._nodes
 
     @classmethod
+    def players(cls) -> List[Player]:
+        """Returns a list of currently connected players."""
+        players = []
+        for node in cls._nodes.values():
+            players.extend(node.players)
+        return players
+
+    @classmethod
     async def createNode(cls, *, client: Union[discord.Client, discord.AutoShardedClient, discord.ext.commands.Bot, discord.ext.commands.AutoShardedBot], host: str, port: int, password: str, region: Optional[VoiceRegion] = None, secure: bool = False, heartbeat: int = 60, resumeKey: Optional[str] = None, spotifyClient: Optional[SpotifyClient] = None, identifier: Optional[str] = None) -> Node:
         """|coro|
 
