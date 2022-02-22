@@ -395,6 +395,9 @@ class Node:
         for player in self.players:
             await player.disconnect(force=force)
 
+        if self.spotifyClient:
+            await self.spotifyClient.close()
+
         try:
             await self._websocket.disconnect()
             del NodePool._nodes[self.identifier]

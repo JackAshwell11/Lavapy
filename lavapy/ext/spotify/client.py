@@ -96,3 +96,10 @@ class SpotifyClient:
                 raise SpotifyAuthException("An error occurred while authenticating with Spotify.")
             data = await response.json()
         self._accessToken = data["access_token"]
+
+    async def close(self) -> None:
+        """|coro|
+
+        Stops the sessions used for communicating with Spotify.
+        """
+        await self.session.close()
