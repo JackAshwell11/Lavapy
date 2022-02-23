@@ -19,6 +19,15 @@
 
 A powerful and robust Python library built from the ground up for interacting with `Lavalink <https://github.com/freyacodes/Lavalink>`_.
 
+IMPORTANT PSA: Future of this Library
+-------------------------------------
+
+The aim of this library was to provide a wrapper for lavalink when using discord.py. Before I started development, I was using a library called `Wavelink <https://github.com/PythonistaGuild/Wavelink>`_, however, once it became archived I decided to start development on this library to not only improve my own skills but to help others with the same problem.
+
+However, now my interest has started to falter. I have lost the drive to continue maintaining this library for a number of reasons: the code isn't PEP 8 compliant unlike my newer projects and the code is hard to maintain in its current form. But the most important reason is that there is now a large number of alternative libraries which do this specific purpose much better than this library including but not limited to: `Wavelink <https://github.com/PythonistaGuild/Wavelink>`_, `Pomice <https://github.com/cloudwithax/pomice>`_, and `Pycord.Wavelink <https://github.com/Pycord-Development/Pycord.Wavelink>`_.
+
+Henceforth, I have made the decision to stop maintaining this library and leave it dormant. I won't archive it as I may recover the drive I had when starting this project later on, but for now, the library is now inactive.
+
 Installation
 ------------
 Lavapy requires Python 3.8 or higher
