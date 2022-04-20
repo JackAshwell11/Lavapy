@@ -260,7 +260,7 @@ class Player(discord.VoiceProtocol):
             }
             await self.node._send(voiceUpdate)
 
-    async def connect(self, *, timeout: float, reconnect: bool) -> None:
+    async def connect(self, *, timeout: float, reconnect: bool, self_deaf: bool = False, self_mute: bool = False) -> None:
         """|coro|
 
         Connects the player to a :class:`discord.VoiceChannel`.
@@ -272,7 +272,7 @@ class Player(discord.VoiceProtocol):
         reconnect: bool
             A bool stating if reconnection is expected.
         """
-        await self.guild.change_voice_state(channel=self.channel)
+        await self.guild.change_voice_state(channel=self.channel, self_mute=self_mute, self_deaf=self_deaf)
         self.node.players.append(self)
         self._connected = True
         logger.info(f"Connected to voice channel {self.channel.id}")
