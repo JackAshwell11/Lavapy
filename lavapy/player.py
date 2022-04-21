@@ -276,7 +276,7 @@ class Player(discord.VoiceProtocol):
         selfMute: bool
             Whether the player should connect muted or not.
         """
-        await self.guild.change_voice_state(channel=self.channel, self_mute=self_mute, self_deaf=self_deaf)
+        await self.guild.change_voice_state(channel=self.channel, self_mute=selfMute, self_deaf=selfDeaf)
         self.node.players.append(self)
         self._connected = True
         logger.info(f"Connected to voice channel {self.channel.id}")
